@@ -1172,8 +1172,21 @@
             <span class="eyebrow">Execution Board</span>
             <p>Azure-style work tracking for you and your agents, backed by live activity, verbose execution traces, and conversation visibility.</p>
           </div>
-          <button id="quickAddProjectBtn" class="accent-btn" type="button">+ New Task</button>
+          <div style="display:flex;gap:0.8rem;flex-wrap:wrap;">
+            <button id="addPriorityBtn" class="ghost-btn" type="button">+ Priority</button>
+            <button id="quickAddProjectBtn" class="accent-btn" type="button">+ New Task</button>
+          </div>
         </div>
+
+        <article class="panel glass" style="margin-bottom:1rem;">
+          <div class="panel-header">
+            <div>
+              <h3 class="panel-title">Top Priorities</h3>
+              <p class="panel-subtitle">Editable operator priorities pinned above the board.</p>
+            </div>
+          </div>
+          <div id="prioritiesList" class="priorities"></div>
+        </article>
 
         <div class="kanban" style="grid-template-columns: minmax(220px,0.85fr) repeat(3, minmax(260px,1fr)) minmax(320px,0.95fr); align-items:start;">
           <article class="kanban-column glass" data-column="recurring">
@@ -3083,6 +3096,7 @@
     }
 
     function renderPriorities() {
+      if (!prioritiesList) return;
       prioritiesList.innerHTML = "";
 
       if (!state.priorities.length) {
@@ -3897,6 +3911,7 @@
 
     // Meetings
     function renderMeetings() {
+      if (!todayMeetings || !upcomingMeetings || !pastMeetings) return;
       const items = state.meetings.items.slice().sort((a, b) => new Date(a.dateTime) - new Date(b.dateTime));
       const nowDate = new Date();
       const todayItems = items.filter((meeting) => isSameDay(new Date(meeting.dateTime), nowDate) && new Date(meeting.dateTime) >= nowDate);
@@ -4099,6 +4114,7 @@
 
     // Intel
     function renderIntel() {
+      if (!intelFilterCategory || !intelFilterImportance || !dailyBriefList || !intelList || !intelDate) return;
       intelFilterCategory.value = state.intel.filters.category;
       intelFilterImportance.value = state.intel.filters.importance;
       intelDate.value = intelDate.value || new Date().toISOString().slice(0, 10);
@@ -4184,6 +4200,7 @@
     }
 
     function renderTimeline() {
+      if (!timelineContainer) return;
       timelineContainer.innerHTML = "";
       const currentIndex = getCurrentPhaseIndex();
 
@@ -4212,11 +4229,13 @@
     }
 
     function renderNotes() {
+      if (!notesTextarea) return;
       notesTextarea.value = state.notes;
       renderNotesMeta();
     }
 
     function renderNotesMeta() {
+      if (!notesCount || !notesSavedAt) return;
       notesCount.textContent = `${state.notes.length.toLocaleString()} characters`;
       notesSavedAt.textContent = state.notesLastSaved ? `Last saved ${formatDateTime(state.notesLastSaved)}` : "Not saved yet";
       renderSearchResults();
