@@ -4,83 +4,225 @@
     "role": "Oyama Productions - CEO",
     "keyMetric": "Positive Revenue",
     "goalDate": "2026-12-31",
-    "revenueProgress": 74
+    "revenueProgress": 74,
+    "weatherCity": "Chicago"
   },
   "priorities": [
     {
-      "id": "5ec16f1e-c014-4917-b46c-4fcb962c5795",
-      "text": "Finalize the autonomous agent org chart and operating cadence",
+      "id": "p1",
+      "text": "Align Mission Control features tightly to the original spec files and current realtime operating goals",
       "done": false
     },
     {
-      "id": "39e73816-a0e3-414f-ad9f-10667de00366",
-      "text": "Systemize content production into reusable distribution loops",
+      "id": "p2",
+      "text": "Make the UI feel closer to Azure DevOps, Azure Cloud, and Teams influenced operations tooling",
       "done": false
     },
     {
-      "id": "0a22d407-9006-4255-bd54-d1b3df6dc209",
-      "text": "Track positive revenue weekly with direct attribution visibility",
-      "done": true
+      "id": "p3",
+      "text": "Keep task execution, agent collaboration, memory, and documents visible in one control surface",
+      "done": false
     }
   ],
   "tasks": [
     {
-      "id": "933c68a2-a247-45c7-bb51-6a7e4c466908",
-      "title": "Define agent roles and handoff rules",
-      "description": "Clarify who scouts demand, creates assets, publishes, analyzes results, and escalates bottlenecks.",
+      "id": "t1",
+      "title": "Convert Mission Control shell to left sidebar app layout",
+      "description": "Replace the top-tab dominant shell with a left navigation layout closer to the screenshot references and Azure-inspired control surfaces.",
       "priority": "high",
       "column": "backlog",
-      "createdAt": "2026-04-20T02:51:42.392Z"
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Feature",
+      "area": "Mission Control"
     },
     {
-      "id": "4882c0aa-56bf-4595-be0a-5a91aed370be",
-      "title": "Build content distribution scorecard",
-      "description": "Measure output, reach, CTR, lead capture, and downstream revenue by content loop.",
+      "id": "t2",
+      "title": "Add org chart hierarchy view for agents and company roles",
+      "description": "Show leadership, execution roles, and support/worker agents in a proper hierarchy view with role cards.",
+      "priority": "high",
+      "column": "backlog",
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Feature",
+      "area": "Agents"
+    },
+    {
+      "id": "t3",
+      "title": "Improve office avatar scene and realtime activity visuals",
+      "description": "Make the office view more expressive with richer avatar placement, current work labels, and better visual state cues.",
+      "priority": "medium",
+      "column": "backlog",
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Feature",
+      "area": "Office"
+    },
+    {
+      "id": "t4",
+      "title": "Audit 0-Memory through 8-Layered-AI-Model-Stack and map missing features",
+      "description": "Go file by file, identify what is implemented, what is partial, and what is still missing or intentionally deferred.",
+      "priority": "high",
+      "column": "in-progress",
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Task",
+      "area": "Spec Alignment"
+    },
+    {
+      "id": "t5",
+      "title": "Make projects portfolio reflect actual progress and ownership",
+      "description": "Repurpose Projects into a polished portfolio overview with progress bars, status, owner, and priority.",
       "priority": "medium",
       "column": "in-progress",
-      "createdAt": "2026-04-20T02:51:42.392Z"
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Feature",
+      "area": "Projects"
     },
     {
-      "id": "4de7e8ad-8beb-40a2-9155-b30c5b142f22",
-      "title": "Draft owned audience capture flow",
-      "description": "Map calls-to-action, lead magnet logic, landing page hooks, and email follow-up entry points.",
+      "id": "t6",
+      "title": "Add visual memory browser and saved docs viewer",
+      "description": "Provide operator-friendly views for long-term memory, daily logs, and saved documents the user sends.",
+      "priority": "medium",
+      "column": "in-progress",
+      "createdAt": "2026-04-20T04:40:00.000Z",
+      "assignee": "Claw",
+      "type": "Feature",
+      "area": "Memory & Docs"
+    },
+    {
+      "id": "t7",
+      "title": "Initial realtime task board, logs, conversations, projects, memory, docs, and office views",
+      "description": "First structural pass completed to move beyond the original template and toward a fuller mission control system.",
       "priority": "low",
       "column": "done",
-      "createdAt": "2026-04-19T02:51:42.392Z"
+      "createdAt": "2026-04-20T04:00:00.000Z",
+      "assignee": "Claw",
+      "type": "Milestone",
+      "area": "Mission Control"
+    }
+  ],
+  "executionLogs": [
+    {
+      "id": "e1",
+      "taskId": "t4",
+      "title": "Spec audit started",
+      "detail": "Reviewing the nine original source files and mapping them against current Mission Control and workspace state.",
+      "agent": "Claw",
+      "level": "info",
+      "timestamp": "2026-04-20T04:40:00.000Z"
+    },
+    {
+      "id": "e2",
+      "taskId": "t4",
+      "title": "Mission Control-focused files identified",
+      "detail": "1-create-HTML-prompt, 2-create-modules, 3-backend-server, and 4-config are the main app implementation specs; others are system/config/integration tasks.",
+      "agent": "Claw",
+      "level": "info",
+      "timestamp": "2026-04-20T04:43:00.000Z"
+    }
+  ],
+  "projects": [
+    {
+      "id": "proj1",
+      "name": "Mission Control",
+      "description": "Central dashboard for tasks, projects, activity, docs, memory, team structure, and realtime execution visibility.",
+      "status": "active",
+      "percent": 72,
+      "owner": "Affan / Claw",
+      "priority": "high",
+      "lastUpdated": "2026-04-20T04:45:00.000Z"
+    },
+    {
+      "id": "proj2",
+      "name": "OpenClaw Setup",
+      "description": "Config, hardening, agent design, integrations, and operating rules for the local OpenClaw system.",
+      "status": "planning",
+      "percent": 38,
+      "owner": "Affan / Claw",
+      "priority": "medium",
+      "lastUpdated": "2026-04-20T04:45:00.000Z"
+    },
+    {
+      "id": "proj3",
+      "name": "Agent Org Infrastructure",
+      "description": "Role design, coordination patterns, checks and balances, and agent operating structure.",
+      "status": "active",
+      "percent": 61,
+      "owner": "Claw",
+      "priority": "high",
+      "lastUpdated": "2026-04-20T04:45:00.000Z"
+    }
+  ],
+  "memoryEntries": [
+    {
+      "id": "m1",
+      "title": "Long-Term Memory",
+      "type": "long-term",
+      "summary": "Project folder defaults, Mission Control focus, multi-agent operating model, and runtime safety defaults.",
+      "content": "The workspace now reflects the user's preference for C:\\Users\\faree\\Desktop\\openclaw as the default project location, Mission Control as the main active project, a role-based multi-agent company model, and cautious runtime safety defaults.",
+      "timestamp": "2026-04-20T04:20:00.000Z"
+    },
+    {
+      "id": "m2",
+      "title": "Spec Alignment Notes",
+      "type": "daily",
+      "summary": "Original source files are being audited one by one to ensure the final system matches the real operating goal.",
+      "content": "Mission Control now needs continued iteration for sidebar layout, org chart, stronger office avatars, and deeper alignment to the original prompt files.",
+      "timestamp": "2026-04-20T04:42:00.000Z"
+    }
+  ],
+  "documents": [
+    {
+      "id": "d1",
+      "title": "Mission Control Spec Audit",
+      "category": "docs",
+      "summary": "Audit of 0-Memory through 8-Layered-AI-Model-Stack against current implementation.",
+      "content": "See SPEC-AUDIT.md in the project root for the current mapping of implemented, partial, deferred, and missing features.",
+      "timestamp": "2026-04-20T04:46:00.000Z"
+    },
+    {
+      "id": "d2",
+      "title": "Realtime Mission Control Direction",
+      "category": "planning",
+      "summary": "Task-first dashboard with projects, memory, docs, org chart, logs, conversations, and office avatars.",
+      "content": "The dashboard is moving toward a more complete mission control with Azure/Teams influence and realtime visibility into task execution and agent coordination.",
+      "timestamp": "2026-04-20T04:35:00.000Z"
+    }
+  ],
+  "conversations": [
+    {
+      "id": "c1",
+      "from": "Affan",
+      "to": "Claw",
+      "message": "Set the remaining UI upgrades as tasks and go through each original source file one by one.",
+      "visibility": "discord",
+      "timestamp": "2026-04-20T04:44:00.000Z"
+    },
+    {
+      "id": "c2",
+      "from": "Claw",
+      "to": "Mission Control",
+      "message": "Audit in progress. Mission Control UI specs are being separated from broader OpenClaw configuration and integration tasks.",
+      "visibility": "system",
+      "timestamp": "2026-04-20T04:45:00.000Z"
     }
   ],
   "notes": "",
   "notesLastSaved": "",
   "activity": [
     {
-      "id": "fafe0b73-e35e-45de-b21a-2f3f00c02a19",
-      "title": "Client removed",
-      "detail": "Atlas Retail removed from revenue ledger.",
-      "timestamp": "2026-04-20T02:58:09.863Z"
+      "id": "a1",
+      "title": "Spec audit created",
+      "detail": "Wrote SPEC-AUDIT.md to map each original source file to current implementation status.",
+      "timestamp": "2026-04-20T04:46:00.000Z"
     },
     {
-      "id": "16f4dc3f-4d08-4ba4-8c0f-bb6c90fb11c3",
-      "title": "Client removed",
-      "detail": "Vertex Labs removed from revenue ledger.",
-      "timestamp": "2026-04-20T02:58:08.240Z"
-    },
-    {
-      "id": "597ef726-d1d5-4cde-9971-a73bc69c23ce",
-      "title": "Client removed",
-      "detail": "Signal Forge removed from revenue ledger.",
-      "timestamp": "2026-04-20T02:58:06.775Z"
-    },
-    {
-      "id": "ef739a6c-faae-4744-b352-d4bd7bfb8683",
-      "title": "Client removed",
-      "detail": "Northstar Media removed from revenue ledger.",
-      "timestamp": "2026-04-20T02:58:05.128Z"
-    },
-    {
-      "id": "ef543b62-83c6-46b9-b4ed-f247385dc043",
-      "title": "Mission control initialized",
-      "detail": "Core dashboard state loaded from local configuration.",
-      "timestamp": "2026-04-20T02:51:42.392Z"
+      "id": "a2",
+      "title": "Tasks refreshed",
+      "detail": "Added the next major UI and alignment items into the Mission Control task board state.",
+      "timestamp": "2026-04-20T04:47:00.000Z"
     }
   ],
   "revenue": {
@@ -116,62 +258,57 @@
   "command": {
     "agents": [
       {
-        "id": "c2ab9be5-dfd5-4d98-97cd-8fc6478ce5a6",
+        "id": "ag1",
         "name": "Scout-01",
         "role": "Opportunity Scout",
         "status": "online",
         "model": "gpt-5.4",
-        "lastActive": "2026-04-20T02:51:42.392Z",
+        "lastActive": "2026-04-20T04:30:00.000Z",
         "description": "Maps market shifts, emerging content angles, and revenue opportunities worth testing.",
         "capabilities": [
           "Opportunity discovery",
           "Competitor signal scans",
           "Offer-angle ideation"
         ],
-        "performanceNotes": "Strong at surfacing asymmetrical bets. Best when given clear ICP constraints.",
+        "performanceNotes": "Strong at surfacing asymmetrical bets.",
         "activity": [
           {
-            "id": "9c23d5fc-727e-4de7-afef-b05be1d0efa9",
-            "message": "Flagged two high-intent AI education niches worth packaging.",
-            "timestamp": "2026-04-20T02:51:42.392Z"
-          },
-          {
-            "id": "4edbcb7c-e80d-438d-8a39-2b89eebf215a",
-            "message": "Ranked top three short-form hooks based on recent platform velocity.",
-            "timestamp": "2026-04-20T00:51:42.392Z"
+            "id": "aga1",
+            "message": "Flagged two high-intent niches worth packaging.",
+            "timestamp": "2026-04-20T04:10:00.000Z"
           }
         ]
       },
       {
-        "id": "afc8e952-2d2d-4539-868c-9e28d74601ee",
+        "id": "ag2",
         "name": "Forge-02",
         "role": "Content Ops Lead",
         "status": "busy",
         "model": "gpt-5.4",
-        "lastActive": "2026-04-20T01:21:42.392Z",
-        "description": "Turns strategy into scripts, content briefs, publishing assets, and repurposing plans.",
+        "lastActive": "2026-04-20T04:28:00.000Z",
+        "description": "Turns strategy into scripts, briefs, publishing assets, and repurposing plans.",
         "capabilities": [
           "Script systems",
           "Repurposing frameworks",
           "Publishing queue management"
         ],
-        "performanceNotes": "High throughput. Needs tighter approval criteria for brand voice edge cases.",
+        "performanceNotes": "High throughput.",
         "activity": [
           {
-            "id": "e9e956cf-6ee8-47d6-b416-65ea55efdc66",
-            "message": "Drafted three repurposing ladders for the YouTube-to-email funnel.",
-            "timestamp": "2026-04-20T01:51:42.392Z"
+            "id": "aga2",
+            "message": "Drafted content repurposing ladders.",
+            "timestamp": "2026-04-20T04:15:00.000Z"
           }
         ]
       },
       {
-        "id": "8bfdccdc-5cbc-41eb-b197-e435184fc0dd",
+        "id": "ag3",
         "name": "Closer-03",
         "role": "Conversion Architect",
         "status": "online",
         "model": "gpt-5.2",
-        "lastActive": "2026-04-20T02:21:42.392Z",
-        "description": "Optimizes attention capture, lead magnet routing, and offer conversion across owned channels.",
+        "lastActive": "2026-04-20T04:26:00.000Z",
+        "description": "Optimizes capture, lead routing, and offer conversion across owned channels.",
         "capabilities": [
           "Landing page logic",
           "Email sequence mapping",
@@ -180,48 +317,48 @@
         "performanceNotes": "Best-performing agent on bottom-of-funnel improvements.",
         "activity": [
           {
-            "id": "34deb1f7-384c-46de-b12e-2c5eefd94158",
-            "message": "Recommended tightening CTA density on the current lead capture flow.",
-            "timestamp": "2026-04-20T01:21:42.392Z"
+            "id": "aga3",
+            "message": "Recommended tightening CTA density.",
+            "timestamp": "2026-04-20T04:14:00.000Z"
           }
         ]
       },
       {
-        "id": "a6762489-e218-4e81-a313-f5a0020d8c49",
+        "id": "ag4",
         "name": "Pulse-04",
         "role": "Performance Analyst",
         "status": "offline",
         "model": "gpt-5.1",
-        "lastActive": "2026-04-19T22:51:42.392Z",
-        "description": "Summarizes loop performance, diagnoses bottlenecks, and suggests reinvestment priorities.",
+        "lastActive": "2026-04-20T03:50:00.000Z",
+        "description": "Summarizes performance, diagnoses bottlenecks, and suggests reinvestment priorities.",
         "capabilities": [
           "KPI analysis",
           "Channel attribution",
           "Experiment review"
         ],
-        "performanceNotes": "Reliable with clean datasets. Needs guardrails on sparse-sample conclusions.",
+        "performanceNotes": "Reliable with clean datasets.",
         "activity": [
           {
-            "id": "88ec761e-cb71-4acb-a475-5472a121559e",
-            "message": "Compiled a weekly attribution summary for content-to-lead conversion.",
-            "timestamp": "2026-04-19T22:51:42.392Z"
+            "id": "aga4",
+            "message": "Compiled a weekly attribution summary.",
+            "timestamp": "2026-04-20T03:50:00.000Z"
           }
         ]
       }
     ],
     "decisions": [
       {
-        "id": "34a6ca5b-d604-4d3e-9853-47a659ec7610",
+        "id": "dec1",
         "date": "2026-04-14",
         "question": "Which growth loop should receive the next execution sprint?",
-        "summary": "Prioritized YouTube-to-email acquisition over low-intent short-form reach because the owned audience multiplier is stronger.",
+        "summary": "Prioritized YouTube-to-email acquisition over low-intent short-form reach.",
         "consultedAgents": "Scout-01, Closer-03, Pulse-04"
       },
       {
-        "id": "6f9dc280-1b12-4d42-a3d0-bd4cd21b897c",
+        "id": "dec2",
         "date": "2026-04-17",
         "question": "How should content production be systemized for agent handoffs?",
-        "summary": "Split ideation, scripting, editing QA, and distribution into four distinct responsibilities with KPI handoff points.",
+        "summary": "Split ideation, scripting, editing QA, and distribution into four distinct responsibilities.",
         "consultedAgents": "Forge-02, Pulse-04"
       }
     ]
@@ -230,144 +367,29 @@
     "subscribers": 3400,
     "ideas": [
       {
-        "id": "56f3eb23-a218-48d5-b0e2-5676217a5d38",
+        "id": "y1",
         "title": "How I Would Build an AI Revenue Machine From Zero",
         "topic": "Strategy",
         "status": "idea",
         "publishDate": "2026-04-29"
       },
       {
-        "id": "385565db-b571-49b8-94b9-cd95c191355e",
+        "id": "y2",
         "title": "The 5-Agent Content Stack Behind Compounding Reach",
         "topic": "Behind the scenes",
         "status": "scripting",
         "publishDate": "2026-05-02"
-      },
-      {
-        "id": "0fede0ee-7e9e-4815-a4b5-aed9fb1dd516",
-        "title": "My Lead Capture System for Attention-to-Asset Conversion",
-        "topic": "Funnels",
-        "status": "filming",
-        "publishDate": "2026-05-06"
-      },
-      {
-        "id": "f0e747f0-ac3f-46f1-9de4-a1b8a5309201",
-        "title": "Why Most AI Automation Content Fails to Monetize",
-        "topic": "Opinion",
-        "status": "editing",
-        "publishDate": "2026-04-24"
-      },
-      {
-        "id": "2d89868d-8450-4fdc-8bbd-b954d3f8774b",
-        "title": "The Autonomous Revenue Dashboard Tour",
-        "topic": "Case study",
-        "status": "published",
-        "publishDate": "2026-04-12"
       }
     ]
   },
   "meetings": {
-    "items": [
-      {
-        "id": "984acc37-400b-49ac-8f08-11b69543f362",
-        "title": "Weekly Revenue Ops Sync",
-        "dateTime": "2026-04-19T22:00:00.000Z",
-        "attendees": "Affan, Ops-Core",
-        "type": "zoom",
-        "prepNotes": "Review current MRR, blocked offers, and top content loop performance.",
-        "agenda": [
-          {
-            "id": "a2145dca-b866-4229-ba53-9a1256ee2494",
-            "text": "Review revenue target progress",
-            "done": false
-          },
-          {
-            "id": "f4f006d0-cff6-4082-b31b-9b78ed6276fc",
-            "text": "Decide next distribution sprint",
-            "done": false
-          }
-        ],
-        "notes": "",
-        "actionItems": ""
-      },
-      {
-        "id": "23251db3-a448-4c01-9c47-267d02cf0011",
-        "title": "Creator Partnership Call",
-        "dateTime": "2026-04-21T19:00:00.000Z",
-        "attendees": "Affan, Potential Partner",
-        "type": "call",
-        "prepNotes": "Clarify audience overlap and joint distribution upside.",
-        "agenda": [
-          {
-            "id": "d2663a58-e75d-4ffd-9480-2df6f5ce4c26",
-            "text": "Validate partnership fit",
-            "done": false
-          }
-        ],
-        "notes": "",
-        "actionItems": ""
-      },
-      {
-        "id": "48094359-b1f3-4611-a6b7-7e0f3d9a3f5f",
-        "title": "Offer Debrief",
-        "dateTime": "2026-04-18T16:00:00.000Z",
-        "attendees": "Affan, Closer-03",
-        "type": "in-person",
-        "prepNotes": "Assess last week's lead quality and offer friction.",
-        "agenda": [
-          {
-            "id": "8591528e-cb35-4c20-84e5-7cfa636924b0",
-            "text": "Review conversion blockers",
-            "done": true
-          }
-        ],
-        "notes": "Need stronger proof blocks above the fold.",
-        "actionItems": "Rewrite landing page opener by Tuesday."
-      }
-    ]
+    "items": []
   },
   "intel": {
     "filters": {
       "category": "all",
       "importance": "all"
     },
-    "items": [
-      {
-        "id": "3ed4579a-059d-45bf-a717-d7d19af687b8",
-        "title": "AI search workflows are shifting buyer discovery earlier",
-        "summary": "Organic discovery is fragmenting across chat interfaces, making owned-asset capture even more valuable.",
-        "source": "https://example.com/ai-search-shift",
-        "category": "AI News",
-        "importance": "hot",
-        "dateAdded": "2026-04-18"
-      },
-      {
-        "id": "88687bc1-19aa-471e-b08e-6168d7ab6728",
-        "title": "Competitor channel doubled output with faceless repurposing",
-        "summary": "Volume increased without a clear conversion upgrade, which suggests room to outperform with better CTA systems.",
-        "source": "https://example.com/competitor-watch",
-        "category": "Competitor Watch",
-        "importance": "notable",
-        "dateAdded": "2026-04-17"
-      },
-      {
-        "id": "16320366-4393-4d25-8992-64c50a68e894",
-        "title": "B2B creator collaborations are converting better than solo launches",
-        "summary": "Partnership-led distribution is showing stronger trust transfer and faster audience lift.",
-        "source": "https://example.com/industry-trends",
-        "category": "Industry Trends",
-        "importance": "notable",
-        "dateAdded": "2026-04-16"
-      },
-      {
-        "id": "d18c0dfa-03c8-46e1-aa64-f52a60c45185",
-        "title": "Opportunity: productize internal dashboards as premium operator assets",
-        "summary": "The dashboard itself could become a lead magnet or premium template once the operating layer is mature.",
-        "source": "https://example.com/opportunity",
-        "category": "Opportunities",
-        "importance": "hot",
-        "dateAdded": "2026-04-15"
-      }
-    ]
+    "items": []
   }
 }
