@@ -1,0 +1,12 @@
+[
+  {
+    "id": "cron-sample-daily-ops",
+    "name": "Daily Ops Check",
+    "schedule": "0 9 * * *",
+    "status": "scheduled",
+    "lastRunAt": null,
+    "nextRunAt": "2026-04-21T14:00:00.000Z",
+    "notes": "Sample job visible in Mission Control for review.",
+    "source": "mission-control-sample"
+  }
+]

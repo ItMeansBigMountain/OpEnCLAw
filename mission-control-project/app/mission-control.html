@@ -87,23 +87,25 @@
       -webkit-backdrop-filter: blur(24px) saturate(140%);
     }
 
-    /* Header */
-    .topbar-wrap {
-      position: sticky;
-      top: 0;
-      z-index: 40;
-      padding: 1.1rem 1.4rem 0;
-    }
-
-    .topbar {
+    /* App shell */
+    .app-shell {
       max-width: var(--max-width);
       margin: 0 auto;
-      padding: 1rem 1.25rem;
+      padding: 1.1rem 1.2rem 1.6rem;
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 1.1rem;
+      align-items: start;
+    }
+
+    .side-nav {
+      position: sticky;
+      top: 1rem;
+      z-index: 40;
+      padding: 1rem;
       border-radius: 24px;
       display: grid;
-      grid-template-columns: minmax(210px, 1fr) auto minmax(280px, 1fr);
       gap: 1rem;
-      align-items: center;
       background:
         linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.035)),
         rgba(13, 13, 18, 0.78);
@@ -139,16 +141,19 @@
     .brand p { margin: 0.12rem 0 0; color: var(--text-muted); font-size: 0.9rem; }
 
     .tab-nav {
-      display: inline-flex;
-      justify-self: center;
-      gap: 0.55rem;
+      display: grid;
+      gap: 0.45rem;
       padding: 0.38rem;
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.05);
+      max-height: 58vh;
+      overflow: auto;
     }
 
     .tab-btn {
+      width: 100%;
+      text-align: left;
       padding: 0.8rem 1rem;
       border-radius: 14px;
       background: transparent;
@@ -169,8 +174,8 @@
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 10px 24px rgba(127, 15, 23, 0.18);
     }
 
-    .topbar-side { display: flex; align-items: center; justify-content: flex-end; gap: 0.85rem; min-width: 0; }
-    .search-shell { position: relative; flex: 1; max-width: 360px; }
+    .topbar-side { display: grid; gap: 0.85rem; min-width: 0; }
+    .search-shell { position: relative; flex: 1; max-width: 100%; }
     .search-shell input {
       width: 100%;
       height: 48px;
@@ -267,10 +272,8 @@
 
     /* Main layout */
     main {
-      max-width: var(--max-width);
-      margin: 0 auto;
-      padding: 2.5rem;
-      padding-top: 1.5rem;
+      min-width: 0;
+      padding: 0;
     }
 
     .tab-panel { display: none; }
@@ -987,9 +990,9 @@
 
     /* Responsive */
     @media (max-width: 1220px) {
-      .topbar { grid-template-columns: 1fr; }
-      .tab-nav { justify-self: start; overflow-x: auto; max-width: 100%; }
-      .topbar-side { justify-content: space-between; }
+      .app-shell { grid-template-columns: 1fr; }
+      .side-nav { position: static; }
+      .tab-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); max-height: none; }
       .metrics-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .dashboard-grid,
       .welcome-grid,
@@ -1007,8 +1010,9 @@
     }
 
     @media (max-width: 800px) {
-      .topbar-wrap { padding: 0.9rem 0.8rem 0; }
-      main { padding: 1rem 0.8rem 2rem; }
+      .app-shell { padding: 0.8rem 0.7rem 1.2rem; }
+      .tab-nav { grid-template-columns: 1fr 1fr; }
+      main { padding: 0; }
       .metrics-grid { grid-template-columns: 1fr; }
       .projects-toolbar,
       .notes-meta,
@@ -1032,52 +1036,52 @@
 </head>
 <body>
   <div class="app-shell">
-    <div class="topbar-wrap">
-      <header class="topbar glass">
-        <div class="brand">
-          <div class="brand-mark">MC</div>
-          <div class="brand-copy">
-            <span class="eyebrow">Oyama Productions</span>
-            <h1>Mission Control</h1>
-            <p>Affan | AI-led operations and revenue orchestration</p>
+    <aside class="side-nav glass">
+      <div class="brand">
+        <div class="brand-mark">MC</div>
+        <div class="brand-copy">
+          <span class="eyebrow">Oyama Productions</span>
+          <h1>Mission Control</h1>
+          <p>Sosai | COO command and execution oversight</p>
+        </div>
+      </div>
+
+      <nav class="tab-nav" aria-label="Primary tabs">
+        <button class="tab-btn active" data-tab="dashboard">Tasks</button>
+        <button class="tab-btn" data-tab="projects">Projects</button>
+        <button class="tab-btn" data-tab="memory">Memory</button>
+        <button class="tab-btn" data-tab="docs">Docs</button>
+        <button class="tab-btn" data-tab="command">Agents</button>
+        <button class="tab-btn" data-tab="office">Office</button>
+        <button class="tab-btn" data-tab="activity-log">Action Logs</button>
+        <button class="tab-btn" data-tab="verbose">Verbose</button>
+        <button class="tab-btn" data-tab="conversations">Conversations</button>
+        <button class="tab-btn" data-tab="revenue">Revenue</button>
+        <button class="tab-btn" data-tab="youtube">YouTube</button>
+        <button class="tab-btn" data-tab="meetings">Meetings</button>
+        <button class="tab-btn" data-tab="intel">Intel</button>
+        <button class="tab-btn" data-tab="automation">Automation</button>
+        <button class="tab-btn" data-tab="gitops">GitOps</button>
+        <button class="tab-btn" data-tab="notes">Notes</button>
+      </nav>
+
+      <div class="topbar-side">
+        <div class="search-shell">
+          <input id="globalSearch" type="search" placeholder="Search priorities, tasks, notes, roadmap..." aria-label="Global search" />
+          <span class="search-shortcut">Ctrl K</span>
+          <div id="searchResults" class="search-results glass" role="listbox" aria-label="Search results"></div>
+        </div>
+        <div class="status-pill" title="Live operating status">
+          <div class="status-dot"></div>
+          <div class="status-copy">
+            <strong id="liveStatusLabel">Mission Live</strong>
+            <span id="liveStatusSubtext">Tracking revenue system</span>
+            <span id="serverIndicator">Server: Offline</span>
+            <span id="liveWeather">Weather: --</span>
           </div>
         </div>
-
-        <nav class="tab-nav" aria-label="Primary tabs">
-          <button class="tab-btn active" data-tab="dashboard">Tasks</button>
-          <button class="tab-btn" data-tab="projects">Projects</button>
-          <button class="tab-btn" data-tab="memory">Memory</button>
-          <button class="tab-btn" data-tab="docs">Docs</button>
-          <button class="tab-btn" data-tab="command">Agents</button>
-          <button class="tab-btn" data-tab="office">Office</button>
-          <button class="tab-btn" data-tab="activity-log">Action Logs</button>
-          <button class="tab-btn" data-tab="verbose">Verbose</button>
-          <button class="tab-btn" data-tab="conversations">Conversations</button>
-          <button class="tab-btn" data-tab="revenue">Revenue</button>
-          <button class="tab-btn" data-tab="youtube">YouTube</button>
-          <button class="tab-btn" data-tab="meetings">Meetings</button>
-          <button class="tab-btn" data-tab="intel">Intel</button>
-          <button class="tab-btn" data-tab="notes">Notes</button>
-        </nav>
-
-        <div class="topbar-side">
-          <div class="search-shell">
-            <input id="globalSearch" type="search" placeholder="Search priorities, tasks, notes, roadmap..." aria-label="Global search" />
-            <span class="search-shortcut">Ctrl K</span>
-            <div id="searchResults" class="search-results glass" role="listbox" aria-label="Search results"></div>
-          </div>
-          <div class="status-pill" title="Live operating status">
-            <div class="status-dot"></div>
-            <div class="status-copy">
-              <strong id="liveStatusLabel">Mission Live</strong>
-              <span id="liveStatusSubtext">Tracking revenue system</span>
-              <span id="serverIndicator">Server: Offline</span>
-              <span id="liveWeather">Weather: --</span>
-            </div>
-          </div>
-        </div>
-      </header>
-    </div>
+      </div>
+    </aside>
 
     <main>
       <!-- Dashboard -->
@@ -1523,6 +1527,62 @@
                 </div>
                 <div id="officeActivityList" class="feed-list"></div>
               </div>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Automation -->
+      <section id="automation" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Cron Jobs</span>
+                <h3 class="panel-title">Scheduled automation</h3>
+                <p class="panel-subtitle">Jobs to review before broader automation is trusted. Includes sample jobs visible from Mission Control.</p>
+              </div>
+              <button id="addSampleCronBtn" class="accent-btn" type="button">Add Sample Cron</button>
+            </div>
+            <div id="cronJobList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Feature Cost View</h3>
+                <p class="panel-subtitle">Quick operator-facing cost and complexity framing for Postgres, cron, and structured backend features.</p>
+              </div>
+            </div>
+            <div id="costView" class="module-stack"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- GitOps -->
+      <section id="gitops" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Code History</span>
+                <h3 class="panel-title">Commit and push log</h3>
+                <p class="panel-subtitle">Recent repo commits, plus whether they appear pushed to GitHub.</p>
+              </div>
+            </div>
+            <div id="gitPushStatus" class="feed-item" style="margin-bottom:1rem;"></div>
+            <div id="gitLogList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Repository Review Notes</h3>
+                <p class="panel-subtitle">What reviewers are likely to care about in Mission Control and GitHub presentation.</p>
+              </div>
+            </div>
+            <div class="module-stack">
+              <div class="micro-card"><span>Visual review</span><strong>Shell, spacing, mobile fit, information hierarchy</strong></div>
+              <div class="micro-card"><span>Operational review</span><strong>Task visibility, logs, cron reviewability, git transparency</strong></div>
+              <div class="micro-card"><span>Project review</span><strong>Clear commits, pushed state, and coherent feature scope</strong></div>
             </div>
           </article>
         </div>
@@ -2214,43 +2274,43 @@
         agents: [
           {
             id: createId(),
-            name: "Scout-01",
-            role: "Opportunity Scout",
+            name: "Sosai",
+            role: "COO",
             status: "online",
             model: "gpt-5.4",
             lastActive: new Date().toISOString(),
-            description: "Maps market shifts, emerging content angles, and revenue opportunities worth testing.",
-            capabilities: ["Opportunity discovery", "Competitor signal scans", "Offer-angle ideation"],
-            performanceNotes: "Strong at surfacing asymmetrical bets. Best when given clear ICP constraints.",
+            description: "Chief operating officer for the system. Orchestrates execution, keeps projects moving, and makes sure specialists are pointed at the right work.",
+            capabilities: ["Operational orchestration", "Cross-project execution", "Delegation and review"],
+            performanceNotes: "Owns flow, clarity, and follow-through across the org.",
             activity: [
-              { id: createId(), message: "Flagged two high-intent AI education niches worth packaging.", timestamp: new Date().toISOString() },
-              { id: createId(), message: "Ranked top three short-form hooks based on recent platform velocity.", timestamp: new Date(Date.now() - 7200000).toISOString() }
+              { id: createId(), message: "Re-prioritized Mission Control around visible execution and mobile reviewability.", timestamp: new Date().toISOString() },
+              { id: createId(), message: "Queued specialist work for memory, GitOps, and automation visibility.", timestamp: new Date(Date.now() - 7200000).toISOString() }
+            ]
+          },
+          {
+            id: createId(),
+            name: "Herald",
+            role: "Master SEO and AISO Consultant",
+            status: "busy",
+            model: "sonnet-4",
+            lastActive: new Date(Date.now() - 5400000).toISOString(),
+            description: "A specialist consultant for search performance, technical SEO, AI search discoverability, and professional audit delivery.",
+            capabilities: ["Technical SEO audits", "AI search optimization", "Actionable fix reports"],
+            performanceNotes: "Should feel like a true craft expert, specific and direct, never generic.",
+            activity: [
+              { id: createId(), message: "Prepared specialist audit framing for Herald role and outputs.", timestamp: new Date(Date.now() - 3600000).toISOString() }
             ]
           },
           {
             id: createId(),
             name: "Forge-02",
             role: "Content Ops Lead",
-            status: "busy",
-            model: "gpt-5.4",
-            lastActive: new Date(Date.now() - 5400000).toISOString(),
-            description: "Turns strategy into scripts, content briefs, publishing assets, and repurposing plans.",
-            capabilities: ["Script systems", "Repurposing frameworks", "Publishing queue management"],
-            performanceNotes: "High throughput. Needs tighter approval criteria for brand voice edge cases.",
-            activity: [
-              { id: createId(), message: "Drafted three repurposing ladders for the YouTube-to-email funnel.", timestamp: new Date(Date.now() - 3600000).toISOString() }
-            ]
-          },
-          {
-            id: createId(),
-            name: "Closer-03",
-            role: "Conversion Architect",
             status: "online",
             model: "gpt-5.2",
             lastActive: new Date(Date.now() - 1800000).toISOString(),
-            description: "Optimizes attention capture, lead magnet routing, and offer conversion across owned channels.",
-            capabilities: ["Landing page logic", "Email sequence mapping", "CTA optimization"],
-            performanceNotes: "Best-performing agent on bottom-of-funnel improvements.",
+            description: "Turns strategy into scripts, content briefs, publishing assets, and repurposing plans.",
+            capabilities: ["Script systems", "Repurposing frameworks", "Publishing queue management"],
+            performanceNotes: "Best when paired with clear campaign goals.",
             activity: [
               { id: createId(), message: "Recommended tightening CTA density on the current lead capture flow.", timestamp: new Date(Date.now() - 5400000).toISOString() }
             ]
@@ -2594,6 +2654,24 @@
         if (Array.isArray(serverActivity) && serverActivity.length) {
           mergeServerActivity(serverActivity);
         }
+
+        const cronJobs = await apiFetch("/cron-jobs");
+        if (Array.isArray(cronJobs)) {
+          state.automation = state.automation || { cronJobs: [] };
+          state.automation.cronJobs = cronJobs;
+        }
+
+        const gitLog = await apiFetch("/git-log");
+        if (gitLog && Array.isArray(gitLog.entries)) {
+          state.gitops = {
+            log: gitLog.entries,
+            ahead: Number(gitLog.ahead) || 0,
+            behind: Number(gitLog.behind) || 0
+          };
+        }
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        renderAll();
       } catch (error) {
         console.warn("Mission Control server sync unavailable:", error);
         renderGreeting();
@@ -2639,7 +2717,15 @@
         notes: typeof localData.notes === "string" ? localData.notes : serverData.notes,
         notesLastSaved: typeof localData.notesLastSaved === "string" && localData.notesLastSaved
           ? localData.notesLastSaved
-          : serverData.notesLastSaved
+          : serverData.notesLastSaved,
+        automation: {
+          cronJobs: Array.isArray(localData.automation?.cronJobs) ? localData.automation.cronJobs : (serverData.automation?.cronJobs || [])
+        },
+        gitops: {
+          log: Array.isArray(localData.gitops?.log) ? localData.gitops.log : (serverData.gitops?.log || []),
+          ahead: Number(localData.gitops?.ahead ?? serverData.gitops?.ahead) || 0,
+          behind: Number(localData.gitops?.behind ?? serverData.gitops?.behind) || 0
+        }
       };
     }
 
@@ -2671,6 +2757,14 @@
         intel: {
           filters: { ...defaultState.intel.filters, ...(parsed.intel?.filters || {}) },
           items: Array.isArray(parsed.intel?.items) ? parsed.intel.items : clone(defaultState.intel.items)
+        },
+        automation: {
+          cronJobs: Array.isArray(parsed.automation?.cronJobs) ? parsed.automation.cronJobs : []
+        },
+        gitops: {
+          log: Array.isArray(parsed.gitops?.log) ? parsed.gitops.log : [],
+          ahead: Number(parsed.gitops?.ahead) || 0,
+          behind: Number(parsed.gitops?.behind) || 0
         }
       };
     }
@@ -2915,6 +3009,8 @@
       renderRevenue();
       renderProjects();
       renderCommandCenter();
+      renderAutomation();
+      renderGitOps();
       renderYouTube();
       renderMeetings();
       renderTimeline();
@@ -3214,6 +3310,72 @@
     }
 
     // Command center
+    function renderAutomation() {
+      const cronJobList = document.getElementById("cronJobList");
+      const costView = document.getElementById("costView");
+      const addSampleCronBtn = document.getElementById("addSampleCronBtn");
+      if (!cronJobList || !costView) return;
+
+      const jobs = Array.isArray(state.automation?.cronJobs) ? state.automation.cronJobs : [];
+      cronJobList.innerHTML = jobs.length
+        ? jobs.map((job) => `
+            <div class="feed-item">
+              <strong>${escapeHtml(job.name)}</strong>
+              <p>${escapeHtml(job.notes || "No notes")}</p>
+              <span>${escapeHtml(job.schedule)} | ${escapeHtml(job.status)} | Next: ${job.nextRunAt ? formatDateTime(job.nextRunAt) : "TBD"}</span>
+            </div>
+          `).join("")
+        : '<div class="empty-state">No cron jobs visible yet.</div>';
+
+      costView.innerHTML = `
+        <div class="micro-card"><span>Postgres</span><strong>$0 local if self-hosted, roughly $10-$30+/mo managed later</strong></div>
+        <div class="micro-card"><span>Cron</span><strong>Low direct cost, mostly design/review overhead</strong></div>
+        <div class="micro-card"><span>Recommendation</span><strong>Keep JSON primary now, add SQL and automation selectively</strong></div>
+      `;
+
+      if (addSampleCronBtn && !addSampleCronBtn.dataset.bound) {
+        addSampleCronBtn.dataset.bound = "true";
+        addSampleCronBtn.addEventListener("click", async () => {
+          const payload = {
+            name: "Mission Control Review Sample",
+            schedule: "0 10 * * 1-5",
+            status: "scheduled",
+            nextRunAt: new Date(Date.now() + 86400000).toISOString(),
+            notes: "Sample review job created from Mission Control UI.",
+            source: "mission-control-ui"
+          };
+          try {
+            await apiFetch("/cron-jobs", { method: "POST", body: JSON.stringify(payload) });
+            await hydrateStateFromServer();
+            logActivity("Sample cron job added", payload.name);
+          } catch (error) {
+            console.warn("Failed to add sample cron job", error);
+          }
+        });
+      }
+    }
+
+    function renderGitOps() {
+      const gitPushStatus = document.getElementById("gitPushStatus");
+      const gitLogList = document.getElementById("gitLogList");
+      if (!gitPushStatus || !gitLogList) return;
+
+      const ahead = Number(state.gitops?.ahead) || 0;
+      const behind = Number(state.gitops?.behind) || 0;
+      const entries = Array.isArray(state.gitops?.log) ? state.gitops.log : [];
+
+      gitPushStatus.innerHTML = `<strong>Push Status</strong><p>Local ahead: ${ahead} | Local behind: ${behind}</p><span>${ahead > 0 ? "There are local commits not yet pushed to GitHub." : "GitHub appears current with local main."}</span>`;
+      gitLogList.innerHTML = entries.length
+        ? entries.map((entry) => `
+            <div class="feed-item">
+              <strong>${escapeHtml(entry.shortHash)} · ${escapeHtml(entry.subject)}</strong>
+              <p>${escapeHtml(entry.author)} · ${formatDateTime(entry.date)}</p>
+              <span>${entry.pushed ? "Pushed to origin/main" : "Local only, not pushed yet"}</span>
+            </div>
+          `).join("")
+        : '<div class="empty-state">No git history available.</div>';
+    }
+
     function renderCommandCenter() {
       agentGrid.innerHTML = "";
 

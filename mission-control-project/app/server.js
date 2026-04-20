@@ -10,6 +10,7 @@ const BASE_DIR = __dirname;
 const HTML_PATH = path.join(BASE_DIR, "mission-control.html");
 const DATA_PATH = path.join(BASE_DIR, "mc-data.json");
 const ACTIVITY_PATH = path.join(BASE_DIR, "mc-activity.json");
+const CRON_SAMPLE_PATH = path.join(BASE_DIR, "mc-cron-sample.json");
 const JSON_LIMIT_BYTES = 1024 * 1024;
 
 const startedAt = Date.now();
@@ -17,6 +18,7 @@ let lastDataRefreshAt = new Date().toISOString();
 
 ensureFile(DATA_PATH, "{}\n");
 ensureFile(ACTIVITY_PATH, "[]\n");
+ensureFile(CRON_SAMPLE_PATH, "[]\n");
 
 const server = http.createServer(async (req, res) => {
   setCorsHeaders(res);
@@ -101,6 +103,37 @@ const server = http.createServer(async (req, res) => {
         ok: true,
         entry
       });
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/git-log") {
+      const gitLog = await getGitLog();
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, gitLog);
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/cron-jobs") {
+      const jobs = readJsonFile(CRON_SAMPLE_PATH, []);
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, jobs);
+    }
+
+    if (req.method === "POST" && requestUrl.pathname === "/mc/cron-jobs") {
+      const payload = await readJsonBody(req);
+      const jobs = readJsonFile(CRON_SAMPLE_PATH, []);
+      const entry = {
+        id: payload.id || createId(),
+        name: payload.name || "Unnamed Job",
+        schedule: payload.schedule || "manual",
+        status: payload.status || "scheduled",
+        lastRunAt: payload.lastRunAt || null,
+        nextRunAt: payload.nextRunAt || null,
+        notes: payload.notes || "",
+        source: payload.source || "mission-control"
+      };
+      jobs.unshift(entry);
+      writeJsonFile(CRON_SAMPLE_PATH, jobs.slice(0, 50));
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 201, { ok: true, entry });
     }
 
     sendJson(res, 404, { error: "Not found" });
@@ -238,6 +271,51 @@ function fetchWeather(city) {
         error.statusCode = 502;
         reject(error);
       });
+  });
+}
+
+function getGitLog() {
+  return new Promise((resolve) => {
+    const { exec } = require("child_process");
+    const command = 'git log --pretty=format:{"hash":"%H","shortHash":"%h","subject":"%s","author":"%an","date":"%aI"} -n 20';
+    exec(command, { cwd: path.resolve(BASE_DIR, "..") }, (error, stdout) => {
+      if (error) {
+        resolve([]);
+        return;
+      }
+
+      const aheadBehindCommand = "git rev-list --left-right --count origin/main...main";
+      exec(aheadBehindCommand, { cwd: path.resolve(BASE_DIR, "..") }, (aheadBehindError, aheadBehindStdout) => {
+        const [behindCountRaw = "0", aheadCountRaw = "0"] = String(aheadBehindStdout || "0 0").trim().split(/\s+/);
+        const behindCount = Number(behindCountRaw) || 0;
+        const aheadCount = Number(aheadCountRaw) || 0;
+
+        const rows = stdout
+          .split(/\r?\n/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .map((line) => {
+            try {
+              return JSON.parse(line);
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean)
+          .map((entry, index) => ({
+            ...entry,
+            pushed: index >= aheadCount,
+            branch: "main",
+            remote: "origin"
+          }));
+
+        resolve({
+          ahead: aheadCount,
+          behind: behindCount,
+          entries: rows
+        });
+      });
+    });
   });
 }
 

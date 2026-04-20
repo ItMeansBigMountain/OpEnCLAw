@@ -1,7 +1,7 @@
 {
   "settings": {
     "name": "Affan",
-    "role": "Oyama Productions - CEO",
+    "role": "Oyama Productions - CEO | Sosai COO oversight",
     "keyMetric": "Positive Revenue",
     "goalDate": "2026-12-31",
     "revenueProgress": 74,
@@ -30,7 +30,7 @@
       "title": "Convert Mission Control shell to left sidebar app layout",
       "description": "Replace the top-tab dominant shell with a left navigation layout closer to the screenshot references and Azure-inspired control surfaces.",
       "priority": "high",
-      "column": "backlog",
+      "column": "in-progress",
       "createdAt": "2026-04-20T04:40:00.000Z",
       "assignee": "Claw",
       "type": "Feature",
@@ -259,67 +259,67 @@
     "agents": [
       {
         "id": "ag1",
-        "name": "Scout-01",
-        "role": "Opportunity Scout",
+        "name": "Sosai",
+        "role": "COO",
         "status": "online",
         "model": "gpt-5.4",
-        "lastActive": "2026-04-20T04:30:00.000Z",
-        "description": "Maps market shifts, emerging content angles, and revenue opportunities worth testing.",
+        "lastActive": "2026-04-20T13:40:00.000Z",
+        "description": "Chief operating officer for the system. Owns execution oversight, delegation, and project movement.",
         "capabilities": [
-          "Opportunity discovery",
-          "Competitor signal scans",
-          "Offer-angle ideation"
+          "Operational orchestration",
+          "Cross-project execution",
+          "Delegation and review"
         ],
-        "performanceNotes": "Strong at surfacing asymmetrical bets.",
+        "performanceNotes": "Primary operating agent and coordinator.",
         "activity": [
           {
             "id": "aga1",
-            "message": "Flagged two high-intent niches worth packaging.",
-            "timestamp": "2026-04-20T04:10:00.000Z"
+            "message": "Shifted Mission Control toward side-nav mobile reviewability and clearer GitOps visibility.",
+            "timestamp": "2026-04-20T13:40:00.000Z"
           }
         ]
       },
       {
         "id": "ag2",
+        "name": "Herald",
+        "role": "Master SEO and AISO Consultant",
+        "status": "busy",
+        "model": "sonnet-4",
+        "lastActive": "2026-04-20T13:20:00.000Z",
+        "description": "A specialist consultant for technical SEO, AI search optimization, audit scoring, and sharp implementation guidance.",
+        "capabilities": [
+          "Technical SEO audits",
+          "AI search optimization",
+          "Actionable fix reports"
+        ],
+        "performanceNotes": "Should operate as a true specialist craft master, not a generic helper.",
+        "activity": [
+          {
+            "id": "aga2",
+            "message": "Prepared specialist SEO/AISO audit positioning and report expectations.",
+            "timestamp": "2026-04-20T13:20:00.000Z"
+          }
+        ]
+      },
+      {
+        "id": "ag3",
         "name": "Forge-02",
         "role": "Content Ops Lead",
-        "status": "busy",
-        "model": "gpt-5.4",
-        "lastActive": "2026-04-20T04:28:00.000Z",
+        "status": "online",
+        "model": "gpt-5.2",
+        "lastActive": "2026-04-20T13:10:00.000Z",
         "description": "Turns strategy into scripts, briefs, publishing assets, and repurposing plans.",
         "capabilities": [
           "Script systems",
           "Repurposing frameworks",
           "Publishing queue management"
         ],
-        "performanceNotes": "High throughput.",
-        "activity": [
-          {
-            "id": "aga2",
-            "message": "Drafted content repurposing ladders.",
-            "timestamp": "2026-04-20T04:15:00.000Z"
-          }
-        ]
-      },
-      {
-        "id": "ag3",
-        "name": "Closer-03",
-        "role": "Conversion Architect",
-        "status": "online",
-        "model": "gpt-5.2",
-        "lastActive": "2026-04-20T04:26:00.000Z",
-        "description": "Optimizes capture, lead routing, and offer conversion across owned channels.",
-        "capabilities": [
-          "Landing page logic",
-          "Email sequence mapping",
-          "CTA optimization"
-        ],
-        "performanceNotes": "Best-performing agent on bottom-of-funnel improvements.",
+        "performanceNotes": "Strong execution partner once campaign direction is clear.",
         "activity": [
           {
             "id": "aga3",
-            "message": "Recommended tightening CTA density.",
-            "timestamp": "2026-04-20T04:14:00.000Z"
+            "message": "Drafted content repurposing ladders.",
+            "timestamp": "2026-04-20T04:15:00.000Z"
           }
         ]
       },
@@ -391,5 +391,35 @@
       "importance": "all"
     },
     "items": []
+  },
+  "automation": {
+    "cronJobs": [
+      {
+        "id": "cron-sample-daily-ops",
+        "name": "Daily Ops Check",
+        "schedule": "0 9 * * *",
+        "status": "scheduled",
+        "lastRunAt": null,
+        "nextRunAt": "2026-04-21T14:00:00.000Z",
+        "notes": "Sample job visible in Mission Control for review.",
+        "source": "mission-control-sample"
+      }
+    ]
+  },
+  "gitops": {
+    "ahead": 1,
+    "behind": 0,
+    "log": [
+      {
+        "hash": "02a570647b54566c922dda491b5e4f85ff46fc3c",
+        "shortHash": "02a5706",
+        "subject": "Fix mission control button wiring regression",
+        "author": "itMeansBigMountain",
+        "date": "2026-04-20T08:32:46-05:00",
+        "pushed": false,
+        "remote": "origin",
+        "branch": "main"
+      }
+    ]
   }
 }
