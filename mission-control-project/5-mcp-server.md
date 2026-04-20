@@ -13,7 +13,7 @@ Copy the skill file below and save it as lead-gen/SKILL.md in your agent's skill
 
 ---
 name: lead-gen
-description: Scrape, enrich, score, and draft personalized outreach for business leads. Use when asked to "find leads", "generate leads", "scrape businesses", "prospect", "find clients", "outreach campaign", "cold email", "contact form outreach", or any lead generation task.
+description: Scrape, enrich, score, and draft personalized outreach for business leads. Use when asked to "find leads", "generate leads", "scrape businesses", "prospect", "find clients", "outreach campaign", "cold email", "contact form outreach", or any data fetching task.
 ---
 
 # Lead Gen Agent
