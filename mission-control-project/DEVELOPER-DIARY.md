@@ -18,7 +18,10 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Durable portability direction: keep JSON primary, document services clearly, and only add machine-bound services behind explicit local scaffolding.
 
 ## Next recommended work
-- Make API base dynamic from the current browser host
-- Add a portability manifest for moving Mission Control and assistant memory/config to a cloud machine
-- Add per-project diary convention across projects under the main desktop project root
-- Continue hardening event binding and render safety so missing sections cannot crash the whole app
+- Fill sparse tabs with more realistic working content so Mission Control feels operational rather than empty
+- Add an approval gate section for pending high-risk or review-required actions
+- Add email setup/report-delivery work into the backlog and eventual governance model
+- Add a secure API inventory/billing tab with masked key display, reveal controls, and billing dashboard links
+- Perform a deeper internal scan of configured APIs later so cost analysis can be grounded in the real provider footprint
+- Keep hardening event binding and render safety so missing sections cannot crash the whole app
+- Continue the portability path for a future cloud machine move

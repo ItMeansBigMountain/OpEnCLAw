@@ -101,122 +101,71 @@
       "assignee": "Claw",
       "type": "Milestone",
       "area": "Mission Control"
-    }
-  ],
-  "executionLogs": [
-    {
-      "id": "e1",
-      "taskId": "t4",
-      "title": "Spec audit started",
-      "detail": "Reviewing the nine original source files and mapping them against current Mission Control and workspace state.",
-      "agent": "Claw",
-      "level": "info",
-      "timestamp": "2026-04-20T04:40:00.000Z"
     },
     {
-      "id": "e2",
-      "taskId": "t4",
-      "title": "Mission Control-focused files identified",
-      "detail": "1-create-HTML-prompt, 2-create-modules, 3-backend-server, and 4-config are the main app implementation specs; others are system/config/integration tasks.",
-      "agent": "Claw",
-      "level": "info",
-      "timestamp": "2026-04-20T04:43:00.000Z"
-    }
-  ],
-  "projects": [
-    {
-      "id": "proj1",
-      "name": "Mission Control",
-      "description": "Central dashboard for tasks, projects, activity, docs, memory, team structure, and realtime execution visibility.",
-      "status": "active",
-      "percent": 72,
-      "owner": "Affan / Claw",
+      "id": "t8",
+      "title": "Add approval gate section to Mission Control",
+      "description": "Create a dedicated view for approval-required actions, pending decisions, and review checkpoints before risky/public actions.",
       "priority": "high",
-      "lastUpdated": "2026-04-20T04:45:00.000Z"
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:25:00.000Z",
+      "assignee": "Sosai",
+      "type": "Feature",
+      "area": "Governance"
     },
     {
-      "id": "proj2",
-      "name": "OpenClaw Setup",
-      "description": "Config, hardening, agent design, integrations, and operating rules for the local OpenClaw system.",
-      "status": "planning",
-      "percent": 38,
-      "owner": "Affan / Claw",
+      "id": "t9",
+      "title": "Seed empty tabs with real working content and scaffolding",
+      "description": "Populate sparse views so Mission Control feels like a living operating system instead of a shell with empty panes.",
+      "priority": "high",
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:26:00.000Z",
+      "assignee": "Sosai",
+      "type": "Task",
+      "area": "Mission Control"
+    },
+    {
+      "id": "t10",
+      "title": "Add email setup and report delivery backlog",
+      "description": "Track personal email delivery, future customer/lead email list operations, and report/document email workflows.",
+      "priority": "high",
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:27:00.000Z",
+      "assignee": "Sosai",
+      "type": "Task",
+      "area": "Email"
+    },
+    {
+      "id": "t11",
+      "title": "Plan portable cloud deployment for Mission Control and assistant state",
+      "description": "Document and eventually implement a move from house machine to cloud machine with portable configs, memory, and project state.",
       "priority": "medium",
-      "lastUpdated": "2026-04-20T04:45:00.000Z"
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:28:00.000Z",
+      "assignee": "Sosai",
+      "type": "Task",
+      "area": "Portability"
     },
     {
-      "id": "proj3",
-      "name": "Agent Org Infrastructure",
-      "description": "Role design, coordination patterns, checks and balances, and agent operating structure.",
-      "status": "active",
-      "percent": 61,
-      "owner": "Claw",
+      "id": "t12",
+      "title": "Deep scan configured APIs and build secure API inventory tab",
+      "description": "Audit configured API providers, keys, and project-linked integrations; then surface them in Mission Control with masked key display, reveal controls, vendor billing links, and cost-analysis support.",
       "priority": "high",
-      "lastUpdated": "2026-04-20T04:45:00.000Z"
-    }
-  ],
-  "memoryEntries": [
-    {
-      "id": "m1",
-      "title": "Long-Term Memory",
-      "type": "long-term",
-      "summary": "Project folder defaults, Mission Control focus, multi-agent operating model, and runtime safety defaults.",
-      "content": "The workspace now reflects the user's preference for C:\\Users\\faree\\Desktop\\openclaw as the default project location, Mission Control as the main active project, a role-based multi-agent company model, and cautious runtime safety defaults.",
-      "timestamp": "2026-04-20T04:20:00.000Z"
-    },
-    {
-      "id": "m2",
-      "title": "Spec Alignment Notes",
-      "type": "daily",
-      "summary": "Original source files are being audited one by one to ensure the final system matches the real operating goal.",
-      "content": "Mission Control now needs continued iteration for sidebar layout, org chart, stronger office avatars, and deeper alignment to the original prompt files.",
-      "timestamp": "2026-04-20T04:42:00.000Z"
-    }
-  ],
-  "documents": [
-    {
-      "id": "d1",
-      "title": "Mission Control Spec Audit",
-      "category": "docs",
-      "summary": "Audit of 0-Memory through 8-Layered-AI-Model-Stack against current implementation.",
-      "content": "See SPEC-AUDIT.md in the project root for the current mapping of implemented, partial, deferred, and missing features.",
-      "timestamp": "2026-04-20T04:46:00.000Z"
-    },
-    {
-      "id": "d2",
-      "title": "Realtime Mission Control Direction",
-      "category": "planning",
-      "summary": "Task-first dashboard with projects, memory, docs, org chart, logs, conversations, and office avatars.",
-      "content": "The dashboard is moving toward a more complete mission control with Azure/Teams influence and realtime visibility into task execution and agent coordination.",
-      "timestamp": "2026-04-20T04:35:00.000Z"
-    }
-  ],
-  "conversations": [
-    {
-      "id": "c1",
-      "from": "Affan",
-      "to": "Claw",
-      "message": "Set the remaining UI upgrades as tasks and go through each original source file one by one.",
-      "visibility": "discord",
-      "timestamp": "2026-04-20T04:44:00.000Z"
-    },
-    {
-      "id": "c2",
-      "from": "Claw",
-      "to": "Mission Control",
-      "message": "Audit in progress. Mission Control UI specs are being separated from broader OpenClaw configuration and integration tasks.",
-      "visibility": "system",
-      "timestamp": "2026-04-20T04:45:00.000Z"
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:33:00.000Z",
+      "assignee": "Sosai",
+      "type": "Task",
+      "area": "API Governance"
     }
   ],
   "notes": "",
   "notesLastSaved": "",
   "activity": [
     {
-      "id": "a1",
-      "title": "Spec audit created",
-      "detail": "Wrote SPEC-AUDIT.md to map each original source file to current implementation status.",
-      "timestamp": "2026-04-20T04:46:00.000Z"
+      "id": "a3",
+      "title": "Mobile API fix identified",
+      "detail": "Frontend API base was hardcoded to localhost, which breaks server calls from phone/LAN access. Switched to window.location.origin based routing.",
+      "timestamp": "2026-04-20T14:10:00.000Z"
     },
     {
       "id": "a2",
@@ -225,10 +174,34 @@
       "timestamp": "2026-04-20T04:47:00.000Z"
     },
     {
-      "id": "a3",
-      "title": "Mobile API fix identified",
-      "detail": "Frontend API base was hardcoded to localhost, which breaks server calls from phone/LAN access. Switched to window.location.origin based routing.",
-      "timestamp": "2026-04-20T14:10:00.000Z"
+      "id": "a1",
+      "title": "Spec audit created",
+      "detail": "Wrote SPEC-AUDIT.md to map each original source file to current implementation status.",
+      "timestamp": "2026-04-20T04:46:00.000Z"
+    },
+    {
+      "id": "fafe0b73-e35e-45de-b21a-2f3f00c02a19",
+      "timestamp": "2026-04-20T02:58:09.863Z",
+      "title": "Client removed",
+      "detail": "Atlas Retail removed from revenue ledger."
+    },
+    {
+      "id": "16f4dc3f-4d08-4ba4-8c0f-bb6c90fb11c3",
+      "timestamp": "2026-04-20T02:58:08.240Z",
+      "title": "Client removed",
+      "detail": "Vertex Labs removed from revenue ledger."
+    },
+    {
+      "id": "597ef726-d1d5-4cde-9971-a73bc69c23ce",
+      "timestamp": "2026-04-20T02:58:06.775Z",
+      "title": "Client removed",
+      "detail": "Signal Forge removed from revenue ledger."
+    },
+    {
+      "id": "ef739a6c-faae-4744-b352-d4bd7bfb8683",
+      "timestamp": "2026-04-20T02:58:05.128Z",
+      "title": "Client removed",
+      "detail": "Northstar Media removed from revenue ledger."
     }
   ],
   "revenue": {
@@ -413,8 +386,6 @@
     ]
   },
   "gitops": {
-    "ahead": 1,
-    "behind": 0,
     "log": [
       {
         "hash": "02a570647b54566c922dda491b5e4f85ff46fc3c",
@@ -426,6 +397,8 @@
         "remote": "origin",
         "branch": "main"
       }
-    ]
+    ],
+    "ahead": 1,
+    "behind": 0
   }
 }
