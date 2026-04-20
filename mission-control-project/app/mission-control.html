@@ -2800,11 +2800,15 @@
 
     // Event wiring
     function bindEvents() {
+      const on = (element, eventName, handler) => {
+        if (element) element.addEventListener(eventName, handler);
+      };
+
       tabButtons.forEach((button) => {
         button.addEventListener("click", () => switchTab(button.dataset.tab));
       });
 
-      addPriorityBtn.addEventListener("click", () => {
+      on(addPriorityBtn, "click", () => {
         state.priorities.unshift({ id: createId(), text: "New priority", done: false });
         saveState();
         renderPriorities();
@@ -2812,7 +2816,7 @@
         logActivity("Priority created", "A new top priority was added to the dashboard.");
       });
 
-      clearActivityBtn.addEventListener("click", () => {
+      on(clearActivityBtn, "click", () => {
         state.activity = [{
           id: createId(),
           title: "Activity feed reset",
@@ -2827,44 +2831,44 @@
         button.addEventListener("click", () => openTaskModal({ column: button.dataset.column }));
       });
 
-      quickAddProjectBtn.addEventListener("click", () => openTaskModal({ column: "backlog" }));
-      closeTaskModalBtn.addEventListener("click", closeTaskModal);
-      cancelTaskBtn.addEventListener("click", closeTaskModal);
+      on(quickAddProjectBtn, "click", () => openTaskModal({ column: "backlog" }));
+      on(closeTaskModalBtn, "click", closeTaskModal);
+      on(cancelTaskBtn, "click", closeTaskModal);
 
-      taskModalBackdrop.addEventListener("click", (event) => {
+      on(taskModalBackdrop, "click", (event) => {
         if (event.target === taskModalBackdrop) closeTaskModal();
       });
 
-      taskForm.addEventListener("submit", handleTaskSubmit);
-      deleteTaskBtn.addEventListener("click", handleTaskDelete);
-      clientForm.addEventListener("submit", handleClientSubmit);
-      deleteClientBtn.addEventListener("click", handleClientDelete);
-      resetClientBtn.addEventListener("click", resetClientForm);
-      monthlyGoalInput.addEventListener("input", handleRevenueSettingsInput);
-      revenueProgressInput.addEventListener("input", handleRevenueSettingsInput);
-      decisionForm.addEventListener("submit", handleDecisionSubmit);
-      closeAgentDrawerBtn.addEventListener("click", closeAgentDrawer);
-      agentDrawerBackdrop.addEventListener("click", closeAgentDrawer);
-      openSendTaskBtn.addEventListener("click", openSendTaskModal);
-      agentPerformanceNotes.addEventListener("input", handleAgentPerformanceNotesInput);
-      closeSendTaskModalBtn.addEventListener("click", closeSendTaskModal);
-      cancelSendTaskBtn.addEventListener("click", closeSendTaskModal);
-      sendTaskModalBackdrop.addEventListener("click", (event) => {
+      on(taskForm, "submit", handleTaskSubmit);
+      on(deleteTaskBtn, "click", handleTaskDelete);
+      on(clientForm, "submit", handleClientSubmit);
+      on(deleteClientBtn, "click", handleClientDelete);
+      on(resetClientBtn, "click", resetClientForm);
+      on(monthlyGoalInput, "input", handleRevenueSettingsInput);
+      on(revenueProgressInput, "input", handleRevenueSettingsInput);
+      on(decisionForm, "submit", handleDecisionSubmit);
+      on(closeAgentDrawerBtn, "click", closeAgentDrawer);
+      on(agentDrawerBackdrop, "click", closeAgentDrawer);
+      on(openSendTaskBtn, "click", openSendTaskModal);
+      on(agentPerformanceNotes, "input", handleAgentPerformanceNotesInput);
+      on(closeSendTaskModalBtn, "click", closeSendTaskModal);
+      on(cancelSendTaskBtn, "click", closeSendTaskModal);
+      on(sendTaskModalBackdrop, "click", (event) => {
         if (event.target === sendTaskModalBackdrop) closeSendTaskModal();
       });
-      sendTaskForm.addEventListener("submit", handleSendTaskSubmit);
-      subscriberCountInput.addEventListener("input", handleSubscriberInput);
-      videoIdeaForm.addEventListener("submit", handleVideoIdeaSubmit);
-      deleteVideoIdeaBtn.addEventListener("click", handleVideoIdeaDelete);
-      resetVideoIdeaBtn.addEventListener("click", resetVideoIdeaForm);
-      meetingForm.addEventListener("submit", handleMeetingSubmit);
-      deleteMeetingBtn.addEventListener("click", handleMeetingDelete);
-      resetMeetingBtn.addEventListener("click", resetMeetingForm);
-      intelForm.addEventListener("submit", handleIntelSubmit);
-      intelFilterCategory.addEventListener("change", handleIntelFilterChange);
-      intelFilterImportance.addEventListener("change", handleIntelFilterChange);
+      on(sendTaskForm, "submit", handleSendTaskSubmit);
+      on(subscriberCountInput, "input", handleSubscriberInput);
+      on(videoIdeaForm, "submit", handleVideoIdeaSubmit);
+      on(deleteVideoIdeaBtn, "click", handleVideoIdeaDelete);
+      on(resetVideoIdeaBtn, "click", resetVideoIdeaForm);
+      on(meetingForm, "submit", handleMeetingSubmit);
+      on(deleteMeetingBtn, "click", handleMeetingDelete);
+      on(resetMeetingBtn, "click", resetMeetingForm);
+      on(intelForm, "submit", handleIntelSubmit);
+      on(intelFilterCategory, "change", handleIntelFilterChange);
+      on(intelFilterImportance, "change", handleIntelFilterChange);
 
-      notesTextarea.addEventListener("input", () => {
+      on(notesTextarea, "input", () => {
         state.notes = notesTextarea.value;
         state.notesLastSaved = new Date().toISOString();
         saveState();
@@ -2872,8 +2876,8 @@
         debounceNotesActivity();
       });
 
-      globalSearch.addEventListener("input", renderSearchResults);
-      globalSearch.addEventListener("focus", renderSearchResults);
+      on(globalSearch, "input", renderSearchResults);
+      on(globalSearch, "focus", renderSearchResults);
 
       document.addEventListener("click", (event) => {
         if (!event.target.closest(".search-shell")) {
