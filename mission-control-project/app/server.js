@@ -11,6 +11,7 @@ const HTML_PATH = path.join(BASE_DIR, "mission-control.html");
 const DATA_PATH = path.join(BASE_DIR, "mc-data.json");
 const ACTIVITY_PATH = path.join(BASE_DIR, "mc-activity.json");
 const CRON_SAMPLE_PATH = path.join(BASE_DIR, "mc-cron-sample.json");
+const LIVE_CONSOLE_PATH = path.join(BASE_DIR, "mc-live-console.json");
 const JSON_LIMIT_BYTES = 1024 * 1024;
 
 const startedAt = Date.now();
@@ -19,6 +20,7 @@ let lastDataRefreshAt = new Date().toISOString();
 ensureFile(DATA_PATH, "{}\n");
 ensureFile(ACTIVITY_PATH, "[]\n");
 ensureFile(CRON_SAMPLE_PATH, "[]\n");
+ensureFile(LIVE_CONSOLE_PATH, "[]\n");
 
 const server = http.createServer(async (req, res) => {
   setCorsHeaders(res);
@@ -133,6 +135,29 @@ const server = http.createServer(async (req, res) => {
       jobs.unshift(entry);
       writeJsonFile(CRON_SAMPLE_PATH, jobs.slice(0, 50));
       lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 201, { ok: true, entry });
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/live-console") {
+      const entries = readJsonFile(LIVE_CONSOLE_PATH, []);
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, entries.slice(-200).reverse());
+    }
+
+    if (req.method === "POST" && requestUrl.pathname === "/mc/live-console") {
+      const payload = await readJsonBody(req);
+      const entries = readJsonFile(LIVE_CONSOLE_PATH, []);
+      const entry = {
+        id: payload.id || createId(),
+        timestamp: new Date().toISOString(),
+        actor: payload.actor || "Sosai",
+        scope: payload.scope || "mission-control",
+        message: payload.message || "",
+        level: payload.level || "info"
+      };
+      entries.push(entry);
+      writeJsonFile(LIVE_CONSOLE_PATH, entries.slice(-1000));
+      lastDataRefreshAt = entry.timestamp;
       return sendJson(res, 201, { ok: true, entry });
     }
 

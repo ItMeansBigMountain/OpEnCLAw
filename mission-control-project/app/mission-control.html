@@ -1061,6 +1061,9 @@
         <button class="tab-btn" data-tab="meetings">Meetings</button>
         <button class="tab-btn" data-tab="intel">Intel</button>
         <button class="tab-btn" data-tab="automation">Automation</button>
+        <button class="tab-btn" data-tab="approvals">Approvals</button>
+        <button class="tab-btn" data-tab="api-inventory">API Inventory</button>
+        <button class="tab-btn" data-tab="email-ops">Email Ops</button>
         <button class="tab-btn" data-tab="gitops">GitOps</button>
         <button class="tab-btn" data-tab="notes">Notes</button>
       </nav>
@@ -1525,22 +1528,108 @@
             <div class="panel-header">
               <div>
                 <span class="eyebrow">Realtime Office</span>
-                <h3 class="panel-title">Avatar activity floor</h3>
-                <p class="panel-subtitle">A playful live scene showing where agents are, what they are doing, and who is collaborating.</p>
+                <h3 class="panel-title">Pixel office + live operator console</h3>
+                <p class="panel-subtitle">Top half shows agent avatars moving through a playful office. Bottom half shows a live console of what the system is doing.</p>
               </div>
             </div>
-            <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,0.7fr);gap:1rem;align-items:start;">
-              <div id="officeCanvas" class="glass" style="position:relative;min-height:520px;border-radius:22px;padding:1rem;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)), repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px), repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px);"></div>
-              <div class="panel glass">
-                <div class="panel-header">
-                  <div>
-                    <h3 class="panel-title">Office Activity</h3>
-                    <p class="panel-subtitle">Current avatar state and recent movement.</p>
+            <div class="module-stack">
+              <div id="officeCanvas" class="glass" style="position:relative;min-height:360px;border-radius:22px;padding:1rem;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)), repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px), repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px);"></div>
+              <div style="display:grid;grid-template-columns:minmax(280px,0.8fr) minmax(0,1.2fr);gap:1rem;align-items:start;">
+                <div class="panel glass">
+                  <div class="panel-header">
+                    <div>
+                      <h3 class="panel-title">Office Activity</h3>
+                      <p class="panel-subtitle">Current avatar state and recent movement.</p>
+                    </div>
                   </div>
+                  <div id="officeActivityList" class="feed-list"></div>
                 </div>
-                <div id="officeActivityList" class="feed-list"></div>
+                <div class="panel glass">
+                  <div class="panel-header">
+                    <div>
+                      <h3 class="panel-title">Live Console</h3>
+                      <p class="panel-subtitle">Realtime stream of execution and agent activity.</p>
+                    </div>
+                  </div>
+                  <div id="liveConsoleList" class="feed-list"></div>
+                </div>
               </div>
             </div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Approvals -->
+      <section id="approvals" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Approval Gates</span>
+                <h3 class="panel-title">Actions that should stop for review</h3>
+                <p class="panel-subtitle">Centralize approval-required work so risky or public actions are visible before execution.</p>
+              </div>
+            </div>
+            <div id="approvalGateList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Governance Notes</h3>
+                <p class="panel-subtitle">Why a task needs approval and what kind of review it should receive.</p>
+              </div>
+            </div>
+            <div id="approvalDetail" class="feed-item" style="min-height:320px;"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- API Inventory -->
+      <section id="api-inventory" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">API Governance</span>
+                <h3 class="panel-title">Configured providers and billing links</h3>
+                <p class="panel-subtitle">Masked keys, vendor dashboards, and future cost analysis support.</p>
+              </div>
+            </div>
+            <div id="apiInventoryList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">API Detail</h3>
+                <p class="panel-subtitle">Selected provider metadata, intended use, and billing/dashboard links.</p>
+              </div>
+            </div>
+            <div id="apiInventoryDetail" class="feed-item" style="min-height:320px;"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Email Ops -->
+      <section id="email-ops" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Email Operations</span>
+                <h3 class="panel-title">Personal delivery and future list workflows</h3>
+                <p class="panel-subtitle">Track report delivery, document email tasks, and later customer/lead email systems.</p>
+              </div>
+            </div>
+            <div id="emailWorkflowList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Email Roadmap</h3>
+                <p class="panel-subtitle">What should come first, and what should stay gated.</p>
+              </div>
+            </div>
+            <div id="emailWorkflowDetail" class="feed-item" style="min-height:320px;"></div>
           </article>
         </div>
       </section>
@@ -2640,6 +2729,7 @@
       window.setInterval(refreshServerStatus, 30000);
       window.setInterval(pushStateToServer, BACKUP_SYNC_INTERVAL_MS);
       window.setInterval(refreshWeather, WEATHER_REFRESH_INTERVAL_MS);
+      window.setInterval(refreshLiveConsole, 12000);
       window.addEventListener("beforeunload", sendLastChanceBackup);
       document.addEventListener("visibilitychange", handleVisibilityBackup);
     }
@@ -2681,6 +2771,11 @@
             ahead: Number(gitLog.ahead) || 0,
             behind: Number(gitLog.behind) || 0
           };
+        }
+
+        const liveConsole = await apiFetch("/live-console");
+        if (Array.isArray(liveConsole)) {
+          state.liveConsole = liveConsole;
         }
 
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -2778,7 +2873,17 @@
           log: Array.isArray(parsed.gitops?.log) ? parsed.gitops.log : [],
           ahead: Number(parsed.gitops?.ahead) || 0,
           behind: Number(parsed.gitops?.behind) || 0
-        }
+        },
+        approvals: {
+          gates: Array.isArray(parsed.approvals?.gates) ? parsed.approvals.gates : []
+        },
+        apiInventory: {
+          providers: Array.isArray(parsed.apiInventory?.providers) ? parsed.apiInventory.providers : []
+        },
+        emailOps: {
+          workflows: Array.isArray(parsed.emailOps?.workflows) ? parsed.emailOps.workflows : []
+        },
+        liveConsole: Array.isArray(parsed.liveConsole) ? parsed.liveConsole : []
       };
     }
 
@@ -3023,6 +3128,9 @@
       renderProjects();
       renderCommandCenter();
       renderAutomation();
+      renderApprovalGates();
+      renderApiInventory();
+      renderEmailOps();
       renderGitOps();
       renderYouTube();
       renderMeetings();
@@ -3668,28 +3776,163 @@
 
     function renderOfficeView() {
       if (!officeCanvas || !officeActivityList) return;
+      const liveConsoleList = document.getElementById("liveConsoleList");
       const agents = Array.isArray(state.command?.agents) ? state.command.agents : [];
+      const desks = [
+        { left: "7%", top: "10%", width: "16%", height: "13%", label: "COO Pod" },
+        { left: "28%", top: "10%", width: "16%", height: "13%", label: "SEO Lab" },
+        { left: "49%", top: "10%", width: "16%", height: "13%", label: "Build Bay" },
+        { left: "70%", top: "10%", width: "16%", height: "13%", label: "Intel Desk" },
+        { left: "16%", top: "56%", width: "18%", height: "14%", label: "Meeting Nook" },
+        { left: "62%", top: "56%", width: "18%", height: "14%", label: "Automation Bench" }
+      ];
+
       officeCanvas.innerHTML = `
-        <div style="position:absolute;left:6%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
-        <div style="position:absolute;left:26%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
-        <div style="position:absolute;left:46%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
-        <div style="position:absolute;left:66%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
-        <div style="position:absolute;left:35%;top:58%;width:22%;height:14%;background:rgba(160,160,160,0.18);border-radius:999px;"></div>
+        <div style="position:absolute;inset:0;border-radius:22px;overflow:hidden;">
+          <div style="position:absolute;left:0;right:0;top:0;bottom:24%;background:linear-gradient(180deg, rgba(111,131,255,0.08), rgba(18,24,45,0.02));"></div>
+          <div style="position:absolute;left:0;right:0;bottom:0;height:24%;background:linear-gradient(180deg, rgba(22,27,50,0.25), rgba(12,14,28,0.45));border-top:1px solid rgba(255,255,255,0.06);"></div>
+          <div style="position:absolute;left:8%;top:34%;width:84%;height:7%;background:rgba(255,255,255,0.05);border-radius:999px;"></div>
+          <div style="position:absolute;left:43%;top:18%;width:14%;height:52%;background:rgba(255,255,255,0.03);border-radius:14px;"></div>
+        </div>
       `;
-      agents.forEach((agent, index) => {
-        const x = 12 + ((index % 4) * 18);
-        const y = index < 2 ? 28 + (index * 12) : 56 + ((index - 2) * 8);
-        const el = document.createElement("div");
-        el.style.cssText = `position:absolute;left:${x}%;top:${y}%;display:flex;flex-direction:column;align-items:center;gap:0.2rem;`;
-        el.innerHTML = `
-          <div style="width:28px;height:28px;border-radius:50%;background:${agent.status === 'online' ? '#52c48e' : agent.status === 'busy' ? '#f3a64d' : '#6f83ff'};box-shadow:0 0 18px rgba(0,0,0,0.35);"></div>
-          <span style="font-size:0.78rem;color:var(--text);">${escapeHtml(agent.name)}</span>
-        `;
-        officeCanvas.appendChild(el);
+
+      desks.forEach((desk) => {
+        const node = document.createElement("div");
+        node.style.cssText = `position:absolute;left:${desk.left};top:${desk.top};width:${desk.width};height:${desk.height};background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);border-radius:12px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);`;
+        node.innerHTML = `<span style="position:absolute;left:8px;bottom:6px;font-size:0.68rem;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.08em;">${escapeHtml(desk.label)}</span>`;
+        officeCanvas.appendChild(node);
       });
-      officeActivityList.innerHTML = (Array.isArray(state.executionLogs) ? state.executionLogs : []).slice().sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp)).slice(0,8).map((entry) => `
-        <div class="feed-item"><strong>${escapeHtml(entry.agent || 'System')}</strong><p>${escapeHtml(entry.title)}</p><span>${formatDateTime(entry.timestamp)}</span></div>
-      `).join("") || '<div class="empty-state">No office activity yet.</div>';
+
+      agents.forEach((agent, index) => {
+        const x = 10 + ((index % 4) * 19) + ((index % 2) * 2.5);
+        const y = index < 4 ? 28 + ((index % 2) * 8) : 66;
+        const statusColor = agent.status === "online" ? "#52c48e" : agent.status === "busy" ? "#f3a64d" : "#6f83ff";
+        const avatar = document.createElement("div");
+        avatar.style.cssText = `position:absolute;left:${x}%;top:${y}%;display:flex;flex-direction:column;align-items:center;gap:0.3rem;transform:translate(-50%, -50%);`;
+        avatar.innerHTML = `
+          <div style="position:relative;width:26px;height:38px;filter:drop-shadow(0 8px 12px rgba(0,0,0,0.35));">
+            <div style="position:absolute;left:7px;top:0;width:12px;height:12px;background:#ffd7b0;border-radius:4px;"></div>
+            <div style="position:absolute;left:5px;top:11px;width:16px;height:14px;background:${statusColor};border-radius:4px 4px 3px 3px;"></div>
+            <div style="position:absolute;left:3px;top:16px;width:4px;height:11px;background:${statusColor};border-radius:2px;"></div>
+            <div style="position:absolute;right:3px;top:16px;width:4px;height:11px;background:${statusColor};border-radius:2px;"></div>
+            <div style="position:absolute;left:7px;bottom:0;width:4px;height:12px;background:#cbd3ff;border-radius:2px;"></div>
+            <div style="position:absolute;right:7px;bottom:0;width:4px;height:12px;background:#cbd3ff;border-radius:2px;"></div>
+          </div>
+          <span style="font-size:0.74rem;color:var(--text);background:rgba(8,10,18,0.48);padding:0.18rem 0.45rem;border-radius:999px;border:1px solid rgba(255,255,255,0.06);">${escapeHtml(agent.name)}</span>
+        `;
+        officeCanvas.appendChild(avatar);
+      });
+
+      officeActivityList.innerHTML = (Array.isArray(state.executionLogs) ? state.executionLogs : [])
+        .slice()
+        .sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp))
+        .slice(0,8)
+        .map((entry) => `
+          <div class="feed-item"><strong>${escapeHtml(entry.agent || 'System')}</strong><p>${escapeHtml(entry.title)}</p><span>${formatDateTime(entry.timestamp)}</span></div>
+        `).join("") || '<div class="empty-state">No office activity yet.</div>';
+
+      if (liveConsoleList) {
+        const consoleEntries = Array.isArray(state.liveConsole) ? state.liveConsole : [];
+        liveConsoleList.innerHTML = consoleEntries.length
+          ? consoleEntries.slice(0, 14).map((entry) => `
+              <div class="feed-item">
+                <strong>${escapeHtml(entry.actor || 'System')} · ${escapeHtml(entry.scope || 'runtime')}</strong>
+                <p>${escapeHtml(entry.message || '')}</p>
+                <span>${escapeHtml(entry.level || 'info')} · ${formatDateTime(entry.timestamp)}</span>
+              </div>
+            `).join("")
+          : '<div class="empty-state">No live console entries yet.</div>';
+      }
+    }
+
+    function renderApprovalGates() {
+      const approvalGateList = document.getElementById("approvalGateList");
+      const approvalDetail = document.getElementById("approvalDetail");
+      if (!approvalGateList || !approvalDetail) return;
+      const gates = Array.isArray(state.approvals?.gates) ? state.approvals.gates : [];
+      if (!gates.length) {
+        approvalGateList.innerHTML = '<div class="empty-state">No approval gates configured.</div>';
+        approvalDetail.innerHTML = '<strong>No gate selected</strong><p>Approval-required work will appear here.</p>';
+        return;
+      }
+      approvalGateList.innerHTML = "";
+      gates.forEach((gate, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "search-result";
+        card.innerHTML = `<strong>${escapeHtml(gate.title)}</strong><span>${escapeHtml(gate.status)} · ${escapeHtml(gate.risk || 'unknown')} risk</span>`;
+        card.addEventListener("click", () => {
+          approvalDetail.innerHTML = `<strong>${escapeHtml(gate.title)}</strong><p style="margin-top:0.65rem;">${escapeHtml(gate.summary || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;"><div><strong>Owner:</strong> ${escapeHtml(gate.owner || 'Unassigned')}</div><div><strong>Type:</strong> ${escapeHtml(gate.type || 'general')}</div><div><strong>Status:</strong> ${escapeHtml(gate.status || 'unknown')}</div><div style="margin-top:0.85rem;">${escapeHtml(gate.notes || '')}</div></div>`;
+        });
+        approvalGateList.appendChild(card);
+        if (index === 0) {
+          approvalDetail.innerHTML = `<strong>${escapeHtml(gate.title)}</strong><p style="margin-top:0.65rem;">${escapeHtml(gate.summary || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;"><div><strong>Owner:</strong> ${escapeHtml(gate.owner || 'Unassigned')}</div><div><strong>Type:</strong> ${escapeHtml(gate.type || 'general')}</div><div><strong>Status:</strong> ${escapeHtml(gate.status || 'unknown')}</div><div style="margin-top:0.85rem;">${escapeHtml(gate.notes || '')}</div></div>`;
+        }
+      });
+    }
+
+    function renderApiInventory() {
+      const apiInventoryList = document.getElementById("apiInventoryList");
+      const apiInventoryDetail = document.getElementById("apiInventoryDetail");
+      if (!apiInventoryList || !apiInventoryDetail) return;
+      const providers = Array.isArray(state.apiInventory?.providers) ? state.apiInventory.providers : [];
+      if (!providers.length) {
+        apiInventoryList.innerHTML = '<div class="empty-state">No API providers cataloged yet.</div>';
+        apiInventoryDetail.innerHTML = '<strong>No provider selected</strong><p>Masked API inventory entries will appear here.</p>';
+        return;
+      }
+      apiInventoryList.innerHTML = "";
+      providers.forEach((provider, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "search-result";
+        card.innerHTML = `<strong>${escapeHtml(provider.vendor)} · ${escapeHtml(provider.service)}</strong><span>${escapeHtml(provider.status || 'unknown')} · ${escapeHtml(provider.maskedKey || 'masked')}</span>`;
+        card.addEventListener("click", () => {
+          apiInventoryDetail.innerHTML = `<strong>${escapeHtml(provider.vendor)} · ${escapeHtml(provider.service)}</strong><p style="margin-top:0.65rem;">${escapeHtml(provider.usedFor || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;"><div><strong>Masked Key:</strong> ${escapeHtml(provider.maskedKey || 'n/a')}</div><div><strong>Status:</strong> ${escapeHtml(provider.status || 'unknown')}</div><div><strong>Billing:</strong> <a href="${escapeHtml(provider.billingUrl || '#')}" target="_blank" rel="noreferrer">${escapeHtml(provider.billingUrl || 'n/a')}</a></div><div style="margin-top:0.85rem;">${escapeHtml(provider.notes || '')}</div></div>`;
+        });
+        apiInventoryList.appendChild(card);
+        if (index === 0) {
+          apiInventoryDetail.innerHTML = `<strong>${escapeHtml(provider.vendor)} · ${escapeHtml(provider.service)}</strong><p style="margin-top:0.65rem;">${escapeHtml(provider.usedFor || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;"><div><strong>Masked Key:</strong> ${escapeHtml(provider.maskedKey || 'n/a')}</div><div><strong>Status:</strong> ${escapeHtml(provider.status || 'unknown')}</div><div><strong>Billing:</strong> <a href="${escapeHtml(provider.billingUrl || '#')}" target="_blank" rel="noreferrer">${escapeHtml(provider.billingUrl || 'n/a')}</a></div><div style="margin-top:0.85rem;">${escapeHtml(provider.notes || '')}</div></div>`;
+        }
+      });
+    }
+
+    function renderEmailOps() {
+      const emailWorkflowList = document.getElementById("emailWorkflowList");
+      const emailWorkflowDetail = document.getElementById("emailWorkflowDetail");
+      if (!emailWorkflowList || !emailWorkflowDetail) return;
+      const workflows = Array.isArray(state.emailOps?.workflows) ? state.emailOps.workflows : [];
+      if (!workflows.length) {
+        emailWorkflowList.innerHTML = '<div class="empty-state">No email workflows configured.</div>';
+        emailWorkflowDetail.innerHTML = '<strong>No workflow selected</strong><p>Email delivery tracking will appear here.</p>';
+        return;
+      }
+      emailWorkflowList.innerHTML = "";
+      workflows.forEach((workflow, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "search-result";
+        card.innerHTML = `<strong>${escapeHtml(workflow.name)}</strong><span>${escapeHtml(workflow.status || 'unknown')}</span>`;
+        card.addEventListener("click", () => {
+          emailWorkflowDetail.innerHTML = `<strong>${escapeHtml(workflow.name)}</strong><p style="margin-top:0.65rem;">${escapeHtml(workflow.summary || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;">${escapeHtml(workflow.notes || '')}</div>`;
+        });
+        emailWorkflowList.appendChild(card);
+        if (index === 0) {
+          emailWorkflowDetail.innerHTML = `<strong>${escapeHtml(workflow.name)}</strong><p style="margin-top:0.65rem;">${escapeHtml(workflow.summary || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;">${escapeHtml(workflow.notes || '')}</div>`;
+        }
+      });
+    }
+
+    async function refreshLiveConsole() {
+      try {
+        const liveConsole = await apiFetch("/live-console");
+        if (Array.isArray(liveConsole)) {
+          state.liveConsole = liveConsole;
+          renderOfficeView();
+        }
+      } catch (error) {
+        console.warn("Failed to refresh live console", error);
+      }
     }
 
     function renderVerboseLogs() {

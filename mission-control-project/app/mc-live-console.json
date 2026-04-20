@@ -1,0 +1,26 @@
+[
+  {
+    "id": "live-1",
+    "timestamp": "2026-04-20T15:05:00.000Z",
+    "actor": "Sosai",
+    "scope": "mission-control",
+    "message": "Stabilized mobile interaction and side-nav shell.",
+    "level": "info"
+  },
+  {
+    "id": "live-2",
+    "timestamp": "2026-04-20T15:08:00.000Z",
+    "actor": "Sosai",
+    "scope": "governance",
+    "message": "Queued approval gates, email ops, and API inventory governance work.",
+    "level": "info"
+  },
+  {
+    "id": "live-3",
+    "timestamp": "2026-04-20T15:11:00.000Z",
+    "actor": "Herald",
+    "scope": "seo",
+    "message": "Standing by for specialist audit work once runtime wiring is finished.",
+    "level": "info"
+  }
+]

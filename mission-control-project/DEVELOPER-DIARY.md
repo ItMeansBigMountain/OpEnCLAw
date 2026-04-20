@@ -18,6 +18,10 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Durable portability direction: keep JSON primary, document services clearly, and only add machine-bound services behind explicit local scaffolding.
 - New working preference from user: once main is in a stable state they like, adopt a branching strategy where project work branches off `main`, feature work happens on `feature/*` branches, and changes are reviewed through pull requests. Until then, stabilize directly on `main`.
 - New standing instruction: document every meaningful instruction the user gives about preferred working style and process.
+- Expanded Mission Control with governance-first operating surfaces: Approvals, API Inventory, and Email Ops.
+- Upgraded the Office tab so it feels more alive, with a playful office floor plus a live console stream for current system activity.
+- Added `mc-live-console.json` and matching backend endpoints so the live console can be persisted locally and refreshed from the server.
+- Installed Playwright locally to improve future runtime inspection and smoke testing during UI work.
 
 ## Next recommended work
 - Fill sparse tabs with more realistic working content so Mission Control feels operational rather than empty

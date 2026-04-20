@@ -396,6 +396,109 @@
       }
     ]
   },
+  "approvals": {
+    "gates": [
+      {
+        "id": "gate-1",
+        "title": "External email sending",
+        "type": "external-action",
+        "status": "needs-approval",
+        "risk": "medium",
+        "summary": "Email reports or documents to the user or others only after workflow and credentials are reviewed.",
+        "notes": "Needed for personal reports first, later customer and lead email operations.",
+        "owner": "Sosai"
+      },
+      {
+        "id": "gate-2",
+        "title": "WAN exposure and authentication",
+        "type": "infrastructure",
+        "status": "deferred",
+        "risk": "high",
+        "summary": "Expose Mission Control over WAN only after login, 2FA, HTTPS, and session design are settled.",
+        "notes": "Explicitly deferred for now.",
+        "owner": "Sosai"
+      },
+      {
+        "id": "gate-3",
+        "title": "API secret inventory reveal controls",
+        "type": "secrets",
+        "status": "needs-design",
+        "risk": "high",
+        "summary": "Masked display is fine by default, but raw secret reveal behavior needs a careful UX and security model.",
+        "notes": "Build inventory tab first, then decide reveal workflow.",
+        "owner": "Sosai"
+      }
+    ]
+  },
+  "apiInventory": {
+    "providers": [
+      {
+        "id": "api-1",
+        "vendor": "Anthropic",
+        "service": "Claude API",
+        "maskedKey": "sk-ant-••••••••••••",
+        "status": "configured-or-expected",
+        "usedFor": "Main reasoning, specialist agent work, prompt-cached workflows",
+        "billingUrl": "https://console.anthropic.com/settings/billing",
+        "notes": "Exact live config still needs a deeper internal scan."
+      },
+      {
+        "id": "api-2",
+        "vendor": "OpenAI",
+        "service": "OpenAI / Codex / ChatGPT-linked tooling",
+        "maskedKey": "oauth-or-api-••••",
+        "status": "partially-configured",
+        "usedFor": "Coding flows, possible Codex and model-provider work",
+        "billingUrl": "https://platform.openai.com/settings/organization/billing/overview",
+        "notes": "May involve OAuth-backed access instead of plain API key usage."
+      },
+      {
+        "id": "api-3",
+        "vendor": "OpenRouter",
+        "service": "OpenRouter model routing",
+        "maskedKey": "sk-or-v1-••••••••",
+        "status": "planned",
+        "usedFor": "Low-cost grunt-work model layer",
+        "billingUrl": "https://openrouter.ai/settings/credits",
+        "notes": "Tracked for future cost governance and routing decisions."
+      },
+      {
+        "id": "api-4",
+        "vendor": "Google",
+        "service": "Gemini embeddings / future semantic memory",
+        "maskedKey": "AIza••••••••••••",
+        "status": "planned",
+        "usedFor": "Possible vector-memory embeddings and semantic recall",
+        "billingUrl": "https://aistudio.google.com/",
+        "notes": "Needed only if semantic memory becomes active."
+      }
+    ]
+  },
+  "emailOps": {
+    "workflows": [
+      {
+        "id": "email-1",
+        "name": "Personal report delivery",
+        "status": "backlog",
+        "summary": "Email reports, summaries, or generated documents directly to the user after approval and credential setup.",
+        "notes": "This should come before customer or lead email automation."
+      },
+      {
+        "id": "email-2",
+        "name": "Customer and lead email infrastructure",
+        "status": "future",
+        "summary": "Mailing list, lead nurture, and customer messaging stack.",
+        "notes": "Keep separated from personal reporting workflows."
+      },
+      {
+        "id": "email-3",
+        "name": "Draft-only email assistance",
+        "status": "candidate",
+        "summary": "Prepare email drafts without sending until the delivery path is approved.",
+        "notes": "Low-risk stepping stone before direct send capability."
+      }
+    ]
+  },
   "gitops": {
     "log": [
       {

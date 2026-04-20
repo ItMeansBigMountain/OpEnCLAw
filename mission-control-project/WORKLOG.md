@@ -71,14 +71,31 @@ Track actions requested, actions attempted, current status, and failures so Miss
   - Prefer `read` for exact file slices
   - Or use PowerShell-safe commands / simpler exec calls on Windows
 
+#### 10. Add approval gates, API inventory, email ops, and live office console scaffolding
+- Status: Success
+- Notes:
+  - Added new Mission Control tabs for Approvals, API Inventory, and Email Ops
+  - Seeded governance-focused data so the new sections are useful on first load
+  - Upgraded the Office tab to include a more playful pixel-style office and a live console stream
+  - Added backend live console endpoints and project-local `mc-live-console.json` persistence
+  - Installed Playwright locally for future browser/runtime inspection work
+
+#### 11. Smoke test syntax after large frontend edits
+- Status: Partial success
+- Notes:
+  - `node --check app\\server.js` passed cleanly
+  - Extracted the inline HTML `<script>` block to a temp JS file and `node --check` passed on that extracted script
+  - Direct `node --check` against `.html` failed as expected because Node does not syntax-check HTML files
+
 ## Open tasks now
-- Convert Mission Control shell to left-sidebar app layout
 - Add org chart hierarchy view for agents and company roles
-- Improve office avatar scene and realtime activity visuals
 - Continue strict feature-by-feature alignment against original source files
 - Improve memory/docs views with richer real data sources
 - Decide which parts of `0-Memory.md`, `5-mcp-server.md`, `6-SEO-agent.md`, `7-prompt-caching.md`, and `8-Layered-AI-Model-Stack.md` should be executed now versus tracked separately
 - Continue LAN/mobile testing for the app URL and fix any firewall/network issues if they appear
+- Turn sample API inventory into a safer real metadata scan without dumping secrets
+- Turn email ops from placeholders into a governed draft-and-send workflow
+- Connect approval gates to real pending actions instead of seeded examples
 
 ## Known caveats
 - Some original prompt files describe broader OpenClaw/system integrations, not just Mission Control UI
