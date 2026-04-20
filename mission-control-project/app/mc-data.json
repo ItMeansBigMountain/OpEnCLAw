@@ -223,6 +223,12 @@
       "title": "Tasks refreshed",
       "detail": "Added the next major UI and alignment items into the Mission Control task board state.",
       "timestamp": "2026-04-20T04:47:00.000Z"
+    },
+    {
+      "id": "a3",
+      "title": "Mobile API fix identified",
+      "detail": "Frontend API base was hardcoded to localhost, which breaks server calls from phone/LAN access. Switched to window.location.origin based routing.",
+      "timestamp": "2026-04-20T14:10:00.000Z"
     }
   ],
   "revenue": {

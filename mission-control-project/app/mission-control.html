@@ -2018,7 +2018,7 @@
   <script>
     // Persistence and roadmap configuration
     const STORAGE_KEY = "mission-control-state-v1";
-    const API_BASE = "http://localhost:8899/mc";
+    const API_BASE = `${window.location.origin}/mc`;
     const BACKUP_SYNC_INTERVAL_MS = 5 * 60 * 1000;
     const WEATHER_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
     const timelineConfig = [
