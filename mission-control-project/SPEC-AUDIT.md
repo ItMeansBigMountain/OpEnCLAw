@@ -110,6 +110,9 @@ Status: Partial
 - Notes:
   - Parts are broader OpenClaw operating policy, not Mission Control UI.
 
+## Review completion
+The numbered files `0-Memory.md` through `8-Layered-AI-Model-Stack.md` have now all been reviewed one by one.
+
 ## Next implementation tasks
 1. Convert shell to left-sidebar layout closer to screenshot references
 2. Add stronger visual polish for Azure/Teams influence
@@ -119,3 +122,4 @@ Status: Partial
 6. Add org chart / hierarchy view under agents/team
 7. Improve office avatar scene and agent state visualization
 8. Consider richer backend endpoints for live execution, docs, memory, and conversations
+9. Decide which parts of 0/5/6/7/8 should now be executed versus remain tracked/deferred

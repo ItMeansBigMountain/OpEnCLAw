@@ -77,9 +77,17 @@ Track actions requested, actions attempted, current status, and failures so Miss
 - Improve office avatar scene and realtime activity visuals
 - Continue strict feature-by-feature alignment against original source files
 - Improve memory/docs views with richer real data sources
-- Eventually expose app on local Wi-Fi and provide phone URL when app run is ready
+- Decide which parts of `0-Memory.md`, `5-mcp-server.md`, `6-SEO-agent.md`, `7-prompt-caching.md`, and `8-Layered-AI-Model-Stack.md` should be executed now versus tracked separately
+- Continue LAN/mobile testing for the app URL and fix any firewall/network issues if they appear
 
 ## Known caveats
 - Some original prompt files describe broader OpenClaw/system integrations, not just Mission Control UI
 - `7-prompt-caching.md` and parts of broader config work are intentionally deferred for now
 - Approval-gated behavior still needs to be designed and implemented
+
+## Review checkpoint
+- Status: Success
+- Notes:
+  - Completed one-by-one review of numbered files `0-Memory.md` through `8-Layered-AI-Model-Stack.md`
+  - Confirmed that files 1/2/3/4 are the most directly implemented in the current app
+  - Confirmed that 0/5/6/7/8 require selective follow-through rather than blind execution
