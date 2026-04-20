@@ -81,7 +81,7 @@ const server = http.createServer(async (req, res) => {
     if (req.method === "GET" && requestUrl.pathname === "/mc/activity") {
       const activity = readJsonFile(ACTIVITY_PATH, []);
       lastDataRefreshAt = new Date().toISOString();
-      return sendJson(res, 200, activity.slice(-50).reverse());
+      return sendJson(res, 200, activity.slice(-200).reverse());
     }
 
     if (req.method === "POST" && requestUrl.pathname === "/mc/activity") {
@@ -94,7 +94,7 @@ const server = http.createServer(async (req, res) => {
       };
 
       activity.push(entry);
-      writeJsonFile(ACTIVITY_PATH, activity.slice(-500));
+      writeJsonFile(ACTIVITY_PATH, activity.slice(-1000));
       lastDataRefreshAt = entry.timestamp;
 
       return sendJson(res, 201, {

@@ -215,8 +215,8 @@
       width: 10px;
       height: 10px;
       border-radius: 50%;
-      background: var(--danger);
-      box-shadow: 0 0 0 0 rgba(255, 106, 120, 0.6);
+      background: var(--status-color, var(--danger));
+      box-shadow: 0 0 0 0 var(--status-pulse-color, rgba(255, 106, 120, 0.6));
       animation: pulse 2s infinite;
     }
 
@@ -224,6 +224,8 @@
     .status-copy span { display: block; line-height: 1.1; }
     .status-copy strong { font-size: 0.8rem; font-weight: 700; }
     .status-copy span { margin-top: 0.18rem; color: var(--text-faint); font-size: 0.74rem; }
+    #serverIndicator { color: var(--text-muted); }
+    #liveWeather { color: #d6d1d7; }
 
     .search-results {
       position: absolute;
@@ -978,7 +980,7 @@
     }
 
     @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(255, 106, 120, 0.56); }
+      0% { box-shadow: 0 0 0 0 var(--status-pulse-color, rgba(255, 106, 120, 0.56)); }
       70% { box-shadow: 0 0 0 12px rgba(255, 106, 120, 0); }
       100% { box-shadow: 0 0 0 0 rgba(255, 106, 120, 0); }
     }
@@ -1042,15 +1044,16 @@
         </div>
 
         <nav class="tab-nav" aria-label="Primary tabs">
-          <button class="tab-btn active" data-tab="dashboard">&#128202; Dashboard</button>
-          <button class="tab-btn" data-tab="revenue">&#128176; Revenue</button>
-          <button class="tab-btn" data-tab="projects">&#128203; Projects</button>
-          <button class="tab-btn" data-tab="command">&#127970; Command Center</button>
-          <button class="tab-btn" data-tab="youtube">&#127916; YouTube</button>
-          <button class="tab-btn" data-tab="meetings">&#128222; Meetings</button>
-          <button class="tab-btn" data-tab="timeline">&#128197; Timeline</button>
-          <button class="tab-btn" data-tab="intel">&#128225; Intel</button>
-          <button class="tab-btn" data-tab="notes">&#128221; Notes</button>
+          <button class="tab-btn active" data-tab="dashboard">Tasks</button>
+          <button class="tab-btn" data-tab="command">Agents</button>
+          <button class="tab-btn" data-tab="activity-log">Action Logs</button>
+          <button class="tab-btn" data-tab="verbose">Verbose</button>
+          <button class="tab-btn" data-tab="conversations">Conversations</button>
+          <button class="tab-btn" data-tab="revenue">Revenue</button>
+          <button class="tab-btn" data-tab="youtube">YouTube</button>
+          <button class="tab-btn" data-tab="meetings">Meetings</button>
+          <button class="tab-btn" data-tab="intel">Intel</button>
+          <button class="tab-btn" data-tab="notes">Notes</button>
         </nav>
 
         <div class="topbar-side">
@@ -1064,6 +1067,8 @@
             <div class="status-copy">
               <strong id="liveStatusLabel">Mission Live</strong>
               <span id="liveStatusSubtext">Tracking revenue system</span>
+              <span id="serverIndicator">Server: Offline</span>
+              <span id="liveWeather">Weather: --</span>
             </div>
           </div>
         </div>
@@ -1076,12 +1081,11 @@
         <article class="welcome-card glass">
           <div class="welcome-grid">
             <div class="welcome-copy">
-              <span class="eyebrow">Command Overview</span>
+              <span class="eyebrow">Realtime Task Board</span>
               <h2 id="welcomeGreeting">Good evening, Affan</h2>
               <p>
-                Build a fully autonomous, agent-driven revenue system that continuously finds high-value opportunities,
-                produces optimized content at scale, captures attention into owned assets, and compounds performance
-                through feedback-driven reinvestment.
+                Track what the system is doing now, see work move across the board, inspect live agent output,
+                and keep execution visible with checks, logs, and conversation trails.
               </p>
             </div>
             <div class="welcome-meta">
@@ -1091,7 +1095,7 @@
               </div>
               <div class="meta-block">
                 <span>Primary Objective</span>
-                <strong>Positive Revenue with minimal human intervention</strong>
+                <strong>Visible multi-agent execution with human oversight</strong>
               </div>
             </div>
           </div>
@@ -1101,84 +1105,158 @@
           <article class="metric-card glass">
             <div class="metric-head">
               <div>
-                <div class="metric-label">Positive Revenue</div>
-                <div id="revenueValue" class="metric-value">74%</div>
+                <div class="metric-label">This Week</div>
+                <div id="revenueValue" class="metric-value">0</div>
               </div>
-              <div class="metric-icon">$</div>
+              <div class="metric-icon">&#128200;</div>
             </div>
-            <div class="progress-rail"><div id="revenueProgress" class="progress-fill" style="width: 74%;"></div></div>
             <div class="metric-foot">
-              <span id="revenueCaption">Target attainment ratio</span>
-              <span id="revenueTrend" class="trend positive">&#8593; +8.2%</span>
+              <span>Tasks created this week</span>
+              <span id="revenueTrend" class="trend positive">&#8593; Moving</span>
             </div>
           </article>
 
           <article class="metric-card glass">
             <div class="metric-head">
               <div>
-                <div class="metric-label">Active Projects</div>
+                <div class="metric-label">In Progress</div>
                 <div id="activeProjectsValue" class="metric-value">0</div>
               </div>
               <div class="metric-icon">&#9681;</div>
             </div>
             <div class="metric-foot">
-              <span>In backlog or execution</span>
-              <span id="projectsTrend" class="trend warning">&#8599; Momentum building</span>
+              <span>Currently active work items</span>
+              <span id="projectsTrend" class="trend warning">&#8599; Active board</span>
             </div>
           </article>
 
           <article class="metric-card glass">
             <div class="metric-head">
               <div>
-                <div class="metric-label">Tasks Today</div>
+                <div class="metric-label">Total</div>
                 <div id="tasksTodayValue" class="metric-value">0</div>
               </div>
               <div class="metric-icon">&#10003;</div>
             </div>
             <div class="metric-foot">
-              <span>Created in the last 24 hours</span>
-              <span id="tasksTrend" class="trend positive">&#8593; Execution ready</span>
+              <span>Total tracked work items</span>
+              <span id="tasksTrend" class="trend positive">&#8593; Logged</span>
             </div>
           </article>
 
           <article class="metric-card glass">
             <div class="metric-head">
               <div>
-                <div class="metric-label">Days to Goal</div>
-                <div id="daysToGoalValue" class="metric-value">0</div>
+                <div class="metric-label">Completion</div>
+                <div id="daysToGoalValue" class="metric-value">0%</div>
               </div>
               <div class="metric-icon">&#9200;</div>
             </div>
             <div class="metric-foot">
-              <span id="goalDateLabel">Toward 2026 year-end objective</span>
-              <span id="goalTrend" class="trend danger">&#9888; Stay compounding</span>
+              <span id="goalDateLabel">Done / total task completion ratio</span>
+              <span id="goalTrend" class="trend danger">&#9888; Review flow matters</span>
             </div>
           </article>
         </div>
 
-        <div class="section-grid dashboard-grid">
-          <article class="panel glass">
-            <div class="panel-header">
-              <div>
-                <h3 class="panel-title">Top Priorities</h3>
-                <p class="panel-subtitle">Editable operating priorities with local persistence.</p>
-              </div>
-              <button id="addPriorityBtn" class="accent-btn" type="button">Add Priority</button>
+        <div class="projects-toolbar">
+          <div>
+            <span class="eyebrow">Execution Board</span>
+            <p>Azure-style work tracking for you and your agents, backed by live activity, verbose execution traces, and conversation visibility.</p>
+          </div>
+          <button id="quickAddProjectBtn" class="accent-btn" type="button">+ New Task</button>
+        </div>
+
+        <div class="kanban" style="grid-template-columns: minmax(220px,0.85fr) repeat(3, minmax(260px,1fr)) minmax(320px,0.95fr); align-items:start;">
+          <article class="kanban-column glass" data-column="recurring">
+            <div class="column-header">
+              <h3>Recurring</h3>
+              <span id="count-recurring" class="column-count">0</span>
             </div>
-            <div id="prioritiesList" class="priorities"></div>
+            <button class="ghost-btn add-task-btn" data-column="recurring" type="button">Add Task</button>
+            <div id="taskList-recurring" class="task-list"></div>
+          </article>
+
+          <article class="kanban-column glass" data-column="backlog">
+            <div class="column-header">
+              <h3>Backlog</h3>
+              <span id="count-backlog" class="column-count">0</span>
+            </div>
+            <button class="ghost-btn add-task-btn" data-column="backlog" type="button">Add Task</button>
+            <div id="taskList-backlog" class="task-list"></div>
+          </article>
+
+          <article class="kanban-column glass" data-column="in-progress">
+            <div class="column-header">
+              <h3>In Progress</h3>
+              <span id="count-in-progress" class="column-count">0</span>
+            </div>
+            <button class="ghost-btn add-task-btn" data-column="in-progress" type="button">Add Task</button>
+            <div id="taskList-in-progress" class="task-list"></div>
+          </article>
+
+          <article class="kanban-column glass" data-column="done">
+            <div class="column-header">
+              <h3>Done</h3>
+              <span id="count-done" class="column-count">0</span>
+            </div>
+            <button class="ghost-btn add-task-btn" data-column="done" type="button">Add Task</button>
+            <div id="taskList-done" class="task-list"></div>
           </article>
 
           <article class="panel glass">
             <div class="panel-header">
               <div>
-                <h3 class="panel-title">Activity Feed</h3>
-                <p class="panel-subtitle">Recent system events stored locally.</p>
+                <h3 class="panel-title">Live Activity</h3>
+                <p class="panel-subtitle">What the system and agents are doing right now.</p>
               </div>
               <button id="clearActivityBtn" class="ghost-btn" type="button">Clear Feed</button>
             </div>
             <div id="activityFeed" class="feed-list"></div>
           </article>
         </div>
+      </section>
+
+      <!-- Action Logs -->
+      <section id="activity-log" class="tab-panel">
+        <article class="panel glass">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Audit Trail</span>
+              <h3 class="panel-title">All action logs</h3>
+              <p class="panel-subtitle">Chronological actions and state changes made across Mission Control.</p>
+            </div>
+          </div>
+          <div id="activityLogList" class="feed-list"></div>
+        </article>
+      </section>
+
+      <!-- Verbose -->
+      <section id="verbose" class="tab-panel">
+        <article class="panel glass">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Execution Trace</span>
+              <h3 class="panel-title">Verbose task output</h3>
+              <p class="panel-subtitle">Detailed step-by-step task narration and execution events for active work.</p>
+            </div>
+          </div>
+          <div id="verboseLogList" class="feed-list"></div>
+        </article>
+      </section>
+
+      <!-- Conversations -->
+      <section id="conversations" class="tab-panel">
+        <article class="panel glass">
+          <div class="panel-header">
+            <div>
+              <span class="eyebrow">Conversation Trail</span>
+              <h3 class="panel-title">Agent and operator conversation history</h3>
+              <p class="panel-subtitle">Inter-agent messages and user-visible coordination history.</p>
+            </div>
+          </div>
+          <div id="conversationHistoryList" class="feed-list"></div>
+        </article>
       </section>
 
       <!-- Revenue -->
@@ -1289,46 +1367,6 @@
               <div id="projectionGrid" class="projection-grid"></div>
             </article>
           </div>
-        </div>
-      </section>
-
-      <!-- Projects -->
-      <section id="projects" class="tab-panel">
-        <div class="projects-toolbar">
-          <div>
-            <span class="eyebrow">Execution Board</span>
-            <p>Manage current initiatives in a compact operating board. Add tasks to any lane, edit details from the card, and keep the count synced automatically.</p>
-          </div>
-          <button id="quickAddProjectBtn" class="accent-btn" type="button">New Task</button>
-        </div>
-
-        <div class="kanban">
-          <article class="kanban-column glass" data-column="backlog">
-            <div class="column-header">
-              <h3>Backlog</h3>
-              <span id="count-backlog" class="column-count">0</span>
-            </div>
-            <button class="ghost-btn add-task-btn" data-column="backlog" type="button">Add Task</button>
-            <div id="taskList-backlog" class="task-list"></div>
-          </article>
-
-          <article class="kanban-column glass" data-column="in-progress">
-            <div class="column-header">
-              <h3>In Progress</h3>
-              <span id="count-in-progress" class="column-count">0</span>
-            </div>
-            <button class="ghost-btn add-task-btn" data-column="in-progress" type="button">Add Task</button>
-            <div id="taskList-in-progress" class="task-list"></div>
-          </article>
-
-          <article class="kanban-column glass" data-column="done">
-            <div class="column-header">
-              <h3>Done</h3>
-              <span id="count-done" class="column-count">0</span>
-            </div>
-            <button class="ghost-btn add-task-btn" data-column="done" type="button">Add Task</button>
-            <div id="taskList-done" class="task-list"></div>
-          </article>
         </div>
       </section>
 
@@ -1823,7 +1861,9 @@
   <script>
     // Persistence and roadmap configuration
     const STORAGE_KEY = "mission-control-state-v1";
-    const API_BASE = window.location.protocol === "file:" ? "http://localhost:8899/mc" : `${window.location.origin}/mc`;
+    const API_BASE = "http://localhost:8899/mc";
+    const BACKUP_SYNC_INTERVAL_MS = 5 * 60 * 1000;
+    const WEATHER_REFRESH_INTERVAL_MS = 10 * 60 * 1000;
     const timelineConfig = [
       {
         title: "Foundation and Signal Mapping",
@@ -1886,7 +1926,8 @@
         role: "Oyama Productions - CEO",
         keyMetric: "Positive Revenue",
         goalDate: "2026-12-31",
-        revenueProgress: 74
+        revenueProgress: 74,
+        weatherCity: "Chicago"
       },
       priorities: [
         { id: createId(), text: "Finalize the autonomous agent org chart and operating cadence", done: false },
@@ -1896,19 +1937,36 @@
       tasks: [
         {
           id: createId(),
+          title: "Heartbeat should scan task board for assigned agent work",
+          description: "Check backlog and recurring lanes for tasks assigned to agents and move them forward with visible logs.",
+          priority: "high",
+          column: "recurring",
+          createdAt: new Date().toISOString(),
+          assignee: "Claw",
+          type: "System",
+          area: "Mission Control"
+        },
+        {
+          id: createId(),
           title: "Define agent roles and handoff rules",
           description: "Clarify who scouts demand, creates assets, publishes, analyzes results, and escalates bottlenecks.",
           priority: "high",
           column: "backlog",
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          assignee: "Affan",
+          type: "PBI",
+          area: "Agents"
         },
         {
           id: createId(),
-          title: "Build content distribution scorecard",
-          description: "Measure output, reach, CTR, lead capture, and downstream revenue by content loop.",
-          priority: "medium",
+          title: "Build realtime execution board",
+          description: "Make Mission Control task-first with live activity, verbose logs, and operator-visible flow.",
+          priority: "high",
           column: "in-progress",
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          assignee: "Claw",
+          type: "Feature",
+          area: "Mission Control"
         },
         {
           id: createId(),
@@ -1916,7 +1974,48 @@
           description: "Map calls-to-action, lead magnet logic, landing page hooks, and email follow-up entry points.",
           priority: "low",
           column: "done",
-          createdAt: new Date(Date.now() - 86400000).toISOString()
+          createdAt: new Date(Date.now() - 86400000).toISOString(),
+          assignee: "Ops",
+          type: "PBI",
+          area: "Revenue"
+        }
+      ],
+      executionLogs: [
+        {
+          id: createId(),
+          taskId: "seed-task-live-board",
+          title: "Mission Control enhancement pass started",
+          detail: "Inspecting current HTML, screenshot target, and server capabilities to move from template dashboard to realtime task board.",
+          agent: "Claw",
+          level: "info",
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: createId(),
+          taskId: "seed-task-live-board",
+          title: "UI target captured",
+          detail: "Extracted the visual pattern: left-nav feel, top KPIs, kanban center, live activity right rail.",
+          agent: "Claw",
+          level: "info",
+          timestamp: new Date(Date.now() - 300000).toISOString()
+        }
+      ],
+      conversations: [
+        {
+          id: createId(),
+          from: "Affan",
+          to: "Claw",
+          message: "I want a realtime mission control with visible tasks, logs, and agent coordination.",
+          visibility: "discord",
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: createId(),
+          from: "Claw",
+          to: "Mission Control",
+          message: "Restructuring the dashboard around tasks first, with verbose and action history tabs.",
+          visibility: "system",
+          timestamp: new Date(Date.now() - 120000).toISOString()
         }
       ],
       notes: "",
@@ -2124,11 +2223,15 @@
     let state = loadState();
     let notesActivityTimer = null;
     let activeAgentId = null;
-    let syncSaveTimer = null;
     let serverStatus = {
       connected: false,
       lastRefresh: "",
       uptimeSeconds: 0
+    };
+    let weatherStatus = {
+      city: defaultState.settings.weatherCity,
+      temperature: "--",
+      condition: "Weather unavailable"
     };
 
     const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
@@ -2138,8 +2241,13 @@
     const liveStatusLabel = document.getElementById("liveStatusLabel");
     const liveStatusSubtext = document.getElementById("liveStatusSubtext");
     const liveStatusDot = document.querySelector(".status-dot");
+    const serverIndicator = document.getElementById("serverIndicator");
+    const liveWeather = document.getElementById("liveWeather");
     const prioritiesList = document.getElementById("prioritiesList");
     const activityFeed = document.getElementById("activityFeed");
+    const activityLogList = document.getElementById("activityLogList");
+    const verboseLogList = document.getElementById("verboseLogList");
+    const conversationHistoryList = document.getElementById("conversationHistoryList");
     const addPriorityBtn = document.getElementById("addPriorityBtn");
     const clearActivityBtn = document.getElementById("clearActivityBtn");
     const globalSearch = document.getElementById("globalSearch");
@@ -2271,22 +2379,34 @@
 
     function saveState(options = {}) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      if (!options.skipServerSync) {
-        scheduleServerStateSync();
+      if (options.activityDescription) {
+        appendActivityToServer({
+          id: createId(),
+          title: "State changed",
+          detail: options.activityDescription
+        });
       }
     }
 
     async function initServerSync() {
       await refreshServerStatus();
       await hydrateStateFromServer();
+      await refreshWeather();
       window.setInterval(refreshServerStatus, 30000);
+      window.setInterval(pushStateToServer, BACKUP_SYNC_INTERVAL_MS);
+      window.setInterval(refreshWeather, WEATHER_REFRESH_INTERVAL_MS);
+      window.addEventListener("beforeunload", sendLastChanceBackup);
+      document.addEventListener("visibilitychange", handleVisibilityBackup);
     }
 
     async function hydrateStateFromServer() {
       try {
         const serverData = await apiFetch("/data");
+        const hasLocalSnapshot = Boolean(localStorage.getItem(STORAGE_KEY));
         if (serverData && Object.keys(serverData).length) {
-          state = mergeState(serverData);
+          state = hasLocalSnapshot
+            ? mergeState(mergeServerBackupIntoLocal(serverData, state))
+            : mergeState(serverData);
           localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
           renderAll();
           resetClientForm();
@@ -2294,8 +2414,8 @@
           resetMeetingForm();
           decisionDate.value = new Date().toISOString().slice(0, 10);
           intelDate.value = new Date().toISOString().slice(0, 10);
-        } else {
-          scheduleServerStateSync();
+        } else if (hasLocalSnapshot) {
+          pushStateToServer();
         }
 
         const serverActivity = await apiFetch("/activity");
@@ -2306,6 +2426,49 @@
         console.warn("Mission Control server sync unavailable:", error);
         renderGreeting();
       }
+    }
+
+    function mergeServerBackupIntoLocal(serverData, localData) {
+      return {
+        ...serverData,
+        ...localData,
+        settings: { ...(serverData.settings || {}), ...(localData.settings || {}) },
+        revenue: {
+          ...(serverData.revenue || {}),
+          ...(localData.revenue || {}),
+          history: Array.isArray(localData.revenue?.history) ? localData.revenue.history : (serverData.revenue?.history || []),
+          clients: Array.isArray(localData.revenue?.clients) ? localData.revenue.clients : (serverData.revenue?.clients || [])
+        },
+        command: {
+          ...(serverData.command || {}),
+          ...(localData.command || {}),
+          agents: Array.isArray(localData.command?.agents) ? localData.command.agents : (serverData.command?.agents || []),
+          decisions: Array.isArray(localData.command?.decisions) ? localData.command.decisions : (serverData.command?.decisions || [])
+        },
+        youtube: {
+          ...(serverData.youtube || {}),
+          ...(localData.youtube || {}),
+          ideas: Array.isArray(localData.youtube?.ideas) ? localData.youtube.ideas : (serverData.youtube?.ideas || [])
+        },
+        meetings: {
+          ...(serverData.meetings || {}),
+          ...(localData.meetings || {}),
+          items: Array.isArray(localData.meetings?.items) ? localData.meetings.items : (serverData.meetings?.items || [])
+        },
+        intel: {
+          ...(serverData.intel || {}),
+          ...(localData.intel || {}),
+          filters: { ...(serverData.intel?.filters || {}), ...(localData.intel?.filters || {}) },
+          items: Array.isArray(localData.intel?.items) ? localData.intel.items : (serverData.intel?.items || [])
+        },
+        priorities: Array.isArray(localData.priorities) ? localData.priorities : (serverData.priorities || []),
+        tasks: Array.isArray(localData.tasks) ? localData.tasks : (serverData.tasks || []),
+        activity: mergeActivityEntries(serverData.activity || [], localData.activity || []),
+        notes: typeof localData.notes === "string" ? localData.notes : serverData.notes,
+        notesLastSaved: typeof localData.notesLastSaved === "string" && localData.notesLastSaved
+          ? localData.notesLastSaved
+          : serverData.notesLastSaved
+      };
     }
 
     function mergeState(payload) {
@@ -2341,23 +2504,21 @@
     }
 
     function mergeServerActivity(entries) {
-      const merged = new Map();
-      [...entries, ...state.activity].forEach((entry) => {
-        const key = entry.id || `${entry.timestamp}-${entry.title}`;
-        if (!merged.has(key)) merged.set(key, entry);
-      });
-      state.activity = Array.from(merged.values())
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 50);
+      state.activity = mergeActivityEntries(entries, state.activity);
       saveState({ skipServerSync: true });
       renderActivity();
     }
 
-    function scheduleServerStateSync() {
-      window.clearTimeout(syncSaveTimer);
-      syncSaveTimer = window.setTimeout(() => {
-        pushStateToServer();
-      }, 500);
+    function mergeActivityEntries(serverEntries, localEntries) {
+      const merged = new Map();
+      [...serverEntries, ...localEntries].forEach((entry) => {
+        const key = entry.id || `${entry.timestamp}-${entry.title}`;
+        if (!merged.has(key)) merged.set(key, entry);
+      });
+
+      return Array.from(merged.values())
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 50);
     }
 
     async function pushStateToServer() {
@@ -2373,6 +2534,57 @@
         renderGreeting();
         console.warn("Failed to sync Mission Control state to server:", error);
       }
+    }
+
+    function handleVisibilityBackup() {
+      if (document.visibilityState === "hidden") {
+        sendLastChanceBackup();
+      }
+    }
+
+    function sendLastChanceBackup() {
+      const payload = JSON.stringify(state);
+      const url = `${API_BASE}/data`;
+
+      try {
+        if (navigator.sendBeacon) {
+          const blob = new Blob([payload], { type: "application/json" });
+          navigator.sendBeacon(url, blob);
+          return;
+        }
+      } catch (error) {
+        console.warn("sendBeacon backup failed:", error);
+      }
+
+      try {
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive: true
+        }).catch(() => {});
+      } catch (error) {
+        console.warn("keepalive backup failed:", error);
+      }
+    }
+
+    async function refreshWeather() {
+      const city = state.settings.weatherCity || defaultState.settings.weatherCity;
+      try {
+        const weather = await apiFetch(`/weather?city=${encodeURIComponent(city)}`);
+        weatherStatus = {
+          city,
+          temperature: weather.temperature,
+          condition: weather.condition
+        };
+      } catch (error) {
+        weatherStatus = {
+          city,
+          temperature: "--",
+          condition: serverStatus.connected ? "Weather unavailable" : "Offline"
+        };
+      }
+      renderGreeting();
     }
 
     async function refreshServerStatus() {
@@ -2518,6 +2730,8 @@
       renderMetrics();
       renderPriorities();
       renderActivity();
+      renderVerboseLogs();
+      renderConversationHistory();
       renderRevenue();
       renderProjects();
       renderCommandCenter();
@@ -2532,11 +2746,12 @@
       const hour = new Date().getHours();
       const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
       welcomeGreeting.textContent = `${greeting}, ${state.settings.name}`;
-      liveStatusLabel.textContent = serverStatus.connected ? "Server Online" : "Local Mode";
-      liveStatusSubtext.textContent = serverStatus.connected
-        ? `Synced | ${state.settings.role}`
-        : `${state.settings.role} | Waiting for backend`;
-      liveStatusDot.style.background = serverStatus.connected ? "var(--success)" : "var(--danger)";
+      liveStatusLabel.textContent = "Mission Live";
+      liveStatusSubtext.textContent = `${state.settings.role} | ${state.settings.keyMetric}`;
+      serverIndicator.textContent = `Server: ${serverStatus.connected ? "Online" : "Offline"}`;
+      liveWeather.textContent = `${weatherStatus.city}: ${weatherStatus.temperature}${weatherStatus.temperature === "--" ? "" : "C"} | ${weatherStatus.condition}`;
+      liveStatusDot.style.setProperty("--status-color", serverStatus.connected ? "var(--success)" : "var(--danger)");
+      liveStatusDot.style.setProperty("--status-pulse-color", serverStatus.connected ? "rgba(82, 196, 142, 0.56)" : "rgba(255, 106, 120, 0.56)");
     }
 
     function startClock() {
@@ -2560,22 +2775,22 @@
     }
 
     function renderMetrics() {
-      const revenueProgress = clamp(Math.round(Number(state.settings.revenueProgress) || 0), 0, 100);
-      const activeProjects = state.tasks.filter((task) => task.column !== "done").length;
-      const tasksToday = state.tasks.filter((task) => Date.now() - new Date(task.createdAt).getTime() < 86400000).length;
-      const daysToGoal = Math.max(0, Math.ceil((new Date(state.settings.goalDate).getTime() - Date.now()) / 86400000));
+      const weekAgo = Date.now() - (7 * 86400000);
+      const createdThisWeek = state.tasks.filter((task) => new Date(task.createdAt).getTime() >= weekAgo).length;
+      const inProgress = state.tasks.filter((task) => task.column === "in-progress").length;
+      const totalTasks = state.tasks.length;
+      const doneTasks = state.tasks.filter((task) => task.column === "done").length;
+      const completion = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
-      document.getElementById("revenueValue").textContent = `${revenueProgress}%`;
-      document.getElementById("revenueProgress").style.width = `${revenueProgress}%`;
-      document.getElementById("revenueCaption").textContent = `${state.settings.keyMetric} progress to target`;
-      setTrend("revenueTrend", revenueProgress >= 70 ? "Strong signal" : "Still ramping", revenueProgress >= 70 ? "positive" : "warning", "up");
-      document.getElementById("activeProjectsValue").textContent = String(activeProjects);
-      setTrend("projectsTrend", activeProjects > 0 ? "In motion" : "Quiet board", activeProjects > 0 ? "warning" : "danger", activeProjects > 0 ? "diag" : "flat");
-      document.getElementById("tasksTodayValue").textContent = String(tasksToday);
-      setTrend("tasksTrend", tasksToday >= 3 ? "Productive burst" : "Add momentum", tasksToday >= 3 ? "positive" : "warning", tasksToday >= 3 ? "up" : "diag");
-      document.getElementById("daysToGoalValue").textContent = String(daysToGoal);
-      document.getElementById("goalDateLabel").textContent = `Target date ${formatDate(state.settings.goalDate)}`;
-      setTrend("goalTrend", daysToGoal <= 45 ? "Tight window" : "Time to compound", daysToGoal <= 45 ? "danger" : "warning", daysToGoal <= 45 ? "warn" : "time");
+      document.getElementById("revenueValue").textContent = String(createdThisWeek);
+      setTrend("revenueTrend", createdThisWeek > 0 ? "Fresh work logged" : "No new work", createdThisWeek > 0 ? "positive" : "warning", createdThisWeek > 0 ? "up" : "flat");
+      document.getElementById("activeProjectsValue").textContent = String(inProgress);
+      setTrend("projectsTrend", inProgress > 0 ? "Active board" : "No active work", inProgress > 0 ? "warning" : "danger", inProgress > 0 ? "diag" : "flat");
+      document.getElementById("tasksTodayValue").textContent = String(totalTasks);
+      setTrend("tasksTrend", totalTasks > 0 ? "Tracked" : "Empty board", totalTasks > 0 ? "positive" : "warning", totalTasks > 0 ? "up" : "flat");
+      document.getElementById("daysToGoalValue").textContent = `${completion}%`;
+      document.getElementById("goalDateLabel").textContent = `${doneTasks} done / ${totalTasks} total`;
+      setTrend("goalTrend", completion >= 50 ? "Flow visible" : "Needs review flow", completion >= 50 ? "positive" : "warning", completion >= 50 ? "up" : "warn");
     }
 
     function setTrend(id, label, tone, icon) {
@@ -2645,18 +2860,15 @@
     }
 
     function renderActivity() {
-      activityFeed.innerHTML = "";
-
-      if (!state.activity.length) {
-        activityFeed.innerHTML = '<div class="empty-state">No activity logged yet.</div>';
-        return;
-      }
-
-      state.activity
-        .slice()
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
-        .slice(0, 24)
-        .forEach((item) => {
+      const entries = Array.isArray(state.activity) ? state.activity.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
+      const renderInto = (target, emptyText, limit = entries.length) => {
+        if (!target) return;
+        target.innerHTML = "";
+        if (!entries.length) {
+          target.innerHTML = `<div class="empty-state">${emptyText}</div>`;
+          return;
+        }
+        entries.slice(0, limit).forEach((item) => {
           const card = document.createElement("div");
           card.className = "feed-item";
           card.innerHTML = `
@@ -2664,8 +2876,11 @@
             <p>${escapeHtml(item.detail)}</p>
             <span>${formatDateTime(item.timestamp)}</span>
           `;
-          activityFeed.appendChild(card);
+          target.appendChild(card);
         });
+      };
+      renderInto(activityFeed, "No activity logged yet.", 24);
+      renderInto(activityLogList, "No action logs recorded yet.");
     }
 
     // Revenue
@@ -2750,7 +2965,7 @@
     function handleRevenueSettingsInput() {
       state.revenue.monthlyGoal = Math.max(0, Number(monthlyGoalInput.value) || 0);
       state.settings.revenueProgress = clamp(Number(revenueProgressInput.value) || 0, 0, 100);
-      saveState();
+      saveState({ activityDescription: "Revenue goal settings updated." });
       renderRevenue();
       renderMetrics();
     }
@@ -2979,11 +3194,11 @@
       const agent = state.command.agents.find((item) => item.id === activeAgentId);
       if (!agent) return;
       agent.performanceNotes = agentPerformanceNotes.value;
-      saveState();
+      saveState({ activityDescription: `Performance notes updated for ${agent.name}.` });
     }
 
     function renderProjects() {
-      ["backlog", "in-progress", "done"].forEach((column) => {
+      ["recurring", "backlog", "in-progress", "done"].forEach((column) => {
         const target = document.getElementById(`taskList-${column}`);
         const tasks = state.tasks.filter((task) => task.column === column);
         document.getElementById(`count-${column}`).textContent = String(tasks.length);
@@ -3002,10 +3217,14 @@
             card.type = "button";
             card.className = "task-card";
             card.innerHTML = `
+              <div style="display:flex;align-items:start;justify-content:space-between;gap:0.75rem;margin-bottom:0.55rem;">
+                <span class="badge ${task.priority}">${escapeHtml(task.type || task.priority || "task")}</span>
+                <span style="color:var(--text-faint);font-size:0.75rem;">${escapeHtml(task.assignee || "Unassigned")}</span>
+              </div>
               <h4>${escapeHtml(task.title)}</h4>
               <p>${escapeHtml(truncate(task.description || "No description added yet.", 132))}</p>
               <div class="task-meta">
-                <span class="badge ${task.priority}">${escapeHtml(task.priority)}</span>
+                <span>${escapeHtml(task.area || "General")}</span>
                 <span>${formatDate(task.createdAt)}</span>
               </div>
             `;
@@ -3016,6 +3235,38 @@
 
       renderMetrics();
       renderSearchResults();
+    }
+
+    function renderVerboseLogs() {
+      if (!verboseLogList) return;
+      verboseLogList.innerHTML = "";
+      const entries = Array.isArray(state.executionLogs) ? state.executionLogs.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
+      if (!entries.length) {
+        verboseLogList.innerHTML = '<div class="empty-state">No verbose execution entries yet.</div>';
+        return;
+      }
+      entries.forEach((entry) => {
+        const card = document.createElement("div");
+        card.className = "feed-item";
+        card.innerHTML = `<strong>${escapeHtml(entry.agent || "System")} · ${escapeHtml(entry.title)}</strong><p>${escapeHtml(entry.detail || "")}</p><span>${formatDateTime(entry.timestamp)}</span>`;
+        verboseLogList.appendChild(card);
+      });
+    }
+
+    function renderConversationHistory() {
+      if (!conversationHistoryList) return;
+      conversationHistoryList.innerHTML = "";
+      const entries = Array.isArray(state.conversations) ? state.conversations.slice().sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) : [];
+      if (!entries.length) {
+        conversationHistoryList.innerHTML = '<div class="empty-state">No conversations recorded yet.</div>';
+        return;
+      }
+      entries.forEach((entry) => {
+        const card = document.createElement("div");
+        card.className = "feed-item";
+        card.innerHTML = `<strong>${escapeHtml(entry.from || "Unknown")} → ${escapeHtml(entry.to || "Unknown")}</strong><p>${escapeHtml(entry.message || "")}</p><span>${escapeHtml(entry.visibility || "system")} · ${formatDateTime(entry.timestamp)}</span>`;
+        conversationHistoryList.appendChild(card);
+      });
     }
 
     // YouTube
@@ -3149,7 +3400,7 @@
 
     function handleSubscriberInput() {
       state.youtube.subscribers = Math.max(0, Number(subscriberCountInput.value) || 0);
-      saveState();
+      saveState({ activityDescription: "YouTube subscriber count updated." });
       renderYouTube();
     }
 
@@ -3260,7 +3511,7 @@
           notesArea.value = meeting.notes || "";
           notesArea.addEventListener("input", () => {
             meeting.notes = notesArea.value;
-            saveState();
+            saveState({ activityDescription: `Meeting notes updated for ${meeting.title}.` });
           });
 
           const actionsField = document.createElement("div");
@@ -3270,7 +3521,7 @@
           actionsArea.value = meeting.actionItems || "";
           actionsArea.addEventListener("input", () => {
             meeting.actionItems = actionsArea.value;
-            saveState();
+            saveState({ activityDescription: `Action items updated for ${meeting.title}.` });
           });
 
           const footer = document.createElement("div");
@@ -3290,7 +3541,7 @@
           addAgendaBtn.textContent = "Add Agenda Item";
           addAgendaBtn.addEventListener("click", () => {
             meeting.agenda.push({ id: createId(), text: "New agenda item", done: false });
-            saveState();
+            saveState({ activityDescription: `Agenda updated for ${meeting.title}.` });
             renderMeetings();
           });
           actions.append(editBtn, addAgendaBtn);
@@ -3320,7 +3571,7 @@
         check.checked = item.done;
         check.addEventListener("change", () => {
           item.done = check.checked;
-          saveState();
+          saveState({ activityDescription: `Agenda checklist updated for ${meeting.title}.` });
         });
 
         const text = document.createElement("input");
@@ -3328,7 +3579,7 @@
         text.value = item.text;
         text.addEventListener("input", () => {
           item.text = text.value;
-          saveState();
+          saveState({ activityDescription: `Agenda text updated for ${meeting.title}.` });
         });
 
         const remove = document.createElement("button");
@@ -3337,7 +3588,7 @@
         remove.textContent = "X";
         remove.addEventListener("click", () => {
           meeting.agenda = meeting.agenda.filter((agendaItem) => agendaItem.id !== item.id);
-          saveState();
+          saveState({ activityDescription: `Agenda item removed from ${meeting.title}.` });
           renderMeetings();
         });
 
@@ -3487,7 +3738,7 @@
     function handleIntelFilterChange() {
       state.intel.filters.category = intelFilterCategory.value;
       state.intel.filters.importance = intelFilterImportance.value;
-      saveState();
+      saveState({ activityDescription: "Intel filters updated." });
       renderIntel();
     }
 
@@ -3547,8 +3798,14 @@
           .filter((client) => [client.name, client.status, client.startDate].some((value) => String(value).toLowerCase().includes(query)))
           .map((client) => ({ tab: "revenue", title: client.name, subtitle: `${client.status} | ${formatCurrency(client.monthlyValue)}` })),
         ...state.tasks
-          .filter((task) => [task.title, task.description, task.priority, task.column].some((value) => String(value).toLowerCase().includes(query)))
-          .map((task) => ({ tab: "projects", title: task.title, subtitle: `${task.priority} priority | ${labelForColumn(task.column)}` })),
+          .filter((task) => [task.title, task.description, task.priority, task.column, task.assignee, task.area, task.type].some((value) => String(value).toLowerCase().includes(query)))
+          .map((task) => ({ tab: "dashboard", title: task.title, subtitle: `${task.priority} priority | ${labelForColumn(task.column)}` })),
+        ...(Array.isArray(state.executionLogs) ? state.executionLogs : [])
+          .filter((item) => [item.title, item.detail, item.agent, item.level].some((value) => String(value).toLowerCase().includes(query)))
+          .map((item) => ({ tab: "verbose", title: item.title, subtitle: `${item.agent} | ${item.level || "info"}` })),
+        ...(Array.isArray(state.conversations) ? state.conversations : [])
+          .filter((item) => [item.from, item.to, item.message, item.visibility].some((value) => String(value).toLowerCase().includes(query)))
+          .map((item) => ({ tab: "conversations", title: `${item.from} → ${item.to}`, subtitle: truncate(item.message || "", 80) })),
         ...state.command.agents
           .filter((agent) => [agent.name, agent.role, agent.status, agent.model, agent.description].some((value) => String(value).toLowerCase().includes(query)))
           .map((agent) => ({ tab: "command", title: agent.name, subtitle: `${agent.role} | ${agent.status}` })),
@@ -3617,13 +3874,17 @@
 
     function handleTaskSubmit(event) {
       event.preventDefault();
+      const existingTask = state.tasks.find((task) => task.id === taskId.value);
       const payload = {
         id: taskId.value || createId(),
         title: taskTitle.value.trim(),
         description: taskDescription.value.trim(),
         priority: taskPriority.value,
         column: taskColumn.value,
-        createdAt: taskId.value ? (state.tasks.find((task) => task.id === taskId.value)?.createdAt || new Date().toISOString()) : new Date().toISOString()
+        createdAt: taskId.value ? (existingTask?.createdAt || new Date().toISOString()) : new Date().toISOString(),
+        assignee: existingTask?.assignee || "Unassigned",
+        type: existingTask?.type || "PBI",
+        area: existingTask?.area || "Mission Control"
       };
 
       if (!payload.title) return;
@@ -3668,9 +3929,22 @@
         timestamp: new Date().toISOString()
       };
       state.activity.unshift(entry);
-      state.activity = state.activity.slice(0, 50);
+      state.activity = state.activity.slice(0, 200);
+      if (Array.isArray(state.executionLogs)) {
+        state.executionLogs.unshift({
+          id: createId(),
+          title,
+          detail,
+          taskId: null,
+          agent: "Mission Control",
+          level: "info",
+          timestamp: entry.timestamp
+        });
+        state.executionLogs = state.executionLogs.slice(0, 300);
+      }
       saveState();
       renderActivity();
+      renderVerboseLogs();
       appendActivityToServer(entry);
     }
 
