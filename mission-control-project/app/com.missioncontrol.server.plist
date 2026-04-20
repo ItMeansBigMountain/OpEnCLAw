@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>Label</key>
+    <string>com.missioncontrol.server</string>
+
+    <key>ProgramArguments</key>
+    <array>
+      <string>/usr/bin/env</string>
+      <string>node</string>
+      <string>REPLACE_WITH_ABSOLUTE_PATH_TO_SERVER_JS</string>
+    </array>
+
+    <key>WorkingDirectory</key>
+    <string>REPLACE_WITH_ABSOLUTE_PATH_TO_PROJECT_FOLDER</string>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/tmp/mission-control-server.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/tmp/mission-control-server.error.log</string>
+  </dict>
+</plist>

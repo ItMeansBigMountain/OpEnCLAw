@@ -1823,6 +1823,7 @@
   <script>
     // Persistence and roadmap configuration
     const STORAGE_KEY = "mission-control-state-v1";
+    const API_BASE = window.location.protocol === "file:" ? "http://localhost:8899/mc" : `${window.location.origin}/mc`;
     const timelineConfig = [
       {
         title: "Foundation and Signal Mapping",
@@ -2123,6 +2124,12 @@
     let state = loadState();
     let notesActivityTimer = null;
     let activeAgentId = null;
+    let syncSaveTimer = null;
+    let serverStatus = {
+      connected: false,
+      lastRefresh: "",
+      uptimeSeconds: 0
+    };
 
     const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
     const tabPanels = Array.from(document.querySelectorAll(".tab-panel"));
@@ -2130,6 +2137,7 @@
     const welcomeGreeting = document.getElementById("welcomeGreeting");
     const liveStatusLabel = document.getElementById("liveStatusLabel");
     const liveStatusSubtext = document.getElementById("liveStatusSubtext");
+    const liveStatusDot = document.querySelector(".status-dot");
     const prioritiesList = document.getElementById("prioritiesList");
     const activityFeed = document.getElementById("activityFeed");
     const addPriorityBtn = document.getElementById("addPriorityBtn");
@@ -2243,41 +2251,14 @@
     resetMeetingForm();
     decisionDate.value = new Date().toISOString().slice(0, 10);
     intelDate.value = new Date().toISOString().slice(0, 10);
+    initServerSync();
 
     // Storage helpers
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) return clone(defaultState);
-        const parsed = JSON.parse(raw);
-        return {
-          settings: { ...defaultState.settings, ...(parsed.settings || {}) },
-          priorities: Array.isArray(parsed.priorities) && parsed.priorities.length ? parsed.priorities : clone(defaultState.priorities),
-          tasks: Array.isArray(parsed.tasks) ? parsed.tasks : clone(defaultState.tasks),
-          notes: typeof parsed.notes === "string" ? parsed.notes : defaultState.notes,
-          notesLastSaved: typeof parsed.notesLastSaved === "string" ? parsed.notesLastSaved : defaultState.notesLastSaved,
-          activity: Array.isArray(parsed.activity) && parsed.activity.length ? parsed.activity : clone(defaultState.activity),
-          revenue: {
-            monthlyGoal: parsed.revenue && "monthlyGoal" in parsed.revenue ? Number(parsed.revenue.monthlyGoal) : defaultState.revenue.monthlyGoal,
-            history: Array.isArray(parsed.revenue?.history) && parsed.revenue.history.length ? parsed.revenue.history : clone(defaultState.revenue.history),
-            clients: Array.isArray(parsed.revenue?.clients) ? parsed.revenue.clients : clone(defaultState.revenue.clients)
-          },
-          command: {
-            agents: Array.isArray(parsed.command?.agents) && parsed.command.agents.length ? parsed.command.agents : clone(defaultState.command.agents),
-            decisions: Array.isArray(parsed.command?.decisions) ? parsed.command.decisions : clone(defaultState.command.decisions)
-          },
-          youtube: {
-            subscribers: parsed.youtube && "subscribers" in parsed.youtube ? Number(parsed.youtube.subscribers) : defaultState.youtube.subscribers,
-            ideas: Array.isArray(parsed.youtube?.ideas) ? parsed.youtube.ideas : clone(defaultState.youtube.ideas)
-          },
-          meetings: {
-            items: Array.isArray(parsed.meetings?.items) ? parsed.meetings.items : clone(defaultState.meetings.items)
-          },
-          intel: {
-            filters: { ...defaultState.intel.filters, ...(parsed.intel?.filters || {}) },
-            items: Array.isArray(parsed.intel?.items) ? parsed.intel.items : clone(defaultState.intel.items)
-          }
-        };
+        return mergeState(JSON.parse(raw));
       } catch (error) {
         console.error("State load failed:", error);
         return clone(defaultState);
@@ -2288,8 +2269,149 @@
       return JSON.parse(JSON.stringify(value));
     }
 
-    function saveState() {
+    function saveState(options = {}) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      if (!options.skipServerSync) {
+        scheduleServerStateSync();
+      }
+    }
+
+    async function initServerSync() {
+      await refreshServerStatus();
+      await hydrateStateFromServer();
+      window.setInterval(refreshServerStatus, 30000);
+    }
+
+    async function hydrateStateFromServer() {
+      try {
+        const serverData = await apiFetch("/data");
+        if (serverData && Object.keys(serverData).length) {
+          state = mergeState(serverData);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          renderAll();
+          resetClientForm();
+          resetVideoIdeaForm();
+          resetMeetingForm();
+          decisionDate.value = new Date().toISOString().slice(0, 10);
+          intelDate.value = new Date().toISOString().slice(0, 10);
+        } else {
+          scheduleServerStateSync();
+        }
+
+        const serverActivity = await apiFetch("/activity");
+        if (Array.isArray(serverActivity) && serverActivity.length) {
+          mergeServerActivity(serverActivity);
+        }
+      } catch (error) {
+        console.warn("Mission Control server sync unavailable:", error);
+        renderGreeting();
+      }
+    }
+
+    function mergeState(payload) {
+      const parsed = payload && typeof payload === "object" ? payload : {};
+      return {
+        settings: { ...defaultState.settings, ...(parsed.settings || {}) },
+        priorities: Array.isArray(parsed.priorities) && parsed.priorities.length ? parsed.priorities : clone(defaultState.priorities),
+        tasks: Array.isArray(parsed.tasks) ? parsed.tasks : clone(defaultState.tasks),
+        notes: typeof parsed.notes === "string" ? parsed.notes : defaultState.notes,
+        notesLastSaved: typeof parsed.notesLastSaved === "string" ? parsed.notesLastSaved : defaultState.notesLastSaved,
+        activity: Array.isArray(parsed.activity) && parsed.activity.length ? parsed.activity : clone(defaultState.activity),
+        revenue: {
+          monthlyGoal: parsed.revenue && "monthlyGoal" in parsed.revenue ? Number(parsed.revenue.monthlyGoal) : defaultState.revenue.monthlyGoal,
+          history: Array.isArray(parsed.revenue?.history) && parsed.revenue.history.length ? parsed.revenue.history : clone(defaultState.revenue.history),
+          clients: Array.isArray(parsed.revenue?.clients) ? parsed.revenue.clients : clone(defaultState.revenue.clients)
+        },
+        command: {
+          agents: Array.isArray(parsed.command?.agents) && parsed.command.agents.length ? parsed.command.agents : clone(defaultState.command.agents),
+          decisions: Array.isArray(parsed.command?.decisions) ? parsed.command.decisions : clone(defaultState.command.decisions)
+        },
+        youtube: {
+          subscribers: parsed.youtube && "subscribers" in parsed.youtube ? Number(parsed.youtube.subscribers) : defaultState.youtube.subscribers,
+          ideas: Array.isArray(parsed.youtube?.ideas) ? parsed.youtube.ideas : clone(defaultState.youtube.ideas)
+        },
+        meetings: {
+          items: Array.isArray(parsed.meetings?.items) ? parsed.meetings.items : clone(defaultState.meetings.items)
+        },
+        intel: {
+          filters: { ...defaultState.intel.filters, ...(parsed.intel?.filters || {}) },
+          items: Array.isArray(parsed.intel?.items) ? parsed.intel.items : clone(defaultState.intel.items)
+        }
+      };
+    }
+
+    function mergeServerActivity(entries) {
+      const merged = new Map();
+      [...entries, ...state.activity].forEach((entry) => {
+        const key = entry.id || `${entry.timestamp}-${entry.title}`;
+        if (!merged.has(key)) merged.set(key, entry);
+      });
+      state.activity = Array.from(merged.values())
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+        .slice(0, 50);
+      saveState({ skipServerSync: true });
+      renderActivity();
+    }
+
+    function scheduleServerStateSync() {
+      window.clearTimeout(syncSaveTimer);
+      syncSaveTimer = window.setTimeout(() => {
+        pushStateToServer();
+      }, 500);
+    }
+
+    async function pushStateToServer() {
+      try {
+        await apiFetch("/data", {
+          method: "POST",
+          body: JSON.stringify(state)
+        });
+        serverStatus.connected = true;
+        renderGreeting();
+      } catch (error) {
+        serverStatus.connected = false;
+        renderGreeting();
+        console.warn("Failed to sync Mission Control state to server:", error);
+      }
+    }
+
+    async function refreshServerStatus() {
+      try {
+        const status = await apiFetch("/status");
+        serverStatus.connected = status.connection_health === "online";
+        serverStatus.lastRefresh = status.last_data_refresh_timestamp || "";
+        serverStatus.uptimeSeconds = Number(status.uptime_seconds) || 0;
+      } catch (error) {
+        serverStatus.connected = false;
+      }
+      renderGreeting();
+    }
+
+    async function appendActivityToServer(entry) {
+      try {
+        await apiFetch("/activity", {
+          method: "POST",
+          body: JSON.stringify(entry)
+        });
+      } catch (error) {
+        console.warn("Failed to append activity to server:", error);
+      }
+    }
+
+    async function apiFetch(pathname, options = {}) {
+      const response = await fetch(`${API_BASE}${pathname}`, {
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        },
+        ...options
+      });
+
+      if (!response.ok) {
+        throw new Error(`Request failed: ${response.status}`);
+      }
+
+      return response.status === 204 ? null : response.json();
     }
 
     // Event wiring
@@ -2410,8 +2532,11 @@
       const hour = new Date().getHours();
       const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
       welcomeGreeting.textContent = `${greeting}, ${state.settings.name}`;
-      liveStatusLabel.textContent = "Mission Live";
-      liveStatusSubtext.textContent = `${state.settings.role} | ${state.settings.keyMetric}`;
+      liveStatusLabel.textContent = serverStatus.connected ? "Server Online" : "Local Mode";
+      liveStatusSubtext.textContent = serverStatus.connected
+        ? `Synced | ${state.settings.role}`
+        : `${state.settings.role} | Waiting for backend`;
+      liveStatusDot.style.background = serverStatus.connected ? "var(--success)" : "var(--danger)";
     }
 
     function startClock() {
@@ -3536,15 +3661,17 @@
 
     // Activity and formatting helpers
     function logActivity(title, detail) {
-      state.activity.unshift({
+      const entry = {
         id: createId(),
         title,
         detail,
         timestamp: new Date().toISOString()
-      });
+      };
+      state.activity.unshift(entry);
       state.activity = state.activity.slice(0, 50);
       saveState();
       renderActivity();
+      appendActivityToServer(entry);
     }
 
     function debounceNotesActivity() {
