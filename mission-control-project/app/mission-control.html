@@ -2778,12 +2778,35 @@
           state.liveConsole = liveConsole;
         }
 
+        const apiInventoryScan = await apiFetch("/api-inventory-scan");
+        if (apiInventoryScan && typeof apiInventoryScan === "object") {
+          state.apiInventory = state.apiInventory || { providers: [], scanStatus: null };
+          state.apiInventory.scanStatus = {
+            status: apiInventoryScan.status || "unknown",
+            lastScannedAt: apiInventoryScan.lastScannedAt || null,
+            coverage: apiInventoryScan.coverage || "unknown",
+            notes: "Safe metadata discovery only"
+          };
+          if (Array.isArray(apiInventoryScan.providers) && apiInventoryScan.providers.length) {
+            state.apiInventory.providers = mergeDiscoveredProviders(state.apiInventory.providers, apiInventoryScan.providers);
+          }
+        }
+
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
         renderAll();
       } catch (error) {
         console.warn("Mission Control server sync unavailable:", error);
         renderGreeting();
       }
+    }
+
+    function chooseArray(localArray, serverArray, options = {}) {
+      const localItems = Array.isArray(localArray) ? localArray : [];
+      const serverItems = Array.isArray(serverArray) ? serverArray : [];
+      if (!localItems.length) return serverItems;
+      if (!serverItems.length) return localItems;
+      if (options.preferServerWhenLonger && serverItems.length > localItems.length) return serverItems;
+      return localItems;
     }
 
     function mergeServerBackupIntoLocal(serverData, localData) {
@@ -2794,46 +2817,59 @@
         revenue: {
           ...(serverData.revenue || {}),
           ...(localData.revenue || {}),
-          history: Array.isArray(localData.revenue?.history) ? localData.revenue.history : (serverData.revenue?.history || []),
-          clients: Array.isArray(localData.revenue?.clients) ? localData.revenue.clients : (serverData.revenue?.clients || [])
+          history: chooseArray(localData.revenue?.history, serverData.revenue?.history),
+          clients: chooseArray(localData.revenue?.clients, serverData.revenue?.clients)
         },
         command: {
           ...(serverData.command || {}),
           ...(localData.command || {}),
-          agents: Array.isArray(localData.command?.agents) ? localData.command.agents : (serverData.command?.agents || []),
-          decisions: Array.isArray(localData.command?.decisions) ? localData.command.decisions : (serverData.command?.decisions || [])
+          agents: chooseArray(localData.command?.agents, serverData.command?.agents, { preferServerWhenLonger: true }),
+          decisions: chooseArray(localData.command?.decisions, serverData.command?.decisions, { preferServerWhenLonger: true })
         },
         youtube: {
           ...(serverData.youtube || {}),
           ...(localData.youtube || {}),
-          ideas: Array.isArray(localData.youtube?.ideas) ? localData.youtube.ideas : (serverData.youtube?.ideas || [])
+          ideas: chooseArray(localData.youtube?.ideas, serverData.youtube?.ideas)
         },
         meetings: {
           ...(serverData.meetings || {}),
           ...(localData.meetings || {}),
-          items: Array.isArray(localData.meetings?.items) ? localData.meetings.items : (serverData.meetings?.items || [])
+          items: chooseArray(localData.meetings?.items, serverData.meetings?.items)
         },
         intel: {
           ...(serverData.intel || {}),
           ...(localData.intel || {}),
           filters: { ...(serverData.intel?.filters || {}), ...(localData.intel?.filters || {}) },
-          items: Array.isArray(localData.intel?.items) ? localData.intel.items : (serverData.intel?.items || [])
+          items: chooseArray(localData.intel?.items, serverData.intel?.items)
         },
-        priorities: Array.isArray(localData.priorities) ? localData.priorities : (serverData.priorities || []),
-        tasks: Array.isArray(localData.tasks) ? localData.tasks : (serverData.tasks || []),
+        priorities: chooseArray(localData.priorities, serverData.priorities, { preferServerWhenLonger: true }),
+        tasks: chooseArray(localData.tasks, serverData.tasks, { preferServerWhenLonger: true }),
         activity: mergeActivityEntries(serverData.activity || [], localData.activity || []),
         notes: typeof localData.notes === "string" ? localData.notes : serverData.notes,
         notesLastSaved: typeof localData.notesLastSaved === "string" && localData.notesLastSaved
           ? localData.notesLastSaved
           : serverData.notesLastSaved,
         automation: {
-          cronJobs: Array.isArray(localData.automation?.cronJobs) ? localData.automation.cronJobs : (serverData.automation?.cronJobs || [])
+          cronJobs: chooseArray(localData.automation?.cronJobs, serverData.automation?.cronJobs, { preferServerWhenLonger: true })
         },
         gitops: {
-          log: Array.isArray(localData.gitops?.log) ? localData.gitops.log : (serverData.gitops?.log || []),
+          log: chooseArray(localData.gitops?.log, serverData.gitops?.log, { preferServerWhenLonger: true }),
           ahead: Number(localData.gitops?.ahead ?? serverData.gitops?.ahead) || 0,
           behind: Number(localData.gitops?.behind ?? serverData.gitops?.behind) || 0
-        }
+        },
+        approvals: {
+          gates: chooseArray(localData.approvals?.gates, serverData.approvals?.gates, { preferServerWhenLonger: true })
+        },
+        apiInventory: {
+          ...(serverData.apiInventory || {}),
+          ...(localData.apiInventory || {}),
+          providers: chooseArray(localData.apiInventory?.providers, serverData.apiInventory?.providers, { preferServerWhenLonger: true }),
+          scanStatus: localData.apiInventory?.scanStatus || serverData.apiInventory?.scanStatus || null
+        },
+        emailOps: {
+          workflows: chooseArray(localData.emailOps?.workflows, serverData.emailOps?.workflows, { preferServerWhenLonger: true })
+        },
+        liveConsole: chooseArray(localData.liveConsole, serverData.liveConsole, { preferServerWhenLonger: true })
       };
     }
 
@@ -2878,7 +2914,8 @@
           gates: Array.isArray(parsed.approvals?.gates) ? parsed.approvals.gates : []
         },
         apiInventory: {
-          providers: Array.isArray(parsed.apiInventory?.providers) ? parsed.apiInventory.providers : []
+          providers: Array.isArray(parsed.apiInventory?.providers) ? parsed.apiInventory.providers : [],
+          scanStatus: parsed.apiInventory?.scanStatus || null
         },
         emailOps: {
           workflows: Array.isArray(parsed.emailOps?.workflows) ? parsed.emailOps.workflows : []
@@ -3937,6 +3974,15 @@
           approvalDetail.innerHTML = `<strong>${escapeHtml(gate.title)}</strong><p style="margin-top:0.65rem;">${escapeHtml(gate.summary || '')}</p><div style="margin-top:1rem;color:var(--text-muted);line-height:1.7;"><div><strong>Owner:</strong> ${escapeHtml(gate.owner || 'Unassigned')}</div><div><strong>Type:</strong> ${escapeHtml(gate.type || 'general')}</div><div><strong>Status:</strong> ${escapeHtml(gate.status || 'unknown')}</div><div style="margin-top:0.85rem;">${escapeHtml(gate.notes || '')}</div></div>`;
         }
       });
+    }
+
+    function mergeDiscoveredProviders(existingProviders, discoveredProviders) {
+      const merged = new Map();
+      [...(Array.isArray(existingProviders) ? existingProviders : []), ...(Array.isArray(discoveredProviders) ? discoveredProviders : [])].forEach((provider) => {
+        const key = provider.id || `${provider.vendor}-${provider.service}`;
+        merged.set(key, { ...(merged.get(key) || {}), ...provider });
+      });
+      return Array.from(merged.values());
     }
 
     function renderApiInventory() {

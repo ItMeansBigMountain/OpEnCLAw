@@ -13,6 +13,14 @@ const ACTIVITY_PATH = path.join(BASE_DIR, "mc-activity.json");
 const CRON_SAMPLE_PATH = path.join(BASE_DIR, "mc-cron-sample.json");
 const LIVE_CONSOLE_PATH = path.join(BASE_DIR, "mc-live-console.json");
 const JSON_LIMIT_BYTES = 1024 * 1024;
+const API_HINTS = [
+  { env: "ANTHROPIC_API_KEY", vendor: "Anthropic", service: "Claude API", billingUrl: "https://console.anthropic.com/settings/billing" },
+  { env: "OPENAI_API_KEY", vendor: "OpenAI", service: "OpenAI API", billingUrl: "https://platform.openai.com/settings/organization/billing/overview" },
+  { env: "OPENROUTER_API_KEY", vendor: "OpenRouter", service: "OpenRouter", billingUrl: "https://openrouter.ai/settings/credits" },
+  { env: "GOOGLE_API_KEY", vendor: "Google", service: "Google AI / Gemini", billingUrl: "https://aistudio.google.com/" },
+  { env: "TAVILY_API_KEY", vendor: "Tavily", service: "Tavily Search", billingUrl: "https://app.tavily.com/" },
+  { env: "SERPAPI_API_KEY", vendor: "SerpApi", service: "SerpApi", billingUrl: "https://serpapi.com/dashboard" }
+];
 
 const startedAt = Date.now();
 let lastDataRefreshAt = new Date().toISOString();
@@ -159,6 +167,12 @@ const server = http.createServer(async (req, res) => {
       writeJsonFile(LIVE_CONSOLE_PATH, entries.slice(-1000));
       lastDataRefreshAt = entry.timestamp;
       return sendJson(res, 201, { ok: true, entry });
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/api-inventory-scan") {
+      const inventory = getSafeApiInventoryScan();
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, inventory);
     }
 
     sendJson(res, 404, { error: "Not found" });
@@ -342,6 +356,34 @@ function getGitLog() {
       });
     });
   });
+}
+
+function getSafeApiInventoryScan() {
+  const providers = API_HINTS
+    .filter((hint) => Boolean(process.env[hint.env]))
+    .map((hint) => ({
+      id: `scan-${hint.env.toLowerCase()}`,
+      vendor: hint.vendor,
+      service: hint.service,
+      status: "env-detected",
+      maskedKey: maskSecret(process.env[hint.env]),
+      billingUrl: hint.billingUrl,
+      source: `env:${hint.env}`,
+      notes: "Detected from environment metadata only. Raw secrets are not exposed."
+    }));
+
+  return {
+    status: providers.length ? "env-metadata-detected" : "no-known-env-secrets-detected",
+    lastScannedAt: new Date().toISOString(),
+    coverage: "environment metadata only",
+    providers
+  };
+}
+
+function maskSecret(value) {
+  if (!value || typeof value !== "string") return "not-present";
+  if (value.length <= 8) return `${value.slice(0, 2)}••••`;
+  return `${value.slice(0, 4)}••••${value.slice(-4)}`;
 }
 
 function createId() {
