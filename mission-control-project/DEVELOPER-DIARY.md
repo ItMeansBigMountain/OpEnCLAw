@@ -16,6 +16,8 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Added project-local Postgres scaffolding under `app/postgres/` to keep future DB setup portable.
 - Identified a likely mobile/LAN bug source: frontend API requests were hardcoded to `http://localhost:8899/mc`, which is wrong when the dashboard is opened from a phone over LAN.
 - Durable portability direction: keep JSON primary, document services clearly, and only add machine-bound services behind explicit local scaffolding.
+- New working preference from user: once main is in a stable state they like, adopt a branching strategy where project work branches off `main`, feature work happens on `feature/*` branches, and changes are reviewed through pull requests. Until then, stabilize directly on `main`.
+- New standing instruction: document every meaningful instruction the user gives about preferred working style and process.
 
 ## Next recommended work
 - Fill sparse tabs with more realistic working content so Mission Control feels operational rather than empty

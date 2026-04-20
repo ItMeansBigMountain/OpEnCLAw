@@ -156,6 +156,17 @@
       "assignee": "Sosai",
       "type": "Task",
       "area": "API Governance"
+    },
+    {
+      "id": "t13",
+      "title": "Adopt branch and PR workflow after main is stable",
+      "description": "Once main reaches a stable user-approved state, shift project work to branch off main, use feature/* branches for PBIs/tasks, and review changes through pull requests.",
+      "priority": "medium",
+      "column": "backlog",
+      "createdAt": "2026-04-20T14:40:00.000Z",
+      "assignee": "Sosai",
+      "type": "Task",
+      "area": "GitOps"
     }
   ],
   "notes": "",
