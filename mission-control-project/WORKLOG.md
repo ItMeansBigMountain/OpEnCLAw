@@ -94,6 +94,7 @@ Track actions requested, actions attempted, current status, and failures so Miss
 - Decide which parts of `0-Memory.md`, `5-mcp-server.md`, `6-SEO-agent.md`, `7-prompt-caching.md`, and `8-Layered-AI-Model-Stack.md` should be executed now versus tracked separately
 - Continue LAN/mobile testing for the app URL and fix any firewall/network issues if they appear
 - Turn sample API inventory into a safer real metadata scan without dumping secrets
+- Fix state hydration precedence so stale localStorage cannot hide newer server-seeded structures during UI loads and smoke tests
 - Turn email ops from placeholders into a governed draft-and-send workflow
 - Connect approval gates to real pending actions instead of seeded examples
 

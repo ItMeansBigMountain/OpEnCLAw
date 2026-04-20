@@ -22,6 +22,7 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Upgraded the Office tab so it feels more alive, with a playful office floor plus a live console stream for current system activity.
 - Added `mc-live-console.json` and matching backend endpoints so the live console can be persisted locally and refreshed from the server.
 - Installed Playwright locally to improve future runtime inspection and smoke testing during UI work.
+- Added the first repeatable Playwright smoke test plus project-local test config, and used it to catch selector ambiguity plus a state-hydration precedence problem where stale localStorage can mask newer server-seeded structures.
 
 ## Next recommended work
 - Fill sparse tabs with more realistic working content so Mission Control feels operational rather than empty

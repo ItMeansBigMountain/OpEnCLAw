@@ -251,6 +251,8 @@
         "id": "ag1",
         "name": "Sosai",
         "role": "COO",
+        "team": "Leadership",
+        "reportsTo": null,
         "status": "online",
         "model": "gpt-5.4",
         "lastActive": "2026-04-20T13:40:00.000Z",
@@ -273,6 +275,8 @@
         "id": "ag2",
         "name": "Herald",
         "role": "Master SEO and AISO Consultant",
+        "team": "Growth Strategy",
+        "reportsTo": "ag1",
         "status": "busy",
         "model": "sonnet-4",
         "lastActive": "2026-04-20T13:20:00.000Z",
@@ -295,6 +299,8 @@
         "id": "ag3",
         "name": "Forge-02",
         "role": "Content Ops Lead",
+        "team": "Publishing",
+        "reportsTo": "ag1",
         "status": "online",
         "model": "gpt-5.2",
         "lastActive": "2026-04-20T13:10:00.000Z",
@@ -317,6 +323,8 @@
         "id": "ag4",
         "name": "Pulse-04",
         "role": "Performance Analyst",
+        "team": "Analytics",
+        "reportsTo": "ag1",
         "status": "offline",
         "model": "gpt-5.1",
         "lastActive": "2026-04-20T03:50:00.000Z",
@@ -332,6 +340,30 @@
             "id": "aga4",
             "message": "Compiled a weekly attribution summary.",
             "timestamp": "2026-04-20T03:50:00.000Z"
+          }
+        ]
+      },
+      {
+        "id": "ag5",
+        "name": "Watchtower",
+        "role": "Approval and Risk Analyst",
+        "team": "Governance",
+        "reportsTo": "ag1",
+        "status": "online",
+        "model": "gpt-5.1-mini",
+        "lastActive": "2026-04-20T16:15:00.000Z",
+        "description": "Flags risky actions, missing approvals, and workflow gaps before execution moves outside the machine.",
+        "capabilities": [
+          "Approval gate triage",
+          "Risk reviews",
+          "Governance escalation"
+        ],
+        "performanceNotes": "Useful for keeping autonomous action visible and constrained.",
+        "activity": [
+          {
+            "id": "aga5",
+            "message": "Derived approval needs from active backlog and deferred WAN work.",
+            "timestamp": "2026-04-20T16:15:00.000Z"
           }
         ]
       }
@@ -472,7 +504,13 @@
         "billingUrl": "https://aistudio.google.com/",
         "notes": "Needed only if semantic memory becomes active."
       }
-    ]
+    ],
+    "scanStatus": {
+      "status": "seeded-manual-inventory",
+      "lastScannedAt": "2026-04-20T16:18:00.000Z",
+      "coverage": "manual seed only",
+      "notes": "Real secret scraping is intentionally not implemented. Next step is safe env/config metadata discovery only."
+    }
   },
   "emailOps": {
     "workflows": [

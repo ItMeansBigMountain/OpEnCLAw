@@ -3501,22 +3501,62 @@
     function renderCommandCenter() {
       agentGrid.innerHTML = "";
 
-      state.command.agents.forEach((agent) => {
+      const agents = Array.isArray(state.command?.agents) ? state.command.agents : [];
+      const leadership = agents.filter((agent) => !agent.reportsTo);
+      const childrenByLeader = new Map();
+      agents.forEach((agent) => {
+        const key = agent.reportsTo || "root";
+        if (!childrenByLeader.has(key)) childrenByLeader.set(key, []);
+        childrenByLeader.get(key).push(agent);
+      });
+
+      const renderAgentCard = (agent, compact = false) => {
         const card = document.createElement("button");
         card.type = "button";
         card.className = "agent-card";
+        card.style.textAlign = "left";
         card.innerHTML = `
-          <h4>${escapeHtml(agent.name)}</h4>
-          <p>${escapeHtml(agent.role)}</p>
-          <div class="agent-meta">
+          <div style="display:flex;align-items:start;justify-content:space-between;gap:0.75rem;">
+            <div>
+              <h4>${escapeHtml(agent.name)}</h4>
+              <p>${escapeHtml(agent.role)}</p>
+            </div>
             <span class="status-inline"><span class="tiny-dot ${agent.status}"></span>${escapeHtml(capitalize(agent.status))}</span>
+          </div>
+          <div class="agent-meta">
+            <span>${escapeHtml(agent.team || 'General')}</span>
             <span>${escapeHtml(agent.model)}</span>
-            <span>Last active ${formatDateTime(agent.lastActive)}</span>
+            <span>${compact ? 'Reports into org map' : `Last active ${formatDateTime(agent.lastActive)}`}</span>
           </div>
         `;
         card.addEventListener("click", () => openAgentDrawer(agent.id));
-        agentGrid.appendChild(card);
-      });
+        return card;
+      };
+
+      if (leadership.length) {
+        leadership.forEach((leader) => {
+          const wrapper = document.createElement("div");
+          wrapper.style.display = "grid";
+          wrapper.style.gap = "0.8rem";
+
+          wrapper.appendChild(renderAgentCard(leader));
+
+          const reports = childrenByLeader.get(leader.id) || [];
+          if (reports.length) {
+            const reportRow = document.createElement("div");
+            reportRow.style.display = "grid";
+            reportRow.style.gridTemplateColumns = "repeat(auto-fit, minmax(180px, 1fr))";
+            reportRow.style.gap = "0.8rem";
+            reportRow.style.paddingLeft = "1.1rem";
+            reports.forEach((report) => reportRow.appendChild(renderAgentCard(report, true)));
+            wrapper.appendChild(reportRow);
+          }
+
+          agentGrid.appendChild(wrapper);
+        });
+      } else {
+        agents.forEach((agent) => agentGrid.appendChild(renderAgentCard(agent)));
+      }
 
       decisionDate.value = decisionDate.value || new Date().toISOString().slice(0, 10);
       decisionList.innerHTML = "";
@@ -3845,11 +3885,39 @@
       }
     }
 
+    function deriveApprovalGates() {
+      const baseGates = Array.isArray(state.approvals?.gates) ? state.approvals.gates : [];
+      const taskDerived = (Array.isArray(state.tasks) ? state.tasks : [])
+        .filter((task) => {
+          const text = `${task.title || ''} ${task.description || ''} ${task.area || ''}`.toLowerCase();
+          return text.includes('email') || text.includes('wan') || text.includes('api') || text.includes('credential') || text.includes('approval');
+        })
+        .map((task) => ({
+          id: `derived-${task.id}`,
+          title: `Review task: ${task.title}`,
+          type: task.area || 'task',
+          status: task.column === 'done' ? 'completed' : task.column === 'in-progress' ? 'active-review' : 'needs-review',
+          risk: /wan|credential|secret|api/i.test(`${task.title} ${task.description}`) ? 'high' : 'medium',
+          summary: task.description || 'Task requires explicit review before external or sensitive execution.',
+          notes: `Derived from board lane: ${task.column}. Assignee: ${task.assignee || 'Unassigned'}.`,
+          owner: task.assignee || 'Sosai',
+          source: 'derived-from-task-board'
+        }));
+
+      const merged = [...baseGates];
+      taskDerived.forEach((gate) => {
+        if (!merged.some((existing) => existing.id === gate.id || existing.title === gate.title)) {
+          merged.push(gate);
+        }
+      });
+      return merged;
+    }
+
     function renderApprovalGates() {
       const approvalGateList = document.getElementById("approvalGateList");
       const approvalDetail = document.getElementById("approvalDetail");
       if (!approvalGateList || !approvalDetail) return;
-      const gates = Array.isArray(state.approvals?.gates) ? state.approvals.gates : [];
+      const gates = deriveApprovalGates();
       if (!gates.length) {
         approvalGateList.innerHTML = '<div class="empty-state">No approval gates configured.</div>';
         approvalDetail.innerHTML = '<strong>No gate selected</strong><p>Approval-required work will appear here.</p>';
@@ -3876,12 +3944,15 @@
       const apiInventoryDetail = document.getElementById("apiInventoryDetail");
       if (!apiInventoryList || !apiInventoryDetail) return;
       const providers = Array.isArray(state.apiInventory?.providers) ? state.apiInventory.providers : [];
+      const scanStatus = state.apiInventory?.scanStatus || null;
+      apiInventoryList.innerHTML = scanStatus ? `<div class="feed-item"><strong>Inventory Scan Status</strong><p>${escapeHtml(scanStatus.status || 'unknown')}</p><span>${escapeHtml(scanStatus.coverage || 'n/a')} · ${scanStatus.lastScannedAt ? formatDateTime(scanStatus.lastScannedAt) : 'No scan time'}</span></div>` : "";
       if (!providers.length) {
-        apiInventoryList.innerHTML = '<div class="empty-state">No API providers cataloged yet.</div>';
+        if (!scanStatus) {
+          apiInventoryList.innerHTML = '<div class="empty-state">No API providers cataloged yet.</div>';
+        }
         apiInventoryDetail.innerHTML = '<strong>No provider selected</strong><p>Masked API inventory entries will appear here.</p>';
         return;
       }
-      apiInventoryList.innerHTML = "";
       providers.forEach((provider, index) => {
         const card = document.createElement("button");
         card.type = "button";
