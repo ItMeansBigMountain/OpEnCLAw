@@ -1045,7 +1045,11 @@
 
         <nav class="tab-nav" aria-label="Primary tabs">
           <button class="tab-btn active" data-tab="dashboard">Tasks</button>
+          <button class="tab-btn" data-tab="projects">Projects</button>
+          <button class="tab-btn" data-tab="memory">Memory</button>
+          <button class="tab-btn" data-tab="docs">Docs</button>
           <button class="tab-btn" data-tab="command">Agents</button>
+          <button class="tab-btn" data-tab="office">Office</button>
           <button class="tab-btn" data-tab="activity-log">Action Logs</button>
           <button class="tab-btn" data-tab="verbose">Verbose</button>
           <button class="tab-btn" data-tab="conversations">Conversations</button>
@@ -1370,6 +1374,72 @@
         </div>
       </section>
 
+      <!-- Projects -->
+      <section id="projects" class="tab-panel">
+        <div class="module-stack">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Project Portfolio</span>
+                <h3 class="panel-title">Tracked project progress</h3>
+                <p class="panel-subtitle">A portfolio view inspired by Azure boards and project hubs, showing project status, ownership, and completion.</p>
+              </div>
+            </div>
+            <div id="projectCards" class="module-grid-3"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Memory -->
+      <section id="memory" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Memory Browser</span>
+                <h3 class="panel-title">Daily and long-term memory</h3>
+                <p class="panel-subtitle">Visualize long-term memory and daily journals as an operator-readable timeline.</p>
+              </div>
+            </div>
+            <div id="memoryList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Memory Detail</h3>
+                <p class="panel-subtitle">Selected memory content and structured summary.</p>
+              </div>
+            </div>
+            <div id="memoryDetail" class="feed-item" style="min-height:420px;"></div>
+          </article>
+        </div>
+      </section>
+
+      <!-- Docs -->
+      <section id="docs" class="tab-panel">
+        <div class="module-grid-2">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Document Library</span>
+                <h3 class="panel-title">Saved documents</h3>
+                <p class="panel-subtitle">Flexible storage for drafts, notes, uploads, and documents you send me.</p>
+              </div>
+            </div>
+            <div id="docsList" class="feed-list"></div>
+          </article>
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">Document Preview</h3>
+                <p class="panel-subtitle">Selected content preview and metadata.</p>
+              </div>
+            </div>
+            <div id="docsDetail" class="feed-item" style="min-height:420px;"></div>
+          </article>
+        </div>
+      </section>
+
       <!-- Command Center -->
       <section id="command" class="tab-panel">
         <div class="module-stack">
@@ -1428,6 +1498,33 @@
               <div id="decisionList" class="decision-list"></div>
             </article>
           </div>
+        </div>
+      </section>
+
+      <!-- Office -->
+      <section id="office" class="tab-panel">
+        <div class="module-stack">
+          <article class="panel glass">
+            <div class="panel-header">
+              <div>
+                <span class="eyebrow">Realtime Office</span>
+                <h3 class="panel-title">Avatar activity floor</h3>
+                <p class="panel-subtitle">A playful live scene showing where agents are, what they are doing, and who is collaborating.</p>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(280px,0.7fr);gap:1rem;align-items:start;">
+              <div id="officeCanvas" class="glass" style="position:relative;min-height:520px;border-radius:22px;padding:1rem;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01)), repeating-linear-gradient(0deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px), repeating-linear-gradient(90deg, rgba(255,255,255,0.02) 0 32px, transparent 32px 64px);"></div>
+              <div class="panel glass">
+                <div class="panel-header">
+                  <div>
+                    <h3 class="panel-title">Office Activity</h3>
+                    <p class="panel-subtitle">Current avatar state and recent movement.</p>
+                  </div>
+                </div>
+                <div id="officeActivityList" class="feed-list"></div>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 
@@ -2000,6 +2097,74 @@
           timestamp: new Date(Date.now() - 300000).toISOString()
         }
       ],
+      projects: [
+        {
+          id: createId(),
+          name: "Agent Org Infrastructure",
+          description: "Core infrastructure for the autonomous agent organization, health monitoring, message bus, and role boundaries.",
+          status: "active",
+          percent: 92,
+          owner: "Claw",
+          priority: "high",
+          lastUpdated: new Date(Date.now() - 86400000).toISOString()
+        },
+        {
+          id: createId(),
+          name: "Mission Control",
+          description: "Central dashboard for tasks, projects, activity, docs, memory, and realtime visibility.",
+          status: "active",
+          percent: 68,
+          owner: "Affan",
+          priority: "high",
+          lastUpdated: new Date().toISOString()
+        },
+        {
+          id: createId(),
+          name: "OpenClaw Setup",
+          description: "Configuration, hardening, and operating rules for the local OpenClaw system.",
+          status: "planning",
+          percent: 35,
+          owner: "Claw",
+          priority: "medium",
+          lastUpdated: new Date(Date.now() - 172800000).toISOString()
+        }
+      ],
+      memoryEntries: [
+        {
+          id: createId(),
+          title: "Long-Term Memory",
+          type: "long-term",
+          summary: "Default work folder, mission-control-first focus, multi-agent operating model, and runtime safety defaults.",
+          content: "The system should prefer C:\\Users\\faree\\Desktop\\openclaw for new projects, keep Mission Control central, use role-based agents with checks and balances, and preserve operator-first safety boundaries.",
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: createId(),
+          title: "2026-04-19",
+          type: "daily",
+          summary: "Internalized multi-agent model and safety defaults into workspace memory.",
+          content: "Logged the user's preference for project location, role-based multi-agent orchestration, and safety defaults around one operator, one server, one channel, and cautious trust boundaries.",
+          timestamp: new Date(Date.now() - 7200000).toISOString()
+        }
+      ],
+      documents: [
+        {
+          id: createId(),
+          title: "Mission Control Realtime Direction",
+          category: "planning",
+          summary: "Requirements for task visibility, verbose execution logs, project progress, memory views, docs, and office avatars.",
+          content: "The user wants a realtime mission control with Azure DevOps influence, live execution visibility, richer projects, memory visualization, saved docs, org chart tracking, and an office screen with agent avatars.",
+          timestamp: new Date().toISOString()
+        },
+        {
+          id: createId(),
+          title: "Workspace Operating Model",
+          category: "docs",
+          summary: "Multi-agent company/project setup with checks and balances.",
+          content: "Distinct role-aware agents should collaborate with visible responsibilities across strategy, execution, review, analysis, and publishing.",
+          timestamp: new Date(Date.now() - 3600000).toISOString()
+        }
+      ],
       conversations: [
         {
           id: createId(),
@@ -2248,6 +2413,13 @@
     const activityLogList = document.getElementById("activityLogList");
     const verboseLogList = document.getElementById("verboseLogList");
     const conversationHistoryList = document.getElementById("conversationHistoryList");
+    const projectCards = document.getElementById("projectCards");
+    const memoryList = document.getElementById("memoryList");
+    const memoryDetail = document.getElementById("memoryDetail");
+    const docsList = document.getElementById("docsList");
+    const docsDetail = document.getElementById("docsDetail");
+    const officeCanvas = document.getElementById("officeCanvas");
+    const officeActivityList = document.getElementById("officeActivityList");
     const addPriorityBtn = document.getElementById("addPriorityBtn");
     const clearActivityBtn = document.getElementById("clearActivityBtn");
     const globalSearch = document.getElementById("globalSearch");
@@ -2732,6 +2904,10 @@
       renderActivity();
       renderVerboseLogs();
       renderConversationHistory();
+      renderProjectsPortfolio();
+      renderMemoryView();
+      renderDocsView();
+      renderOfficeView();
       renderRevenue();
       renderProjects();
       renderCommandCenter();
@@ -3235,6 +3411,105 @@
 
       renderMetrics();
       renderSearchResults();
+    }
+
+    function renderProjectsPortfolio() {
+      if (!projectCards) return;
+      const items = Array.isArray(state.projects) ? state.projects : [];
+      if (!items.length) {
+        projectCards.innerHTML = '<div class="empty-state">No projects tracked yet.</div>';
+        return;
+      }
+      projectCards.innerHTML = items.map((project) => `
+        <article class="micro-card" style="padding:1.2rem;border-radius:20px;">
+          <div style="display:flex;justify-content:space-between;gap:0.75rem;align-items:start;">
+            <div>
+              <strong style="font-size:1.05rem;display:block;">${escapeHtml(project.name)}</strong>
+              <p class="muted-copy" style="margin:0.45rem 0 0;">${escapeHtml(project.description)}</p>
+            </div>
+            <span class="status-chip ${escapeHtml(project.status)}">${escapeHtml(project.status)}</span>
+          </div>
+          <div class="progress-rail" style="margin-top:1rem;"><div class="progress-fill" style="width:${clamp(Number(project.percent) || 0, 0, 100)}%;"></div></div>
+          <div class="task-meta" style="margin-top:0.9rem;">
+            <span>${escapeHtml(project.owner || "Unassigned")}</span>
+            <span>${escapeHtml(project.priority || "medium")}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderMemoryView() {
+      if (!memoryList || !memoryDetail) return;
+      const entries = Array.isArray(state.memoryEntries) ? state.memoryEntries.slice().sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp)) : [];
+      if (!entries.length) {
+        memoryList.innerHTML = '<div class="empty-state">No memory entries yet.</div>';
+        memoryDetail.innerHTML = '<strong>No memory selected</strong><p>Add or sync memory entries to visualize them here.</p>';
+        return;
+      }
+      memoryList.innerHTML = "";
+      entries.forEach((entry, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "search-result";
+        card.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.type)} · ${formatDateTime(entry.timestamp)}</span>`;
+        card.addEventListener("click", () => {
+          memoryDetail.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><p>${escapeHtml(entry.summary || "")}</p><div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">${escapeHtml(entry.content || "")}</div>`;
+        });
+        memoryList.appendChild(card);
+        if (index === 0) {
+          memoryDetail.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><p>${escapeHtml(entry.summary || "")}</p><div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">${escapeHtml(entry.content || "")}</div>`;
+        }
+      });
+    }
+
+    function renderDocsView() {
+      if (!docsList || !docsDetail) return;
+      const entries = Array.isArray(state.documents) ? state.documents.slice().sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp)) : [];
+      if (!entries.length) {
+        docsList.innerHTML = '<div class="empty-state">No documents saved yet.</div>';
+        docsDetail.innerHTML = '<strong>No document selected</strong><p>Saved documents and uploads will appear here.</p>';
+        return;
+      }
+      docsList.innerHTML = "";
+      entries.forEach((entry, index) => {
+        const card = document.createElement("button");
+        card.type = "button";
+        card.className = "search-result";
+        card.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><span>${escapeHtml(entry.category || "other")} · ${formatDateTime(entry.timestamp)}</span>`;
+        card.addEventListener("click", () => {
+          docsDetail.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><p>${escapeHtml(entry.summary || "")}</p><div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">${escapeHtml(entry.content || "")}</div>`;
+        });
+        docsList.appendChild(card);
+        if (index === 0) {
+          docsDetail.innerHTML = `<strong>${escapeHtml(entry.title)}</strong><p>${escapeHtml(entry.summary || "")}</p><div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">${escapeHtml(entry.content || "")}</div>`;
+        }
+      });
+    }
+
+    function renderOfficeView() {
+      if (!officeCanvas || !officeActivityList) return;
+      const agents = Array.isArray(state.command?.agents) ? state.command.agents : [];
+      officeCanvas.innerHTML = `
+        <div style="position:absolute;left:6%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
+        <div style="position:absolute;left:26%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
+        <div style="position:absolute;left:46%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
+        <div style="position:absolute;left:66%;top:12%;width:14%;height:10%;background:rgba(255,255,255,0.06);border-radius:12px;"></div>
+        <div style="position:absolute;left:35%;top:58%;width:22%;height:14%;background:rgba(160,160,160,0.18);border-radius:999px;"></div>
+      `;
+      agents.forEach((agent, index) => {
+        const x = 12 + ((index % 4) * 18);
+        const y = index < 2 ? 28 + (index * 12) : 56 + ((index - 2) * 8);
+        const el = document.createElement("div");
+        el.style.cssText = `position:absolute;left:${x}%;top:${y}%;display:flex;flex-direction:column;align-items:center;gap:0.2rem;`;
+        el.innerHTML = `
+          <div style="width:28px;height:28px;border-radius:50%;background:${agent.status === 'online' ? '#52c48e' : agent.status === 'busy' ? '#f3a64d' : '#6f83ff'};box-shadow:0 0 18px rgba(0,0,0,0.35);"></div>
+          <span style="font-size:0.78rem;color:var(--text);">${escapeHtml(agent.name)}</span>
+        `;
+        officeCanvas.appendChild(el);
+      });
+      officeActivityList.innerHTML = (Array.isArray(state.executionLogs) ? state.executionLogs : []).slice().sort((a,b)=> new Date(b.timestamp)-new Date(a.timestamp)).slice(0,8).map((entry) => `
+        <div class="feed-item"><strong>${escapeHtml(entry.agent || 'System')}</strong><p>${escapeHtml(entry.title)}</p><span>${formatDateTime(entry.timestamp)}</span></div>
+      `).join("") || '<div class="empty-state">No office activity yet.</div>';
     }
 
     function renderVerboseLogs() {
@@ -3806,6 +4081,15 @@
         ...(Array.isArray(state.conversations) ? state.conversations : [])
           .filter((item) => [item.from, item.to, item.message, item.visibility].some((value) => String(value).toLowerCase().includes(query)))
           .map((item) => ({ tab: "conversations", title: `${item.from} → ${item.to}`, subtitle: truncate(item.message || "", 80) })),
+        ...(Array.isArray(state.projects) ? state.projects : [])
+          .filter((item) => [item.name, item.description, item.status, item.owner, item.priority].some((value) => String(value).toLowerCase().includes(query)))
+          .map((item) => ({ tab: "projects", title: item.name, subtitle: `${item.status} | ${item.percent}%` })),
+        ...(Array.isArray(state.memoryEntries) ? state.memoryEntries : [])
+          .filter((item) => [item.title, item.type, item.summary, item.content].some((value) => String(value).toLowerCase().includes(query)))
+          .map((item) => ({ tab: "memory", title: item.title, subtitle: item.type })),
+        ...(Array.isArray(state.documents) ? state.documents : [])
+          .filter((item) => [item.title, item.category, item.summary, item.content].some((value) => String(value).toLowerCase().includes(query)))
+          .map((item) => ({ tab: "docs", title: item.title, subtitle: item.category || "doc" })),
         ...state.command.agents
           .filter((agent) => [agent.name, agent.role, agent.status, agent.model, agent.description].some((value) => String(value).toLowerCase().includes(query)))
           .map((agent) => ({ tab: "command", title: agent.name, subtitle: `${agent.role} | ${agent.status}` })),
