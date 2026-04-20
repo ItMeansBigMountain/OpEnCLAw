@@ -5,7 +5,7 @@ const path = require("path");
 const { URL } = require("url");
 
 const PORT = 8899;
-const HOST = "127.0.0.1";
+const HOST = process.env.MISSION_CONTROL_HOST || "0.0.0.0";
 const BASE_DIR = __dirname;
 const HTML_PATH = path.join(BASE_DIR, "mission-control.html");
 const DATA_PATH = path.join(BASE_DIR, "mc-data.json");
