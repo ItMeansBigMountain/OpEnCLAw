@@ -51,10 +51,15 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Important safety detail: the new reflection path stays masked. The exec-approval token is masked, and config-audit command summaries are sanitized so raw secret-bearing arguments do not get dumped into the UI.
 - Put the new runtime panels in the visible **Agents** area instead of creating more navigation sprawl. That keeps the shell small while making the substrate much more inspectable.
 
+## 2026-04-22
+- Corrected a product/process mismatch after direct user feedback: the web approval queue was not how blockers were actually being resolved in practice, so it should not stay as a first-class Mission Control dependency.
+- Removed the Mission Control **Approvals** tab from the shell and stopped rendering the approval-queue workflow.
+- Kept the broader safety rule intact: destructive, public, install/system-change, expensive, or secret-sensitive actions still require explicit approval, but that approval should happen directly in chat/Discord instead of through a dashboard queue.
+- Reframed the remaining runtime reflection from "Exec Approvals" to "Exec Policy" so the UI mirrors substrate state without pretending the operator is expected to use a web approval gate.
+
 ## Next recommended work
 - Add OpenClaw gateway reflection panels for runtime health, plugins/channels, control surfaces, and security warnings
 - Fill sparse tabs with more realistic working content so Mission Control feels operational rather than empty
-- Add an approval gate section for pending high-risk or review-required actions
 - Add email setup/report-delivery work into the backlog and eventual governance model
 - Add a secure API inventory/billing tab with masked key display, reveal controls, and billing dashboard links
 - Perform a deeper internal scan of configured APIs later so cost analysis can be grounded in the real provider footprint

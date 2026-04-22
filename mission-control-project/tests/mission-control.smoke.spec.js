@@ -35,11 +35,7 @@ test('mission control loads key operating surfaces', async ({ page }) => {
   await expect(page.locator('#projectCards')).toBeVisible();
   await expect(page.locator('#projectCards')).toContainText(/mission-control-project|Mission Control/i);
 
-  await openTab(page, 'approvals', /^Approvals/);
-  await expect(page.locator('#approvalGateList')).toBeVisible();
-  await expect(page.locator('#approvedLogList')).toBeVisible();
-  await expect(page.locator('#deniedLogList')).toBeVisible();
-  await expect(page.locator('#approvalGateList')).toContainText(/Critical review:|Execution approval substrate|Gateway security review required|Suspicious config audit event requires review|No active approval gates\./);
+  await expect(page.locator('.tab-nav .tab-btn[data-tab="approvals"]')).toHaveCount(0);
 
   await openTab(page, 'office', /^Office$/);
   await expect(page.locator('#officeCanvas')).toBeVisible();

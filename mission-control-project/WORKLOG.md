@@ -7,7 +7,7 @@ Track actions requested, actions attempted, current status, and failures so Miss
 - Build Mission Control into a realtime, operator-visible dashboard
 - Align implementation against the original source prompt files
 - Keep task, memory, docs, org structure, and agent activity visible
-- Prepare for approval-gated operations later
+- Route blockers directly through chat/Discord instead of depending on a web approval queue
 
 ## Action log
 
@@ -274,6 +274,13 @@ Track actions requested, actions attempted, current status, and failures so Miss
   - The regression test also cleans up its own created task and delete tombstone so repeated runs do not pollute Mission Control data.
   - Revalidated existing key-surface smoke coverage after the new regression was added.
 
+#### 32. Remove the web approval queue from Mission Control
+- Status: Success
+- Notes:
+  - Removed the **Approvals** tab from the live shell and stopped rendering the Mission Control approval queue so the UI now matches the real operator workflow.
+  - Kept risky-action approvals as a direct chat/Discord safety rule rather than a dashboard dependency.
+  - Updated the smoke test and project docs so internal guidance no longer tells the team to depend on a web approval gate.
+
 ## Open tasks now
 - Add OpenClaw gateway status, health, logs, plugin/channel/runtime summary, and security warnings as first-class Mission Control reflected surfaces
 - Add org chart hierarchy view for agents and company roles
@@ -282,17 +289,16 @@ Track actions requested, actions attempted, current status, and failures so Miss
 - Decide which parts of `0-Memory.md`, `5-mcp-server.md`, `6-SEO-agent.md`, `7-prompt-caching.md`, and `8-Layered-AI-Model-Stack.md` should be executed now versus tracked separately
 - Continue LAN/mobile testing for the app URL and fix any firewall/network issues if they appear
 - Turn sample API inventory into a safer real metadata scan without dumping secrets
-- Connect approval gates to real action-creation or review workflows instead of inferred backlog-only visibility
 - Add a true sent-email audit source once outbound email capability exists, so Email Ops becomes a real sent-mail log rather than placeholders
 - Keep expanding Mission Control as a reflection layer for assistant state, config, memory, sessions, and governance instead of manual-only seeded panes
 - Add an integration pass that maps Mission Control project artifacts against live `.openclaw` runtime/state directories like `agents`, `memory`, `flows`, `tasks`, `logs`, `media`, `exec-approvals.json`, and config backup/clobber files
 - Turn email ops from placeholders into a governed draft-and-send workflow
-- Connect approval gates to real pending actions instead of seeded examples
+- Continue trimming dead approval-queue code/CSS left behind by the UI removal when it is worth a focused cleanup pass
 
 ## Known caveats
 - Some original prompt files describe broader OpenClaw/system integrations, not just Mission Control UI
 - `7-prompt-caching.md` and parts of broader config work are intentionally deferred for now
-- Approval-gated behavior still needs to be designed and implemented
+- The web approval queue has been retired; risky actions still require explicit approval, but through direct chat/Discord rather than a Mission Control tab
 
 ## Review checkpoint
 - Status: Success

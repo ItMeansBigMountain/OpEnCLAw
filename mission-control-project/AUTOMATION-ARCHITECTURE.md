@@ -10,7 +10,7 @@ It should reflect real assistant state automatically, not depend on manual dashb
 - Git commits and repo state
 - Workspace memory and control docs
 - Assistant configuration and auth metadata
-- Approvals / risky pending actions
+- Direct operator blockers / risky pending actions (handled in chat/Discord, not a web approval queue)
 - Sent email log
 
 ## Reflection model
@@ -20,6 +20,7 @@ It should reflect real assistant state automatically, not depend on manual dashb
    - `.openclaw/openclaw.json`
    - git repository state
    - later: email send logs
+   - direct operator chat/Discord decisions for risky actions when needed
 2. Mission Control builds or refreshes derived machine-readable artifacts in-project.
 3. The UI reads those derived artifacts and server endpoints.
 4. Automation refreshes them regularly and on interaction.

@@ -1264,7 +1264,6 @@
 
       <nav class="tab-nav" aria-label="Primary tabs">
         <button class="tab-btn active" data-tab="dashboard">Tasks</button>
-        <button class="tab-btn" data-tab="approvals">Approvals <span id="approvalBadge" class="status-chip pending" style="margin-left:0.4rem;display:none;">0</span></button>
         <button class="tab-btn" data-tab="stats">Stats</button>
         <button class="tab-btn" data-tab="office">Office</button>
         <button class="tab-btn" data-tab="context-files">Context Files</button>
@@ -1671,9 +1670,9 @@
             <article class="panel glass">
               <div class="panel-header">
                 <div>
-                  <span class="eyebrow">Exec Approvals</span>
-                  <h3 class="panel-title">Approval socket and policy footprint</h3>
-                  <p class="panel-subtitle">Safe reflection of the local exec-approval substrate with masked token handling.</p>
+                  <span class="eyebrow">Exec Policy</span>
+                  <h3 class="panel-title">Runtime policy footprint</h3>
+                  <p class="panel-subtitle">Safe reflection of the local exec-policy substrate with masked control metadata.</p>
                 </div>
               </div>
               <div id="openclawRuntimeApprovalsPanel" class="feed-item" style="min-height:320px;"></div>
@@ -1688,43 +1687,6 @@
                 </div>
               </div>
               <div id="openclawRuntimeConfigPanel" class="feed-item" style="min-height:320px;"></div>
-            </article>
-          </div>
-        </div>
-      </section>
-
-      <!-- Approvals -->
-      <section id="approvals" class="tab-panel">
-        <div class="module-stack">
-          <div id="approvalSummary" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;"></div>
-          <article class="panel glass">
-            <div class="panel-header">
-              <div>
-                <span class="eyebrow">Approval Gates</span>
-                <h3 class="panel-title">Critical actions that should stop for review</h3>
-                <p class="panel-subtitle">Compact approval rows with inline approve/reject controls. Click a row to expand the details.</p>
-              </div>
-            </div>
-            <div id="approvalGateList" class="module-stack"></div>
-          </article>
-          <div class="module-grid-2">
-            <article class="panel glass">
-              <div class="panel-header">
-                <div>
-                  <h3 class="panel-title">Approved Log</h3>
-                  <p class="panel-subtitle">Resolved approvals leave the active queue and are saved here with any generated PBI link.</p>
-                </div>
-              </div>
-              <div id="approvedLogList" class="feed-list"></div>
-            </article>
-            <article class="panel glass">
-              <div class="panel-header">
-                <div>
-                  <h3 class="panel-title">Denied Log</h3>
-                  <p class="panel-subtitle">Rejected approvals are kept as a decision trail after they leave the queue.</p>
-                </div>
-              </div>
-              <div id="deniedLogList" class="feed-list"></div>
             </article>
           </div>
         </div>
@@ -2634,7 +2596,6 @@
       renderOfficeView();
       renderProjects();
       renderCommandCenter();
-      renderApprovalGates();
       renderApiInventory();
       renderEmailOps();
       renderGitOps();
@@ -3106,8 +3067,8 @@
           areas: ["mission control", "memory & docs", "agents"]
         },
         "project-openclaw-config": {
-          keywords: ["openclaw", "config", "gateway", "discord", "browser", "runtime", "approval", "api inventory"],
-          areas: ["gateway reflection", "runtime access", "approvals", "api inventory"]
+          keywords: ["openclaw", "config", "gateway", "discord", "browser", "runtime", "policy", "api inventory"],
+          areas: ["gateway reflection", "runtime access", "policy", "api inventory"]
         },
         "project-agent-org-infrastructure": {
           keywords: ["agent", "org", "role", "model", "routing", "critic", "analyst", "archivist", "writer", "herald"],
@@ -3474,467 +3435,11 @@
       }
     }
 
-    function makeApprovalId(value) {
-      return String(value || 'approval')
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/^-+|-+$/g, '') || 'approval';
-    }
-
-    function approvalStatusRank(status) {
-      return {
-        'needs-review': 0,
-        'active-review': 1,
-        'needs-design': 2,
-        deferred: 3,
-        approved: 4,
-        denied: 5,
-        completed: 6
-      }[status] ?? 7;
-    }
-
-    function approvalRiskRank(risk) {
-      return { high: 0, medium: 1, low: 2 }[risk] ?? 3;
-    }
-
-    function approvalSourceLabel(source) {
-      return {
-        'openclaw-exec-approvals': 'Exec approvals runtime',
-        'gateway-warning': 'Gateway warning',
-        'config-audit': 'Config audit log',
-        'config-health': 'Config health',
-        'config-artifact': 'Config artifacts',
-        'derived-from-task-board': 'Task board',
-        'mission-control': 'Mission Control'
-      }[source] || source || 'Unknown source';
-    }
-
     function humanizeToken(value) {
       return String(value || '')
         .replaceAll('-', ' ')
         .replaceAll('_', ' ')
         .replace(/\b\w/g, (character) => character.toUpperCase());
-    }
-
-    function taskNeedsCriticalApproval(task) {
-      if (task.approvalGateId || String(task.source || '').toLowerCase() === 'approval approved log') {
-        return false;
-      }
-      const haystack = [task.title, task.description, task.area, task.source, task.type]
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-      const criticalSignals = [
-        /\b(delete|remove|destroy|wipe|purge|drop|archive|terminate)\b/,
-        /\b(install|dependency|package|npm|pnpm|yarn|pip|brew|apt|system change)\b/,
-        /\b(deploy|publish|production|go live|launch|public release|ship publicly|public)\b/,
-        /\b(cost|billing|charge|purchase|invoice|spend|budget|quota|credits?)\b/,
-        /\b(secret|credential|token|api key|key rotation)\b/
-      ];
-      return criticalSignals.some((pattern) => pattern.test(haystack));
-    }
-
-    function approvalGateIsCritical(gate) {
-      if (['openclaw-exec-approvals', 'gateway-warning', 'config-audit', 'config-health', 'config-artifact'].includes(gate.source)) {
-        return true;
-      }
-      return taskNeedsCriticalApproval({
-        title: gate.title,
-        description: gate.summary,
-        area: gate.type,
-        source: gate.source,
-        type: gate.notes
-      });
-    }
-
-    function deriveApprovalGates() {
-      const baseGates = (Array.isArray(state.approvals?.gates) ? state.approvals.gates : []).filter(approvalGateIsCritical);
-      const approvalRuntime = state.openclawFootprint?.details?.approvals || {};
-      const gatewayWarnings = Array.isArray(state.gatewayReflection?.warnings) ? state.gatewayReflection.warnings : [];
-      const configHealth = state.openclawFootprint?.details?.configHealth || {};
-      const configAudit = state.openclawFootprint?.details?.configAudit || {};
-      const configArtifacts = Array.isArray(state.openclawFootprint?.configArtifacts) ? state.openclawFootprint.configArtifacts : [];
-      const clobberedArtifacts = configArtifacts.filter((name) => /\.clobbered\./i.test(String(name || '')));
-
-      const runtimeDerived = [];
-      if (approvalRuntime.exists && Number(approvalRuntime.defaultRuleCount) === 0 && Number(approvalRuntime.agentOverrideCount) === 0) {
-        runtimeDerived.push({
-          id: 'runtime-exec-approvals-empty-rules',
-          title: 'Execution approval substrate has no configured rules',
-          type: 'runtime-approval-substrate',
-          status: 'needs-review',
-          risk: 'high',
-          summary: 'OpenClaw exec approvals exist locally, but there are no default or agent-specific approval rules configured yet.',
-          notes: `Socket: ${approvalRuntime.socketPath || 'unknown'} • Defaults: ${Number(approvalRuntime.defaultRuleCount) || 0} • Agent overrides: ${Number(approvalRuntime.agentOverrideCount) || 0} • Token remains masked in Mission Control.`,
-          owner: 'Sosai',
-          source: 'openclaw-exec-approvals'
-        });
-      }
-
-      gatewayWarnings.forEach((warning, index) => {
-        runtimeDerived.push({
-          id: `gateway-warning-${index + 1}-${makeApprovalId(warning)}`,
-          title: 'Gateway security review required',
-          type: 'gateway-warning',
-          status: 'needs-review',
-          risk: /security|insecure|auth/i.test(warning) ? 'high' : 'medium',
-          summary: warning,
-          notes: 'Reflected from live gateway/runtime warnings and should remain visible until reviewed or remediated.',
-          owner: 'Sosai',
-          source: 'gateway-warning'
-        });
-      });
-
-      if (clobberedArtifacts.length) {
-        runtimeDerived.push({
-          id: 'config-artifact-clobbered-review',
-          title: 'Clobbered config artifacts require operator review',
-          type: 'config-artifact-review',
-          status: 'needs-review',
-          risk: 'high',
-          summary: `${clobberedArtifacts.length} clobbered OpenClaw config artifact${clobberedArtifacts.length === 1 ? '' : 's'} are present locally.`,
-          notes: clobberedArtifacts.slice(0, 6).join(' • '),
-          owner: 'Sosai',
-          source: 'config-artifact'
-        });
-      }
-
-      if (Number(configHealth.suspiciousPathCount) > 0) {
-        runtimeDerived.push({
-          id: 'config-health-suspicious-paths',
-          title: 'Config health is reporting suspicious paths',
-          type: 'config-health-review',
-          status: 'needs-review',
-          risk: 'high',
-          summary: `${Number(configHealth.suspiciousPathCount)} config path${Number(configHealth.suspiciousPathCount) === 1 ? '' : 's'} currently have suspicious signatures.`,
-          notes: `Suspicious paths: ${(Array.isArray(configHealth.suspiciousPaths) ? configHealth.suspiciousPaths : []).join(' • ') || 'Unknown path list'}`,
-          owner: 'Sosai',
-          source: 'config-health'
-        });
-      }
-
-      if (Number(configAudit.suspiciousEventCount) > 0) {
-        const recentSuspiciousEvents = Array.isArray(configAudit.recentSuspiciousEvents) ? configAudit.recentSuspiciousEvents : [];
-        recentSuspiciousEvents.slice(0, 3).forEach((entry, index) => {
-          runtimeDerived.push({
-            id: `config-audit-suspicious-${index + 1}-${makeApprovalId(entry.ts || entry.command || 'event')}`,
-            title: 'Suspicious config audit event requires review',
-            type: 'config-audit-review',
-            status: 'needs-review',
-            risk: 'high',
-            summary: `${entry.event || 'config event'}${entry.phase ? ` (${entry.phase})` : ''} flagged ${Array.isArray(entry.suspicious) ? entry.suspicious.length : 0} suspicious signal${Array.isArray(entry.suspicious) && entry.suspicious.length === 1 ? '' : 's'}.`,
-            notes: `${entry.command || 'unknown-command'} • ${(Array.isArray(entry.suspicious) ? entry.suspicious : []).join(' • ')}`,
-            owner: 'Sosai',
-            source: 'config-audit',
-            reviewedAt: null,
-            createdAt: entry.ts || null
-          });
-        });
-      }
-
-      const taskDerived = (Array.isArray(state.tasks) ? state.tasks : [])
-        .filter(taskNeedsCriticalApproval)
-        .map((task) => ({
-          id: `derived-${task.id}`,
-          title: `Critical review: ${task.title}`,
-          type: task.area || 'task',
-          status: task.column === 'done' ? 'completed' : task.column === 'in-progress' ? 'active-review' : 'needs-review',
-          risk: /delete|remove|destroy|wipe|install|deploy|publish|production|public|cost|billing|charge|purchase|budget|secret|credential|token/i.test(`${task.title} ${task.description}`) ? 'high' : 'medium',
-          summary: task.description || 'Critical task requires explicit review before destructive, public, install, or high-cost execution.',
-          notes: `Derived from board lane: ${task.column}. Assignee: ${task.assignee || 'Unassigned'}. Source: ${task.source || 'Task board'}.`,
-          owner: task.assignee || 'Sosai',
-          source: 'derived-from-task-board'
-        }));
-
-      const merged = [...baseGates];
-      [...runtimeDerived, ...taskDerived].forEach((gate) => {
-        if (!merged.some((existing) => existing.id === gate.id || existing.title === gate.title)) {
-          merged.push(gate);
-        }
-      });
-
-      return merged
-        .filter(approvalGateIsCritical)
-        .slice()
-        .sort((a, b) => {
-          const statusDelta = approvalStatusRank(a.status) - approvalStatusRank(b.status);
-          if (statusDelta !== 0) return statusDelta;
-          const riskDelta = approvalRiskRank(a.risk) - approvalRiskRank(b.risk);
-          if (riskDelta !== 0) return riskDelta;
-          return new Date(b.reviewedAt || b.createdAt || 0) - new Date(a.reviewedAt || a.createdAt || 0);
-        });
-    }
-
-    function getApprovalLogs() {
-      const approvalsState = state.approvals || {};
-      return {
-        approved: Array.isArray(approvalsState.logs?.approved) ? approvalsState.logs.approved : [],
-        denied: Array.isArray(approvalsState.logs?.denied) ? approvalsState.logs.denied : []
-      };
-    }
-
-    function ensureApprovalState() {
-      state.approvals = state.approvals || {};
-      state.approvals.gates = Array.isArray(state.approvals.gates) ? state.approvals.gates : [];
-      state.approvals.logs = state.approvals.logs || { approved: [], denied: [] };
-      state.approvals.logs.approved = Array.isArray(state.approvals.logs.approved) ? state.approvals.logs.approved : [];
-      state.approvals.logs.denied = Array.isArray(state.approvals.logs.denied) ? state.approvals.logs.denied : [];
-
-      state.approvals.gates.forEach((gate) => {
-        if (gate.status === 'approved' && !state.approvals.logs.approved.some((item) => item.id === gate.id)) {
-          state.approvals.logs.approved.unshift({
-            id: gate.id,
-            title: gate.title,
-            summary: gate.summary,
-            source: gate.source || 'mission-control',
-            risk: gate.risk || 'unknown',
-            owner: gate.owner || 'Sosai',
-            decidedAt: gate.reviewedAt || gate.createdAt || new Date().toISOString(),
-            taskId: gate.pbiTaskId || null,
-            taskTitle: null
-          });
-        }
-        if (gate.status === 'denied' && !state.approvals.logs.denied.some((item) => item.id === gate.id)) {
-          state.approvals.logs.denied.unshift({
-            id: gate.id,
-            title: gate.title,
-            summary: gate.summary,
-            source: gate.source || 'mission-control',
-            risk: gate.risk || 'unknown',
-            owner: gate.owner || 'Sosai',
-            decidedAt: gate.reviewedAt || gate.createdAt || new Date().toISOString()
-          });
-        }
-      });
-    }
-
-    function renderApprovalSummary(activeGates) {
-      if (!approvalSummary) return;
-      const logs = getApprovalLogs();
-      const pendingCount = activeGates.length;
-      const highRiskCount = activeGates.filter((gate) => gate.risk === 'high').length;
-      const runtimeBackedCount = activeGates.filter((gate) => ['openclaw-exec-approvals', 'gateway-warning', 'config-audit', 'config-health', 'config-artifact'].includes(gate.source)).length;
-      const approvedCount = logs.approved.length;
-      const deniedCount = logs.denied.length;
-
-      approvalSummary.innerHTML = `
-        <div class="micro-card">
-          <span>Pending review</span>
-          <strong style="display:block;font-size:1.45rem;margin-top:0.35rem;">${pendingCount}</strong>
-          <p class="muted-copy" style="margin:0.45rem 0 0;">Approval items still needing operator review.</p>
-        </div>
-        <div class="micro-card">
-          <span>High risk</span>
-          <strong style="display:block;font-size:1.45rem;margin-top:0.35rem;">${highRiskCount}</strong>
-          <p class="muted-copy" style="margin:0.45rem 0 0;">Risky items that should not proceed casually.</p>
-        </div>
-        <div class="micro-card">
-          <span>Approved log</span>
-          <strong style="display:block;font-size:1.45rem;margin-top:0.35rem;">${approvedCount}</strong>
-          <p class="muted-copy" style="margin:0.45rem 0 0;">Approved decisions saved and removed from the active queue.</p>
-        </div>
-        <div class="micro-card">
-          <span>Denied log</span>
-          <strong style="display:block;font-size:1.45rem;margin-top:0.35rem;">${deniedCount}</strong>
-          <p class="muted-copy" style="margin:0.45rem 0 0;">Rejected decisions kept as an audit trail.</p>
-        </div>
-      `;
-    }
-
-    function renderApprovalBadge() {
-      const approvalBadge = document.getElementById("approvalBadge");
-      if (!approvalBadge) return;
-      const gates = deriveApprovalGates().filter((gate) => ['needs-review', 'active-review', 'needs-design'].includes(gate.status));
-      const pendingCount = gates.length;
-      approvalBadge.textContent = String(pendingCount);
-      approvalBadge.style.display = pendingCount ? "inline-flex" : "none";
-    }
-
-    function buildApprovalTaskPayload(gate) {
-      return {
-        id: `approval-task-${makeApprovalId(gate.id || gate.title)}`,
-        title: `PBI: ${gate.title}`,
-        description: `${gate.summary || 'Approved action from Mission Control approvals.'}\n\nApproval source: ${approvalSourceLabel(gate.source)}\nApproval notes: ${gate.notes || 'No extra notes.'}`,
-        priority: gate.risk === 'high' ? 'high' : 'medium',
-        column: 'backlog',
-        createdAt: new Date().toISOString(),
-        assignee: gate.owner || 'Sosai',
-        type: 'PBI',
-        area: gate.type ? humanizeToken(gate.type) : 'Approvals',
-        source: 'Approval approved log',
-        approvalGateId: gate.id
-      };
-    }
-
-    function ensurePbiTaskForApproval(gate) {
-      const existingTask = (Array.isArray(state.tasks) ? state.tasks : []).find((task) => task.approvalGateId === gate.id || task.id === gate.pbiTaskId);
-      if (existingTask) return existingTask;
-      const payload = buildApprovalTaskPayload(gate);
-      state.tasks = Array.isArray(state.tasks) ? state.tasks : [];
-      state.tasks.unshift(payload);
-      logActivity('PBI created from approval', payload.title);
-      return payload;
-    }
-
-    function upsertApprovalDecisionLog(gate, status, task) {
-      ensureApprovalState();
-      const targetKey = status === 'approved' ? 'approved' : 'denied';
-      const otherKey = status === 'approved' ? 'denied' : 'approved';
-      const linkedTask = task || (gate.source === 'derived-from-task-board' && String(gate.id || '').startsWith('derived-')
-        ? (Array.isArray(state.tasks) ? state.tasks.find((item) => item.id === gate.id.slice('derived-'.length)) : null)
-        : null);
-      const entry = {
-        id: gate.id,
-        title: gate.title,
-        summary: gate.summary,
-        source: gate.source || 'mission-control',
-        risk: gate.risk || 'unknown',
-        owner: gate.owner || 'Sosai',
-        decidedAt: new Date().toISOString(),
-        taskId: linkedTask?.id || null,
-        taskTitle: linkedTask?.title || null
-      };
-      state.approvals.logs[otherKey] = state.approvals.logs[otherKey].filter((item) => item.id !== gate.id);
-      const existingIndex = state.approvals.logs[targetKey].findIndex((item) => item.id === gate.id);
-      if (existingIndex >= 0) state.approvals.logs[targetKey][existingIndex] = entry;
-      else state.approvals.logs[targetKey].unshift(entry);
-      state.approvals.logs[targetKey] = state.approvals.logs[targetKey]
-        .slice()
-        .sort((a, b) => new Date(b.decidedAt || 0) - new Date(a.decidedAt || 0))
-        .slice(0, 100);
-    }
-
-    function upsertApprovalGateStatus(gate, status) {
-      ensureApprovalState();
-      const gates = Array.isArray(state.approvals.gates) ? state.approvals.gates.slice() : [];
-      let createdTask = null;
-      if (status === 'approved' && gate.source !== 'derived-from-task-board') {
-        createdTask = ensurePbiTaskForApproval(gate);
-      }
-      const nextGate = {
-        ...gate,
-        status,
-        reviewedAt: new Date().toISOString(),
-        source: gate.source || 'mission-control',
-        pbiTaskId: status === 'approved' ? (createdTask?.id || gate.pbiTaskId || null) : null
-      };
-      const existingIndex = gates.findIndex((item) => item.id === gate.id);
-      if (existingIndex >= 0) gates[existingIndex] = nextGate;
-      else gates.unshift(nextGate);
-      state.approvals.gates = gates;
-      if (status === 'approved' || status === 'denied') {
-        upsertApprovalDecisionLog(nextGate, status, createdTask);
-      }
-      saveState();
-      logActivity(`Approval ${status}`, gate.title);
-      renderProjects();
-      renderProjectsPortfolio();
-      renderApprovalGates();
-    }
-
-    function renderApprovalDetail(gate) {
-      return `
-        <div class="approval-detail-body">
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
-            <div class="micro-card"><span>Status</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(humanizeToken(gate.status || 'unknown'))}</strong></div>
-            <div class="micro-card"><span>Risk</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(humanizeToken(gate.risk || 'unknown'))}</strong></div>
-            <div class="micro-card"><span>Source</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(approvalSourceLabel(gate.source))}</strong></div>
-            <div class="micro-card"><span>Owner</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(gate.owner || 'Unassigned')}</strong></div>
-          </div>
-          <div>
-            <strong>Summary</strong>
-            <div style="margin-top:0.45rem;">${escapeHtml(gate.summary || '')}</div>
-          </div>
-          <div>
-            <strong>Details</strong>
-            <div style="margin-top:0.45rem;white-space:pre-wrap;">${escapeHtml(gate.notes || 'No review notes captured.')}</div>
-          </div>
-          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;">
-            <div class="micro-card"><span>Type</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(humanizeToken(gate.type || 'general'))}</strong></div>
-            <div class="micro-card"><span>Reviewed at</span><strong style="display:block;margin-top:0.3rem;">${gate.reviewedAt ? escapeHtml(formatDateTime(gate.reviewedAt)) : 'Not reviewed yet'}</strong></div>
-          </div>
-        </div>
-      `;
-    }
-
-    function renderApprovalHistory() {
-      const logs = getApprovalLogs();
-      if (approvedLogList) {
-        approvedLogList.innerHTML = logs.approved.length
-          ? logs.approved.map((entry) => `
-              <div class="feed-item approval-log-card">
-                <strong>${escapeHtml(entry.title)}</strong>
-                <p>${escapeHtml(entry.summary || 'Approved decision recorded.')}</p>
-                <span>${escapeHtml(approvalSourceLabel(entry.source))} · ${escapeHtml(humanizeToken(entry.risk || 'unknown'))} risk · ${formatDateTime(entry.decidedAt)}</span>
-                ${entry.taskTitle ? `<span>PBI created: ${escapeHtml(entry.taskTitle)}</span>` : '<span>No PBI task was generated for this approval.</span>'}
-              </div>
-            `).join('')
-          : '<div class="empty-state">No approved decisions saved yet.</div>';
-      }
-      if (deniedLogList) {
-        deniedLogList.innerHTML = logs.denied.length
-          ? logs.denied.map((entry) => `
-              <div class="feed-item approval-log-card">
-                <strong>${escapeHtml(entry.title)}</strong>
-                <p>${escapeHtml(entry.summary || 'Denied decision recorded.')}</p>
-                <span>${escapeHtml(approvalSourceLabel(entry.source))} · ${escapeHtml(humanizeToken(entry.risk || 'unknown'))} risk · ${formatDateTime(entry.decidedAt)}</span>
-              </div>
-            `).join('')
-          : '<div class="empty-state">No denied decisions saved yet.</div>';
-      }
-    }
-
-    function renderApprovalGates() {
-      ensureApprovalState();
-      const approvalGateList = document.getElementById('approvalGateList');
-      if (!approvalGateList) return;
-      const gates = deriveApprovalGates();
-      const activeGates = gates.filter((gate) => ['needs-review', 'active-review', 'needs-design'].includes(gate.status));
-      renderApprovalBadge();
-      renderApprovalSummary(activeGates);
-      renderApprovalHistory();
-      if (!activeGates.length) {
-        approvalGateList.innerHTML = '<div class="empty-state">No active approval gates. Approved and denied items are now in their logs.</div>';
-        return;
-      }
-      approvalGateList.innerHTML = '';
-      activeGates.forEach((gate, index) => {
-        const details = document.createElement('details');
-        details.className = 'approval-card';
-        if (index === 0) details.open = true;
-        details.innerHTML = `
-          <summary>
-            <div class="approval-row">
-              <div>
-                <strong style="font-size:1rem;display:block;">${escapeHtml(gate.title)}</strong>
-                <div class="approval-meta">
-                  <span>${escapeHtml(approvalSourceLabel(gate.source))}</span>
-                  <span>${escapeHtml(humanizeToken(gate.status || 'unknown'))}</span>
-                  <span>${escapeHtml(humanizeToken(gate.risk || 'unknown'))} risk</span>
-                </div>
-                <p style="margin:0.55rem 0 0;color:var(--text-muted);">${escapeHtml(truncate(gate.summary || '', 132))}</p>
-              </div>
-              <div class="approval-actions-inline">
-                <button class="ghost-btn approval-compact-btn" type="button" data-approval-action="deny">Reject</button>
-                <button class="accent-btn approval-compact-btn" type="button" data-approval-action="approve">Approve</button>
-                <span class="approval-expand">▾</span>
-              </div>
-            </div>
-          </summary>
-          ${renderApprovalDetail(gate)}
-        `;
-        details.querySelector('[data-approval-action="approve"]').addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          upsertApprovalGateStatus(gate, 'approved');
-        });
-        details.querySelector('[data-approval-action="deny"]').addEventListener('click', (event) => {
-          event.preventDefault();
-          event.stopPropagation();
-          upsertApprovalGateStatus(gate, 'denied');
-        });
-        approvalGateList.appendChild(details);
-      });
     }
 
     function mergeDiscoveredProviders(existingProviders, discoveredProviders) {
@@ -4048,7 +3553,7 @@
         setPanel('openclawFootprintCard', '', '<strong>No OpenClaw footprint yet</strong><p>Live `.openclaw` directory reflection will appear here.</p>');
         setPanel('openclawRuntimeAgentsPanel', '', '<strong>No runtime agent mirror yet</strong><p>Configured-vs-runtime agent coverage will appear here.</p>');
         setPanel('openclawRuntimeStoresPanel', '', '<strong>No runtime store mirror yet</strong><p>Task/flow/log/media storage summaries will appear here.</p>');
-        setPanel('openclawRuntimeApprovalsPanel', '', '<strong>No exec approval mirror yet</strong><p>Approval socket and policy reflection will appear here.</p>');
+        setPanel('openclawRuntimeApprovalsPanel', '', '<strong>No exec policy mirror yet</strong><p>Runtime policy reflection will appear here.</p>');
         setPanel('openclawRuntimeConfigPanel', '', '<strong>No config health mirror yet</strong><p>Config health and audit summaries will appear here.</p>');
         return;
       }
@@ -4107,7 +3612,7 @@
 
       const approvals = details.approvals || {};
       setPanel('openclawRuntimeApprovalsPanel', `
-        <strong>Exec approvals substrate</strong>
+        <strong>Exec policy substrate</strong>
         <div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;display:grid;gap:0.45rem;">
           <div><strong>File exists:</strong> ${escapeHtml(String(Boolean(approvals.exists)))}</div>
           <div><strong>Socket path:</strong> ${escapeHtml(approvals.socketPath || 'n/a')}</div>
@@ -4115,7 +3620,7 @@
           <div><strong>Default rules:</strong> ${escapeHtml(String(approvals.defaultRuleCount || 0))}</div>
           <div><strong>Agent overrides:</strong> ${escapeHtml(String(approvals.agentOverrideCount || 0))}</div>
         </div>
-      `, '<strong>No exec approval mirror yet</strong><p>Approval socket and policy reflection will appear here.</p>');
+      `, '<strong>No exec policy mirror yet</strong><p>Runtime policy reflection will appear here.</p>');
 
       const configHealth = details.configHealth || {};
       const configAudit = details.configAudit || {};
