@@ -3,6 +3,7 @@ const https = require("https");
 const fs = require("fs");
 const path = require("path");
 const { URL } = require("url");
+const os = require("os");
 
 const PORT = 8899;
 const HOST = process.env.MISSION_CONTROL_HOST || "0.0.0.0";
@@ -12,6 +13,7 @@ const DATA_PATH = path.join(BASE_DIR, "mc-data.json");
 const ACTIVITY_PATH = path.join(BASE_DIR, "mc-activity.json");
 const CRON_SAMPLE_PATH = path.join(BASE_DIR, "mc-cron-sample.json");
 const LIVE_CONSOLE_PATH = path.join(BASE_DIR, "mc-live-console.json");
+const DERIVED_STATE_PATH = path.join(BASE_DIR, "mc-derived-state.json");
 const JSON_LIMIT_BYTES = 1024 * 1024;
 const API_HINTS = [
   { env: "ANTHROPIC_API_KEY", vendor: "Anthropic", service: "Claude API", billingUrl: "https://console.anthropic.com/settings/billing" },
@@ -19,8 +21,13 @@ const API_HINTS = [
   { env: "OPENROUTER_API_KEY", vendor: "OpenRouter", service: "OpenRouter", billingUrl: "https://openrouter.ai/settings/credits" },
   { env: "GOOGLE_API_KEY", vendor: "Google", service: "Google AI / Gemini", billingUrl: "https://aistudio.google.com/" },
   { env: "TAVILY_API_KEY", vendor: "Tavily", service: "Tavily Search", billingUrl: "https://app.tavily.com/" },
-  { env: "SERPAPI_API_KEY", vendor: "SerpApi", service: "SerpApi", billingUrl: "https://serpapi.com/dashboard" }
+  { env: "SERPAPI_API_KEY", vendor: "SerpApi", service: "SerpApi", billingUrl: "https://serpapi.com/dashboard" },
+  { env: "DISCORD_BOT_TOKEN", vendor: "Discord", service: "Discord Bot", billingUrl: "https://discord.com/developers/applications" }
 ];
+const OPENCLAW_HOME = path.join(os.homedir(), ".openclaw");
+const WORKSPACE_DIR = path.join(OPENCLAW_HOME, "workspace");
+const OPENCLAW_CONFIG_PATH = path.join(OPENCLAW_HOME, "openclaw.json");
+const SESSION_DIR = path.join(OPENCLAW_HOME, "agents", "main", "sessions");
 
 const startedAt = Date.now();
 let lastDataRefreshAt = new Date().toISOString();
@@ -29,6 +36,7 @@ ensureFile(DATA_PATH, "{}\n");
 ensureFile(ACTIVITY_PATH, "[]\n");
 ensureFile(CRON_SAMPLE_PATH, "[]\n");
 ensureFile(LIVE_CONSOLE_PATH, "[]\n");
+ensureFile(DERIVED_STATE_PATH, "{}\n");
 
 const server = http.createServer(async (req, res) => {
   setCorsHeaders(res);
@@ -175,6 +183,24 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, inventory);
     }
 
+    if (req.method === "GET" && requestUrl.pathname === "/mc/workspace-snapshot") {
+      const snapshot = getWorkspaceSnapshot();
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, snapshot);
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/conversation-history") {
+      const history = getConversationHistory();
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, history);
+    }
+
+    if (req.method === "GET" && requestUrl.pathname === "/mc/derived-state") {
+      const derived = readJsonFile(DERIVED_STATE_PATH, {});
+      lastDataRefreshAt = new Date().toISOString();
+      return sendJson(res, 200, derived);
+    }
+
     sendJson(res, 404, { error: "Not found" });
   } catch (error) {
     const statusCode = error.statusCode || 500;
@@ -315,51 +341,62 @@ function fetchWeather(city) {
 
 function getGitLog() {
   return new Promise((resolve) => {
-    const { exec } = require("child_process");
-    const command = 'git log --pretty=format:{"hash":"%H","shortHash":"%h","subject":"%s","author":"%an","date":"%aI"} -n 20';
-    exec(command, { cwd: path.resolve(BASE_DIR, "..") }, (error, stdout) => {
-      if (error) {
-        resolve([]);
-        return;
-      }
+    try {
+      const { execFileSync } = require("child_process");
+      const repoDir = path.resolve(BASE_DIR, "..");
+      const branchName = String(execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: repoDir, stdio: ['ignore', 'pipe', 'ignore'] }) || 'main').trim() || 'main';
+      const remoteUrl = String(execFileSync('git', ['config', '--get', 'remote.origin.url'], { cwd: repoDir, stdio: ['ignore', 'pipe', 'ignore'] }) || '').trim();
+      const repoName = remoteUrl ? remoteUrl.split('/').pop().replace(/\.git$/i, '') : path.basename(repoDir);
+      const remoteName = remoteUrl ? 'origin' : 'local';
+      const aheadBehindArgs = remoteUrl
+        ? ['rev-list', '--left-right', '--count', `${remoteName}/${branchName}...${branchName}`]
+        : ['rev-list', '--left-right', '--count', `${branchName}...${branchName}`];
+      const [behindCountRaw = '0', aheadCountRaw = '0'] = String(execFileSync('git', aheadBehindArgs, { cwd: repoDir, stdio: ['ignore', 'pipe', 'ignore'] }) || '0 0').trim().split(/\s+/);
+      const rawLog = String(execFileSync('git', ['log', '--pretty=format:%H%x1f%h%x1f%s%x1f%an%x1f%aI', '-n', '20'], { cwd: repoDir, stdio: ['ignore', 'pipe', 'ignore'] }) || '');
+      const behindCount = Number(behindCountRaw) || 0;
+      const aheadCount = Number(aheadCountRaw) || 0;
+      const entries = rawLog
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .map((line) => {
+          const [hash, shortHash, subject, author, date] = line.split('\u001f');
+          return hash ? { hash, shortHash, subject, author, date } : null;
+        })
+        .filter(Boolean)
+        .map((entry, index) => ({
+          ...entry,
+          pushed: index >= aheadCount,
+          branch: branchName,
+          remote: remoteName,
+          repo: repoName,
+          remoteUrl
+        }));
 
-      const aheadBehindCommand = "git rev-list --left-right --count origin/main...main";
-      exec(aheadBehindCommand, { cwd: path.resolve(BASE_DIR, "..") }, (aheadBehindError, aheadBehindStdout) => {
-        const [behindCountRaw = "0", aheadCountRaw = "0"] = String(aheadBehindStdout || "0 0").trim().split(/\s+/);
-        const behindCount = Number(behindCountRaw) || 0;
-        const aheadCount = Number(aheadCountRaw) || 0;
-
-        const rows = stdout
-          .split(/\r?\n/)
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .map((line) => {
-            try {
-              return JSON.parse(line);
-            } catch {
-              return null;
-            }
-          })
-          .filter(Boolean)
-          .map((entry, index) => ({
-            ...entry,
-            pushed: index >= aheadCount,
-            branch: "main",
-            remote: "origin"
-          }));
-
-        resolve({
-          ahead: aheadCount,
-          behind: behindCount,
-          entries: rows
-        });
+      resolve({
+        ahead: aheadCount,
+        behind: behindCount,
+        branch: branchName,
+        remote: remoteName,
+        repo: repoName,
+        remoteUrl,
+        entries
       });
-    });
+    } catch {
+      resolve({
+        ahead: 0,
+        behind: 0,
+        branch: 'unknown',
+        remote: 'local',
+        repo: path.basename(path.resolve(BASE_DIR, '..')),
+        remoteUrl: '',
+        entries: []
+      });
+    }
   });
 }
 
 function getSafeApiInventoryScan() {
-  const providers = API_HINTS
+  const envProviders = API_HINTS
     .filter((hint) => Boolean(process.env[hint.env]))
     .map((hint) => ({
       id: `scan-${hint.env.toLowerCase()}`,
@@ -372,12 +409,178 @@ function getSafeApiInventoryScan() {
       notes: "Detected from environment metadata only. Raw secrets are not exposed."
     }));
 
+  const configProviders = getConfigBackedProviders();
+  const merged = dedupeProviders([...envProviders, ...configProviders]);
+
   return {
-    status: providers.length ? "env-metadata-detected" : "no-known-env-secrets-detected",
+    status: merged.length ? "config-and-env-metadata-detected" : "no-known-env-secrets-detected",
     lastScannedAt: new Date().toISOString(),
-    coverage: "environment metadata only",
-    providers
+    coverage: "environment metadata plus openclaw.json config metadata",
+    providers: merged
   };
+}
+
+function getConfigBackedProviders() {
+  const config = readJsonFile(OPENCLAW_CONFIG_PATH, {});
+  const providers = [];
+
+  const discordTokenId = config.channels?.discord?.token?.id;
+  if (discordTokenId) {
+    providers.push({
+      id: "config-discord-token",
+      vendor: "Discord",
+      service: "Discord Bot",
+      status: "configured-in-openclaw-json",
+      maskedKey: `${discordTokenId.slice(0, 4)}••••`,
+      billingUrl: "https://discord.com/developers/applications",
+      source: "openclaw.json:channels.discord.token.id",
+      notes: "Token source referenced in config; raw token not exposed."
+    });
+  }
+
+  const authProfiles = config.auth?.profiles || {};
+  Object.entries(authProfiles).forEach(([profileName, profile]) => {
+    providers.push({
+      id: `auth-${profileName}`,
+      vendor: profile.provider || "unknown",
+      service: `Auth profile ${profileName}`,
+      status: `auth:${profile.mode || 'unknown'}`,
+      maskedKey: profile.email ? `email:${profile.email}` : "profile-configured",
+      billingUrl: providerBillingUrl(profile.provider),
+      source: `openclaw.json:auth.profiles.${profileName}`,
+      notes: "Auth profile discovered from config metadata."
+    });
+  });
+
+  const skillEntries = config.skills?.entries || {};
+  Object.entries(skillEntries).forEach(([skillName, skillConfig]) => {
+    if (skillConfig && typeof skillConfig === "object") {
+      Object.entries(skillConfig).forEach(([key, value]) => {
+        if (/key|token|secret/i.test(key) && typeof value === "string") {
+          providers.push({
+            id: `skill-${skillName}-${key}`,
+            vendor: skillName,
+            service: `${skillName} (${key})`,
+            status: "configured-in-openclaw-json",
+            maskedKey: maskSecret(value),
+            billingUrl: null,
+            source: `openclaw.json:skills.entries.${skillName}.${key}`,
+            notes: "Discovered in skill config metadata."
+          });
+        }
+      });
+    }
+  });
+
+  return providers;
+}
+
+function providerBillingUrl(provider) {
+  const normalized = String(provider || "").toLowerCase();
+  if (normalized.includes("openai")) return "https://platform.openai.com/settings/organization/billing/overview";
+  if (normalized.includes("anthropic")) return "https://console.anthropic.com/settings/billing";
+  if (normalized.includes("discord")) return "https://discord.com/developers/applications";
+  return null;
+}
+
+function dedupeProviders(items) {
+  const merged = new Map();
+  items.forEach((item) => {
+    const key = item.id || `${item.vendor}-${item.service}-${item.source}`;
+    merged.set(key, { ...(merged.get(key) || {}), ...item });
+  });
+  return Array.from(merged.values());
+}
+
+function getWorkspaceSnapshot() {
+  const memoryDir = path.join(WORKSPACE_DIR, "memory");
+  const memoryEntries = listMarkdownEntries(memoryDir, "daily-memory");
+  const rootDocs = [
+    path.join(WORKSPACE_DIR, "AGENTS.md"),
+    path.join(WORKSPACE_DIR, "SOUL.md"),
+    path.join(WORKSPACE_DIR, "USER.md"),
+    path.join(WORKSPACE_DIR, "TOOLS.md"),
+    path.join(WORKSPACE_DIR, "HEARTBEAT.md"),
+    path.join(WORKSPACE_DIR, "MEMORY.md")
+  ]
+    .filter((filePath) => fs.existsSync(filePath))
+    .map((filePath) => readMarkdownEntry(filePath, "workspace-doc"));
+
+  return {
+    memoryEntries,
+    documents: rootDocs
+  };
+}
+
+function listMarkdownEntries(dirPath, type) {
+  if (!fs.existsSync(dirPath)) return [];
+  return fs.readdirSync(dirPath)
+    .filter((name) => name.toLowerCase().endsWith(".md"))
+    .map((name) => readMarkdownEntry(path.join(dirPath, name), type))
+    .filter(Boolean)
+    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+}
+
+function readMarkdownEntry(filePath, type) {
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    const stats = fs.statSync(filePath);
+    const lines = content.split(/\r?\n/).filter(Boolean);
+    return {
+      id: filePath,
+      title: path.basename(filePath),
+      type,
+      summary: truncateText(lines.slice(0, 3).join(" "), 220),
+      content: truncateText(content, 4000),
+      timestamp: stats.mtime.toISOString(),
+      path: filePath
+    };
+  } catch {
+    return null;
+  }
+}
+
+function getConversationHistory() {
+  if (!fs.existsSync(SESSION_DIR)) return [];
+  const files = fs.readdirSync(SESSION_DIR)
+    .filter((name) => name.toLowerCase().endsWith(".jsonl"))
+    .map((name) => path.join(SESSION_DIR, name))
+    .sort((a, b) => fs.statSync(b).mtimeMs - fs.statSync(a).mtimeMs);
+
+  const latest = files[0];
+  if (!latest) return [];
+  const lines = fs.readFileSync(latest, "utf8").split(/\r?\n/).filter(Boolean);
+  const messages = [];
+
+  lines.forEach((line) => {
+    try {
+      const entry = JSON.parse(line);
+      if (entry.type !== "message" || !entry.message) return;
+      const role = entry.message.role;
+      const textParts = Array.isArray(entry.message.content)
+        ? entry.message.content.filter((item) => item.type === "text" && item.text).map((item) => item.text)
+        : [];
+      const text = textParts.join("\n\n").trim();
+      if (!text) return;
+      messages.push({
+        id: entry.id,
+        from: role === "assistant" ? "Sosai" : role === "user" ? "User" : role,
+        to: role === "assistant" ? "User" : "Sosai",
+        message: truncateText(text, 4000),
+        visibility: "discord-session-transcript",
+        timestamp: entry.timestamp
+      });
+    } catch {
+      return;
+    }
+  });
+
+  return messages.slice(-80).reverse();
+}
+
+function truncateText(value, maxLength) {
+  const text = String(value || "").trim();
+  return text.length > maxLength ? `${text.slice(0, maxLength - 1)}…` : text;
 }
 
 function maskSecret(value) {

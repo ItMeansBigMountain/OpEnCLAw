@@ -1,6 +1,7 @@
 {
   "scripts": {
-    "test:smoke": "playwright test"
+    "test:smoke": "playwright test",
+    "refresh:derived": "node scripts/refresh-derived-state.js"
   },
   "dependencies": {
     "playwright": "^1.59.1"
