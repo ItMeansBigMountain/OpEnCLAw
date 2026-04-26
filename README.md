@@ -1,3 +1,42 @@
+Affan Fareed
+
+---
+
+use `openclaw configure` after onboarding 
+
+---
+
+      v                 v                    v            v            v
+[mission-control]   [server.js]   [refresh-derived-state] [tests]   [worklog/diary]
+      |
+      v
+[Validated result]
+      |
+      v
+[State updated]
+      |
+      v
+[Next loop starts]
+
+
+---
+
+                            [COO / Sosai]
+                                  |
+        +-------------------------+-------------------------+
+        |                         |                         |
+        v                         v                         v
+     [Critic]                 [Operator]               [Archivist]
+  checks the plan           does the work        updates logs/state/files
+        |                         |                         |
+        +------------+------------+------------+------------+
+                     |                         |
+                     v                         v
+                 [Analyst]                 [Writer]
+              validates result        formats summaries/reports
+                     |                         |
+                     +------------+------------+vv
+
 # OpenClaw Discord Project Template
 
 This repo is a starter template for OpenClaw projects that you run locally and control through Discord.

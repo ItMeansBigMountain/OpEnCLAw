@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test:smoke": "playwright test",
+    "test:smoke": "playwright test tests/mission-control.smoke.spec.js",
     "refresh:derived": "node scripts/refresh-derived-state.js"
   },
   "dependencies": {

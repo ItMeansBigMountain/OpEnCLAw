@@ -19,15 +19,243 @@ function truncate(text, max = 4000) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+function loadProjectRegistryItems() {
+  const registryPath = path.join(workspaceDir, 'memory', 'projects.md');
+  if (!fs.existsSync(registryPath)) return [];
+
+  return fs.readFileSync(registryPath, 'utf8')
+    .split(/\r?\n/)
+    .filter((line) => line.trim().startsWith('|'))
+    .slice(2)
+    .map((row) => row.split('|').slice(1, -1).map((cell) => cell.trim()))
+    .filter((cells) => cells.length >= 8)
+    .map(([project, priority, status, feature, pbi, blocker, nextAction, projectPath]) => ({
+      project,
+      priority,
+      status,
+      feature,
+      pbi,
+      blocker,
+      nextAction,
+      path: projectPath
+    }));
+}
+
+function summarizeCommandLine(commandLine) {
+  return truncate(String(commandLine || '').replace(/\s+/g, ' '), 220);
+}
+
+function normalizeWindowsProcessTimestamp(value) {
+  const text = String(value || '').trim();
+  const match = text.match(/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})/);
+  if (!match) return text || null;
+  const [, year, month, day, hour, minute, second] = match;
+  return `${year}-${month}-${day}T${hour}:${minute}:${second}`;
+}
+
+function loadOpenClawManagedProcesses() {
+  if (process.platform !== 'win32') return [];
+
+  try {
+    const raw = execFileSync('wmic', [
+      'process',
+      'where',
+      "name='powershell.exe' or name='node.exe' or name='cmd.exe'",
+      'get',
+      'ProcessId,Name,CommandLine',
+      '/format:csv'
+    ], {
+      stdio: ['ignore', 'pipe', 'ignore']
+    }).toString().trim();
+
+    if (!raw) return [];
+    const items = raw
+      .split(/\r?\n/)
+      .slice(1)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const parts = line.split(',');
+        if (parts.length < 4) return null;
+        const [nodeName, commandLine, name, processId] = parts;
+        return {
+          Node: nodeName,
+          CommandLine: commandLine || '',
+          Name: name || '',
+          ProcessId: processId || ''
+        };
+      })
+      .filter(Boolean)
+      .filter((entry) => /openclaw|ralph\.ps1/i.test(entry.CommandLine || ''));
+
+    return items
+      .map((entry) => {
+        const commandLine = String(entry.CommandLine || '');
+        const normalized = commandLine.toLowerCase();
+        const isRalph = /ralph\.ps1/i.test(commandLine);
+        const isGateway = /gateway --port|\\.openclaw\\gateway\.cmd|node_modules\\openclaw.*\bgateway\b/i.test(commandLine);
+        const isShell = /powershell|cmd\.exe/i.test(String(entry.Name || ''));
+        const kind = isRalph ? 'loop-runner-shell' : isGateway ? 'gateway-service' : isShell ? 'shell' : 'openclaw-process';
+        const label = isRalph
+          ? 'Ralph PowerShell loop'
+          : isGateway
+            ? 'OpenClaw Gateway'
+            : normalized.includes('openclaw')
+              ? 'OpenClaw runtime process'
+              : (entry.Name || 'OpenClaw process');
+
+        return {
+          pid: Number(entry.ProcessId) || 0,
+          name: entry.Name || 'process',
+          label,
+          kind,
+          shell: isShell,
+          startedAt: normalizeWindowsProcessTimestamp(entry.CreationDate),
+          command: summarizeCommandLine(commandLine)
+        };
+      })
+      .sort((a, b) => {
+        const priority = { 'loop-runner-shell': 0, 'gateway-service': 1, shell: 2, 'openclaw-process': 3 };
+        return (priority[a.kind] ?? 9) - (priority[b.kind] ?? 9);
+      });
+  } catch {
+    return [];
+  }
+}
+
+function loadCompanyRuntimeSummary() {
+  const projectItems = loadProjectRegistryItems();
+  const currentWork = projectItems
+    .filter((item) => /in progress|not done|active/i.test(item.status || ''))
+    .slice(0, 4);
+  const managedProcesses = loadOpenClawManagedProcesses();
+  const activeShells = managedProcesses.filter((entry) => entry.shell);
+  const gatewayProcess = managedProcesses.find((entry) => entry.kind === 'gateway-service');
+  const ralphProcess = managedProcesses.find((entry) => entry.kind === 'loop-runner-shell');
+
+  const workflowDiagram = [
+    '[Affan / Discord operator]',
+    '            |',
+    '            v',
+    '[OpenClaw Gateway + CLI]',
+    '            |',
+    '            v',
+    '[Ralph loop runner]',
+    '            |',
+    '            v',
+    '[Read AGENTS.md + projects.md + work-queue.md]',
+    '            |',
+    '            v',
+    '[COO -> Critic -> Operator -> Analyst -> Archivist]',
+    '            |',
+    '            v',
+    '[One bounded validated slice]',
+    '            |',
+    '            v',
+    '[Update Mission Control + logs + state + notify Discord]'
+  ].join('\n');
+
+  const orgChart = [
+    '[COO / Sosai]',
+    ' |-- [Critic] challenge plan before work',
+    ' |-- [Operator] execute one bounded slice',
+    ' |-- [Analyst] validate the result',
+    ' |-- [Archivist] update queue, registry, logs, memory',
+    ' `-- [Writer] format operator-facing summaries'
+  ].join('\n');
+
+  const softwareDiagram = [
+    '[Discord approved channel]',
+    '          |',
+    '          v',
+    '[OpenClaw Gateway]',
+    '          |',
+    '          v',
+    '[OpenClaw CLI agent turns]',
+    '          |',
+    '          v',
+    '[PowerShell: ralph.ps1]',
+    '          |',
+    '          v',
+    '[Mission Control work + tests + logs]'
+  ].join('\n');
+
+  const softwareStack = [
+    {
+      id: 'gateway',
+      label: 'OpenClaw Gateway',
+      status: gatewayProcess ? 'running' : 'not-detected',
+      detail: gatewayProcess ? `PID ${gatewayProcess.pid} • ${gatewayProcess.command}` : 'No live gateway process reflected from OpenClaw-managed commands.'
+    },
+    {
+      id: 'ralph',
+      label: 'Ralph loop runner',
+      status: ralphProcess ? 'running' : 'not-detected',
+      detail: ralphProcess ? `PID ${ralphProcess.pid} • ${ralphProcess.command}` : 'No live Ralph loop runner reflected right now.'
+    },
+    {
+      id: 'agent-turns',
+      label: 'OpenClaw fresh agent turns',
+      status: ralphProcess ? 'active' : 'ready',
+      detail: ralphProcess ? 'Ralph is promoting fresh runs through the OpenClaw CLI.' : 'Ready for fresh-run continuation when the loop runner is active.'
+    }
+  ];
+
+  return {
+    refreshedAt: new Date().toISOString(),
+    currentWork,
+    managedProcesses,
+    activeShells,
+    softwareStack,
+    workflowDiagram,
+    orgChart,
+    softwareDiagram
+  };
+}
+
+function classifyDocumentEntry(filePath, type) {
+  const base = path.basename(filePath);
+  const ext = path.extname(base).toLowerCase();
+  const normalized = base.toLowerCase();
+
+  let sourceKind = type;
+  let fileKind = ext ? ext.replace(/^\./, '') : 'text';
+
+  if (type === 'daily-memory') {
+    sourceKind = 'daily-memory';
+    fileKind = 'memory-log';
+  } else if (type === 'workspace-doc') {
+    sourceKind = 'workspace-doc';
+    if (/^heartbeat\.md$/i.test(base)) fileKind = 'heartbeat';
+    else if (/^memory\.md$/i.test(base)) fileKind = 'memory-root';
+    else if (/^projects\.md$/i.test(base)) fileKind = 'project-registry';
+    else fileKind = 'workspace-doc';
+  } else if (type === 'project-doc') {
+    sourceKind = 'project-doc';
+    if (/worklog/.test(normalized)) fileKind = 'worklog';
+    else if (/diary/.test(normalized)) fileKind = 'developer-diary';
+    else if (/spec-audit/.test(normalized)) fileKind = 'spec-audit';
+    else if (/portability/.test(normalized)) fileKind = 'portability-guide';
+    else if (/automation-architecture/.test(normalized)) fileKind = 'automation-architecture';
+    else if (/token-cost-analysis/.test(normalized)) fileKind = 'cost-analysis';
+    else if (/^\d+-/.test(base)) fileKind = 'source-prompt';
+  }
+
+  return { sourceKind, fileKind };
+}
+
 function readMarkdownEntry(filePath, type) {
   if (!fs.existsSync(filePath)) return null;
   const content = fs.readFileSync(filePath, 'utf8');
   const stat = fs.statSync(filePath);
   const lines = content.split(/\r?\n/).filter(Boolean);
+  const classification = classifyDocumentEntry(filePath, type);
   return {
     id: filePath,
     title: path.basename(filePath),
     type,
+    sourceKind: classification.sourceKind,
+    fileKind: classification.fileKind,
     summary: truncate(lines.slice(0, 3).join(' '), 220),
     content: truncate(content, 4000),
     timestamp: stat.mtime.toISOString(),
@@ -44,6 +272,15 @@ function listMarkdownEntries(dirPath, type) {
     .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 }
 
+function extractTextContent(content) {
+  if (!Array.isArray(content)) return '';
+  return content
+    .filter((item) => item && item.type === 'text' && typeof item.text === 'string')
+    .map((item) => item.text)
+    .join('\n\n')
+    .trim();
+}
+
 function loadConversations() {
   if (!fs.existsSync(sessionDir)) return [];
   const files = fs.readdirSync(sessionDir)
@@ -55,13 +292,14 @@ function loadConversations() {
   return fs.readFileSync(latest, 'utf8').split(/\r?\n/).filter(Boolean).map((line) => {
     try { return JSON.parse(line); } catch { return null; }
   }).filter(Boolean).filter((entry) => entry.type === 'message' && entry.message).map((entry) => {
-    const texts = Array.isArray(entry.message.content) ? entry.message.content.filter((c) => c.type === 'text' && c.text).map((c) => c.text) : [];
-    const text = texts.join('\n\n').trim();
+    const role = entry.message.role === 'assistant' ? 'assistant' : 'user';
+    const text = extractTextContent(entry.message.content);
     if (!text) return null;
     return {
       id: entry.id,
-      from: entry.message.role === 'assistant' ? 'Sosai' : 'User',
-      to: entry.message.role === 'assistant' ? 'User' : 'Sosai',
+      from: role === 'assistant' ? 'Sosai' : 'User',
+      to: role === 'assistant' ? 'User' : 'Sosai',
+      role,
       message: truncate(text),
       visibility: 'discord-session-transcript',
       timestamp: entry.timestamp
@@ -69,16 +307,130 @@ function loadConversations() {
   }).filter(Boolean).slice(-100).reverse();
 }
 
+function parseGitStatusLines(output) {
+  const lines = String(output || '').split(/\r?\n/).filter(Boolean);
+  const changedFiles = [];
+  const summary = {
+    dirty: false,
+    clean: true,
+    stagedCount: 0,
+    unstagedCount: 0,
+    untrackedCount: 0,
+    conflictedCount: 0,
+    renamedCount: 0,
+    deletedCount: 0,
+    changedCount: 0,
+    stagedFiles: [],
+    unstagedFiles: [],
+    untrackedFiles: [],
+    conflictedFiles: [],
+    renamedFiles: [],
+    deletedFiles: [],
+    externalChangeCount: 0,
+    repoLocalChangeCount: 0,
+    externalChangedFiles: [],
+    repoChangedFiles: []
+  };
+
+  lines.forEach((line) => {
+    const statusCode = line.slice(0, 2);
+    const filePath = line.slice(3).trim();
+    if (!filePath) return;
+
+    const staged = statusCode[0];
+    const unstaged = statusCode[1];
+    const entry = {
+      path: filePath,
+      code: statusCode,
+      staged: staged !== ' ' && staged !== '?',
+      unstaged: unstaged !== ' ',
+      untracked: statusCode === '??',
+      conflicted: /[AUUDCR]/.test(staged) && /[AUUDCR]/.test(unstaged),
+      renamed: statusCode.includes('R'),
+      deleted: statusCode.includes('D'),
+      external: filePath.startsWith('..')
+    };
+
+    if (entry.untracked) {
+      summary.untrackedCount += 1;
+      summary.untrackedFiles.push(filePath);
+    } else {
+      if (entry.staged) {
+        summary.stagedCount += 1;
+        summary.stagedFiles.push(filePath);
+      }
+      if (entry.unstaged) {
+        summary.unstagedCount += 1;
+        summary.unstagedFiles.push(filePath);
+      }
+      if (entry.conflicted || statusCode.includes('U')) {
+        summary.conflictedCount += 1;
+        summary.conflictedFiles.push(filePath);
+      }
+    }
+
+    if (entry.renamed) {
+      summary.renamedCount += 1;
+      summary.renamedFiles.push(filePath);
+    }
+
+    if (entry.deleted) {
+      summary.deletedCount += 1;
+      summary.deletedFiles.push(filePath);
+    }
+
+    if (entry.external) {
+      summary.externalChangeCount += 1;
+      summary.externalChangedFiles.push(filePath);
+    } else {
+      summary.repoLocalChangeCount += 1;
+      summary.repoChangedFiles.push(filePath);
+    }
+
+    changedFiles.push(entry);
+  });
+
+  summary.changedCount = changedFiles.length;
+  summary.dirty = summary.changedCount > 0;
+  summary.clean = !summary.dirty;
+  return { summary, changedFiles };
+}
+
 function loadGit() {
   try {
     const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
     const remoteUrl = execFileSync('git', ['config', '--get', 'remote.origin.url'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const upstream = remoteUrl
+      ? execFileSync('git', ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+      : null;
     const repo = remoteUrl ? remoteUrl.split('/').pop().replace(/\.git$/i, '') : path.basename(projectRoot);
-    const aheadBehindArgs = remoteUrl
-      ? ['rev-list', '--left-right', '--count', `origin/${branch}...${branch}`]
+    const remoteHostMatch = remoteUrl.match(/^(?:https?:\/\/|ssh:\/\/)?(?:[^@]+@)?([^/:]+)/i);
+    const remoteHost = remoteHostMatch ? remoteHostMatch[1] : null;
+    const aheadBehindArgs = upstream
+      ? ['rev-list', '--left-right', '--count', `${upstream}...${branch}`]
       : ['rev-list', '--left-right', '--count', `${branch}...${branch}`];
     const aheadBehind = execFileSync('git', aheadBehindArgs, { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().split(/\s+/);
     const log = execFileSync('git', ['log', '--pretty=format:%H%x1f%h%x1f%s%x1f%an%x1f%aI', '-n', '20'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const statusOutput = execFileSync('git', ['status', '--short'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const worktreeOutput = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const { summary: workingTree, changedFiles } = parseGitStatusLines(statusOutput);
+    const worktrees = worktreeOutput
+      .split(/\r?\n\r?\n/)
+      .map((block) => block.split(/\r?\n/).filter(Boolean))
+      .map((lines) => {
+        if (!lines.length) return null;
+        const worktreeLine = lines.find((line) => line.startsWith('worktree '));
+        const branchLine = lines.find((line) => line.startsWith('branch '));
+        const detached = lines.includes('detached');
+        return worktreeLine ? {
+          path: worktreeLine.slice('worktree '.length).trim(),
+          branch: branchLine ? branchLine.slice('branch '.length).trim().replace(/^refs\/heads\//, '') : null,
+          detached
+        } : null;
+      })
+      .filter(Boolean);
+    const repoRoot = worktrees[0]?.path || projectRoot;
+    const currentScope = worktrees.find((entry) => path.resolve(entry.path) === path.resolve(projectRoot)) || null;
     const ahead = Number(aheadBehind[1] || 0) || 0;
     const behind = Number(aheadBehind[0] || 0) || 0;
     const entries = log
@@ -89,10 +441,37 @@ function loadGit() {
         return hash ? { hash, shortHash, subject, author, date } : null;
       })
       .filter(Boolean)
-      .map((entry, index) => ({ ...entry, repo, branch, remote: remoteUrl ? 'origin' : 'local', remoteUrl, pushed: index >= ahead }));
-    return { repo, branch, remote: remoteUrl ? 'origin' : 'local', ahead, behind, entries };
+      .map((entry, index) => ({ ...entry, repo, branch, remote: remoteUrl ? 'origin' : 'local', remoteUrl, upstream, remoteHost, pushed: index >= ahead }));
+    return { repo, branch, remote: remoteUrl ? 'origin' : 'local', remoteUrl, upstream, remoteHost, repoRoot, currentScope, worktrees, ahead, behind, entries, workingTree, changedFiles };
   } catch {
-    return { repo: null, branch: null, remote: null, ahead: 0, behind: 0, entries: [] };
+    return {
+      repo: null,
+      branch: null,
+      remote: null,
+      remoteUrl: null,
+      upstream: null,
+      remoteHost: null,
+      repoRoot: null,
+      currentScope: null,
+      worktrees: [],
+      ahead: 0,
+      behind: 0,
+      entries: [],
+      workingTree: {
+        dirty: false,
+        clean: true,
+        stagedCount: 0,
+        unstagedCount: 0,
+        untrackedCount: 0,
+        conflictedCount: 0,
+        changedCount: 0,
+        stagedFiles: [],
+        unstagedFiles: [],
+        untrackedFiles: [],
+        conflictedFiles: []
+      },
+      changedFiles: []
+    };
   }
 }
 
@@ -417,7 +796,8 @@ function loadOpenClawFootprint() {
       ],
       approvals: loadExecApprovalsSummary(),
       configHealth: loadConfigHealthSummary(),
-      configAudit: loadConfigAuditSummary()
+      configAudit: loadConfigAuditSummary(),
+      companyRuntime: loadCompanyRuntimeSummary()
     }
   };
 }
@@ -734,6 +1114,18 @@ function loadConfiguredAgents() {
   }));
 }
 
+function normalizeProjectStatus(status) {
+  return String(status || 'unknown').toLowerCase().replace(/\s+/g, '-');
+}
+
+function normalizeProjectPriority(priority, missionControl = false) {
+  const normalized = String(priority || '').trim().toLowerCase();
+  if (['p0', 'p1', 'critical', 'highest', 'high'].includes(normalized)) return 'high';
+  if (['p2', 'medium', 'normal'].includes(normalized)) return 'medium';
+  if (['p3', 'p4', 'low'].includes(normalized)) return 'low';
+  return missionControl ? 'high' : 'medium';
+}
+
 function loadProjects(agileTasks) {
   const registryPath = path.join(workspaceDir, 'memory', 'projects.md');
   const registry = fs.existsSync(registryPath) ? fs.readFileSync(registryPath, 'utf8') : '';
@@ -744,7 +1136,32 @@ function loadProjects(agileTasks) {
 
   return projectRows.map((row) => {
     const cells = row.split('|').slice(1, -1).map((cell) => cell.trim());
-    const [name, status, stack, notes, projectPath] = cells;
+    const isExpandedRegistry = cells.length >= 8;
+    const [
+      name,
+      priorityOrStatus,
+      statusOrStack,
+      featureOrNotes,
+      pbiOrPath,
+      blocker,
+      nextAction,
+      explicitPath
+    ] = cells;
+
+    const legacyStatus = priorityOrStatus;
+    const legacyStack = statusOrStack;
+    const legacyNotes = featureOrNotes;
+    const legacyPath = pbiOrPath;
+
+    const priority = isExpandedRegistry ? priorityOrStatus : (/(mission control)/i.test(name || '') ? 'high' : 'medium');
+    const status = isExpandedRegistry ? statusOrStack : legacyStatus;
+    const stack = isExpandedRegistry ? featureOrNotes : legacyStack;
+    const currentPbi = isExpandedRegistry ? pbiOrPath : '';
+    const notes = isExpandedRegistry
+      ? [currentPbi, nextAction].filter(Boolean).join(' • ')
+      : legacyNotes;
+    const projectPath = isExpandedRegistry ? explicitPath : legacyPath;
+
     const missionControl = /mission control/i.test(name || '');
     const relatedTasks = missionControl
       ? agileTasks
@@ -757,13 +1174,16 @@ function loadProjects(agileTasks) {
     return {
       id: `project-${slugify(name)}`,
       name: name || 'Unnamed project',
-      status: (status || 'unknown').toLowerCase().replace(/\s+/g, '-'),
+      status: normalizeProjectStatus(status),
       owner: missionControl ? 'Sosai' : 'Shared',
-      priority: missionControl ? 'high' : 'medium',
+      priority: normalizeProjectPriority(priority, missionControl),
       description: notes || stack || 'No project notes captured yet.',
       percent,
       stack: stack || 'Unspecified',
       path: projectPath || '',
+      blocker: isExpandedRegistry ? (blocker || 'None') : 'None',
+      currentPbi: isExpandedRegistry ? (currentPbi || '') : '',
+      nextAction: isExpandedRegistry ? (nextAction || '') : '',
       taskCount: relatedTasks.length,
       activeTaskCount: relatedTasks.filter((task) => task.column === 'in-progress').length,
       doneTaskCount: doneTasks
@@ -777,6 +1197,20 @@ const documents = [
   'AGENTS.md','SOUL.md','USER.md','TOOLS.md','HEARTBEAT.md','MEMORY.md'
 ].map((name) => readMarkdownEntry(path.join(workspaceDir, name), 'workspace-doc')).filter(Boolean).concat(loadProjectDocuments());
 const conversations = loadConversations();
+const safeConversationDocuments = conversations
+  .filter((entry) => entry.role === 'user')
+  .slice(-20)
+  .map((entry) => ({
+    id: `conversation:${entry.id}`,
+    title: `Conversation note ${entry.timestamp || entry.id}`,
+    type: 'conversation-note',
+    sourceKind: 'conversation-note',
+    fileKind: 'conversation-note',
+    summary: truncate(entry.message, 220),
+    content: truncate(entry.message, 4000),
+    timestamp: entry.timestamp || new Date().toISOString(),
+    path: 'session-transcript'
+  }));
 const git = loadGit();
 const apiInventory = loadApiInventory();
 const futureWork = loadFutureWork();
@@ -795,7 +1229,7 @@ const payload = {
   projects,
   command,
   memoryEntries,
-  documents,
+  documents: [...documents, ...safeConversationDocuments],
   conversations,
   assistantAudit,
   apiInventory,

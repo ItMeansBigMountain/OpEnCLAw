@@ -50,12 +50,42 @@ Track what was attempted, what changed, what broke, what was learned, and what s
 - Pushed the `.openclaw` reflection past the old footprint summary card. Mission Control now derives and shows real runtime panels for configured-vs-runtime agents, runtime stores (`tasks`, `flows`, `logs`, `media`), exec approvals, and config health/audit.
 - Important safety detail: the new reflection path stays masked. The exec-approval token is masked, and config-audit command summaries are sanitized so raw secret-bearing arguments do not get dumped into the UI.
 - Put the new runtime panels in the visible **Agents** area instead of creating more navigation sprawl. That keeps the shell small while making the substrate much more inspectable.
+- Investigated an async-reported Playwright smoke failure around the `Context Files` tab and verified the current workspace no longer reproduces it. The tab button, panel IDs, and smoke selectors all align, and a fresh targeted smoke run passed.
+- Repeatable Windows execution lesson: avoid Unix heredoc / redirection habits in PowerShell-backed shell calls during repo inspection; they create fake failures that slow down debugging.
 
 ## 2026-04-22
 - Corrected a product/process mismatch after direct user feedback: the web approval queue was not how blockers were actually being resolved in practice, so it should not stay as a first-class Mission Control dependency.
 - Removed the Mission Control **Approvals** tab from the shell and stopped rendering the approval-queue workflow.
 - Kept the broader safety rule intact: destructive, public, install/system-change, expensive, or secret-sensitive actions still require explicit approval, but that approval should happen directly in chat/Discord instead of through a dashboard queue.
 - Reframed the remaining runtime reflection from "Exec Approvals" to "Exec Policy" so the UI mirrors substrate state without pretending the operator is expected to use a web approval gate.
+- Applied the same product simplification rule to Office: the Mission Control **Live Console** panel was removed after the operator called it low-value, leaving Office focused on avatars and recent activity instead of pretending the dashboard is the best place to inspect logs.
+
+- Shipped a bounded GitOps continuity follow-up instead of another backend expansion: the GitOps working-tree card now exposes grouped file-scope sections for staged, unstaged, untracked, and external changes using the already-reflected arrays from derived state.
+- Durable lesson: once reflected source data exists, prefer making that data legible in the operator UI before widening ingestion again. That keeps slices smaller and easier to validate.
+- Followed that same rule again for commit continuity: the GitOps feed now separates local-only commits from pushed history using existing reflected `pushed` metadata, which gives operators a clearer bridge between current working-tree churn and unshipped commit state.
+- Added a small but higher-signal remote cue pass: GitOps now reflects the upstream tracking branch plus remote host and turns raw ahead/behind counts into a clearer **Remote risk** summary so operators can tell whether the branch is aligned, locally ahead, or behind tracked remote history.
+- Followed with a bounded repo-scope pass instead of jumping to full multi-repo management: GitOps now reflects worktree metadata so the operator can see the current repo scope/path context and how many worktrees are present before any larger repo-selection slice is attempted.
+- Added one more lightweight comparison cue on top of that reflected worktree data: GitOps now shows a worktree-detail line with branch/path entries so operators can see the current worktree set before any future multi-repo or repo-selection work.
+- Tightened that scope cue further with an explicit current-worktree marker so the operator can tell which reflected worktree the page is actually summarizing before any future selection UI exists.
+- Added a lightweight readiness cue on top: GitOps now distinguishes a single-worktree scope from additional reflected worktrees, which should help decide whether future repo/worktree selection controls are worth shipping.
+- Tightened that worktree-awareness path one step further: the worktree detail preview now admits when more reflected worktrees exist beyond the visible five-item preview instead of silently truncating them.
+- Added one more low-risk coverage cue on top: GitOps now states how many reflected worktrees are currently shown versus total, so operators do not have to infer preview scope from the detail row alone.
+- Followed with a small summary-consistency pass: the same visible-versus-total worktree preview count now appears as a GitOps micro-card, so the cue is readable at a glance before the operator scans the supporting copy.
+- Added one more glanceability cue in the same reflected path: GitOps now surfaces the current worktree path basename as its own micro-card, so branch and path scope can be scanned separately.
+- Followed with a matching repository-identity cue: GitOps now surfaces the repo root basename as its own micro-card so operators can distinguish repo scope from current worktree scope at a glance.
+- Added one more relation cue on top of that same reflected data: GitOps now states whether the current scope is the repo root itself or a linked worktree, which should make future multi-repo or selector decisions easier to judge.
+- Followed with a small readability pass: GitOps now also explains that repo/worktree relationship in a plain sentence so operators do not have to infer it from micro-cards alone.
+- Added one more low-risk scanability improvement on top of the same reflected data: when worktree detail is previewed, the current worktree is now moved to the front of that preview instead of relying on source order alone.
+- Added another bounded readability cue on the same preview: the worktree-detail line now states its shown/total coverage directly, so preview scope is visible in-place instead of only in separate summary copy.
+- Added one more tiny follow-up on the same reflected data: when the preview is already complete, the worktree-detail line now says that all reflected worktrees are shown instead of leaving completeness implicit.
+- Added a similarly small reassurance cue on the same line: when the visible preview includes the active reflected scope, GitOps now says so directly instead of making operators infer it from ordering and markers alone.
+- Followed with one slightly more glanceable cue on the same reflected worktree data: the summary grid now exposes how many reflected worktrees are hidden beyond the preview, instead of leaving truncation awareness only in the detail line.
+- Added one more micro-summary on that same reflected preview state: GitOps now labels the preview as `Complete` or `Truncated`, so operators can classify the preview state at a glance without reading counts first.
+- Added a matching inclusion cue to the summary grid: GitOps now says whether the current reflected worktree is inside the visible preview, so that reassurance is glanceable instead of detail-only.
+- Added one more ordering cue on the same reflected preview state: GitOps now labels whether the preview is `Current-first` or still in reflected source order, so operators can interpret the visible list more quickly.
+- Added one more concrete placement cue on the same preview: GitOps now states the current reflected worktree's visible position like `1/3`, so operators can tell where the active scope sits in the preview without scanning the detail line.
+- Closed the negative-case gap in the worktree detail line: when a current scope exists but the preview does not include it, GitOps now says `current reflected worktree not shown` instead of making operators infer omission from the absence of the positive cue.
+- Tightened the positive-case detail cue too: when the current reflected worktree is visible, the detail line now says `current reflected worktree included at X/Y`, so operators can read inclusion and placement in one place without cross-checking the summary grid.
 
 ## Next recommended work
 - Add OpenClaw gateway reflection panels for runtime health, plugins/channels, control surfaces, and security warnings

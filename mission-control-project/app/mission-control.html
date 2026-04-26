@@ -518,145 +518,10 @@
     }
     .console-list {
       display: grid;
-      gap: 0.65rem;
-      max-height: 420px;
-      overflow: auto;
-      padding-right: 0.15rem;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-    }
-    .console-shell {
-      padding: 0.95rem;
-      border-radius: 18px;
-      background:
-        linear-gradient(180deg, rgba(10, 14, 22, 0.96), rgba(6, 8, 14, 0.98)),
-        rgba(7, 9, 14, 0.98);
-      border: 1px solid rgba(111, 131, 255, 0.14);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,0.04), 0 16px 28px rgba(0,0,0,0.35);
-    }
-    .console-toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       gap: 0.8rem;
-      margin-bottom: 0.85rem;
-      color: #9fb2c9;
-      font-size: 0.72rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-    .console-lights { display: inline-flex; gap: 0.35rem; }
-    .console-lights span {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-      background: rgba(255,255,255,0.14);
-    }
-    .console-lights span:nth-child(1) { background: rgba(255, 106, 120, 0.9); }
-    .console-lights span:nth-child(2) { background: rgba(243, 166, 77, 0.9); }
-    .console-lights span:nth-child(3) { background: rgba(82, 196, 142, 0.9); }
-    .console-row {
-      display: grid;
-      grid-template-columns: auto auto minmax(0, 1fr);
-      gap: 0.75rem;
-      align-items: start;
-      padding: 0.48rem 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
-    .console-row:last-child { border-bottom: 0; }
-    .console-stamp { color: #6d89a4; font-size: 0.74rem; white-space: nowrap; }
-    .console-label { color: #9ec1ff; font-size: 0.76rem; white-space: nowrap; }
-    .console-message { min-width: 0; }
-    .console-route {
-      display: inline-flex;
-      gap: 0.45rem;
-      align-items: center;
-      color: #cdd8e6;
-      font-size: 0.76rem;
-      margin-bottom: 0.2rem;
-    }
-    .console-level {
-      display: inline-flex;
-      align-items: center;
-      padding: 0.12rem 0.42rem;
-      border-radius: 999px;
-      font-size: 0.65rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      border: 1px solid rgba(255,255,255,0.08);
-    }
-    .console-level.info { color: #8dd1ff; background: rgba(55, 116, 162, 0.14); }
-    .console-level.warning { color: #ffd39d; background: rgba(243, 166, 77, 0.13); }
-    .console-level.error { color: #ffc0c7; background: rgba(255, 106, 120, 0.12); }
-    .console-level.success { color: #b5f0d0; background: rgba(82, 196, 142, 0.12); }
-    .console-command {
-      color: #dbe7f5;
-      line-height: 1.55;
-      word-break: break-word;
-    }
-    .console-command::before { content: ">"; color: #52c48e; margin-right: 0.55rem; }
-    .console-meta {
-      display: block;
-      margin-top: 0.28rem;
-      color: #718399;
-      font-size: 0.7rem;
-    }
-
-    .approval-card {
-      border-radius: 18px;
-      border: 1px solid rgba(255,255,255,0.07);
-      background: rgba(255,255,255,0.03);
-      overflow: hidden;
-    }
-    .approval-card[open] { border-color: rgba(183, 29, 40, 0.28); box-shadow: 0 16px 28px rgba(0,0,0,0.24); }
-    .approval-card summary {
-      list-style: none;
-      cursor: pointer;
-      padding: 1rem 1.1rem;
-    }
-    .approval-card summary::-webkit-details-marker { display: none; }
-    .approval-row {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 1rem;
-      align-items: center;
-    }
-    .approval-meta {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.55rem;
-      margin-top: 0.45rem;
-      color: var(--text-faint);
-      font-size: 0.76rem;
-    }
-    .approval-actions-inline { display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap; }
-    .approval-compact-btn {
-      padding: 0.72rem 1.05rem;
-      border-radius: 12px;
-      font-weight: 700;
-      min-width: 96px;
-    }
-    .approval-expand {
-      width: 34px;
-      height: 34px;
-      display: inline-grid;
-      place-items: center;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(255,255,255,0.06);
-      color: var(--text-muted);
-      font-size: 1rem;
-    }
-    .approval-detail-body {
-      padding: 0 1.1rem 1.1rem;
-      color: var(--text-muted);
-      line-height: 1.7;
-      display: grid;
-      gap: 0.9rem;
-    }
-    .approval-log-card {
-      display: grid;
-      gap: 0.45rem;
+      max-height: 505px;
+      overflow: auto;
+      padding-right: 0.3rem;
     }
 
     .priorities { display: grid; gap: 0.75rem; }
@@ -1269,7 +1134,7 @@
         <button class="tab-btn" data-tab="context-files">Context Files</button>
         <button class="tab-btn" data-tab="api-inventory">API Inventory</button>
         <button class="tab-btn" data-tab="email-ops">Email Ops</button>
-        <button class="tab-btn" data-tab="gitops">GitOps</button>
+
       </nav>
 
       <div class="topbar-side">
@@ -1481,22 +1346,13 @@
           <article class="panel glass">
             <div class="panel-header">
               <div>
-                <span class="eyebrow">Office + Console</span>
+                <span class="eyebrow">Office</span>
                 <h3 class="panel-title">Realtime office</h3>
-                <p class="panel-subtitle">Avatars, handoffs, and the console-style log stream now live together here.</p>
+                <p class="panel-subtitle">Avatars, handoffs, and recent role activity.</p>
               </div>
             </div>
             <div class="module-stack">
               <div id="officeCanvas" class="office-stage glass"></div>
-              <div class="panel glass">
-                <div class="panel-header">
-                  <div>
-                    <h3 class="panel-title">Live Console</h3>
-                    <p class="panel-subtitle">Console-style stream of execution, runtime, and agent activity.</p>
-                  </div>
-                </div>
-                <div id="liveConsoleList" class="console-list"></div>
-              </div>
               <div class="panel glass">
                 <div class="panel-header">
                   <div>
@@ -1505,6 +1361,28 @@
                   </div>
                 </div>
                 <div id="officeActivityList" class="feed-list"></div>
+              </div>
+              <div class="module-grid-2">
+                <article class="panel glass">
+                  <div class="panel-header">
+                    <div>
+                      <span class="eyebrow">Company Loop</span>
+                      <h3 class="panel-title">Workflow and org mirror</h3>
+                      <p class="panel-subtitle">At-a-glance company workflow, org chart, and currently promoted work.</p>
+                    </div>
+                  </div>
+                  <div id="companyWorkflowPanel" class="feed-item" style="min-height:360px;"></div>
+                </article>
+                <article class="panel glass">
+                  <div class="panel-header">
+                    <div>
+                      <span class="eyebrow">OpenClaw Runtime</span>
+                      <h3 class="panel-title">Managed shells and software</h3>
+                      <p class="panel-subtitle">Only software and terminal sessions reflected as started or managed by OpenClaw.</p>
+                    </div>
+                  </div>
+                  <div id="openclawManagedRuntimePanel" class="feed-item" style="min-height:360px;"></div>
+                </article>
               </div>
             </div>
           </article>
@@ -1675,7 +1553,7 @@
                   <p class="panel-subtitle">Safe reflection of the local exec-policy substrate with masked control metadata.</p>
                 </div>
               </div>
-              <div id="openclawRuntimeApprovalsPanel" class="feed-item" style="min-height:320px;"></div>
+              <div id="openclawRuntimePolicyPanel" class="feed-item" style="min-height:320px;"></div>
             </article>
 
             <article class="panel glass">
@@ -1742,24 +1620,7 @@
         </div>
       </section>
 
-      <!-- GitOps -->
-      <section id="gitops" class="tab-panel">
-        <div class="module-stack">
-          <article class="panel glass">
-            <div class="panel-header">
-              <div>
-                <span class="eyebrow">Git Commits</span>
-                <h3 class="panel-title">Commit audit log</h3>
-                <p class="panel-subtitle">Commit, repo, branch, remote, and message. Built to stay close to a real commit feed.</p>
-              </div>
-            </div>
-            <div id="gitPushStatus" class="feed-item" style="margin-bottom:1rem;"></div>
-            <div id="gitLogList" class="feed-list"></div>
-          </article>
-        </div>
-      </section>
 
-    </main>
   </div>
 
   <div id="taskModalBackdrop" class="modal-backdrop" aria-hidden="true">
@@ -1934,13 +1795,6 @@
         }
       },
       futureWork: [],
-      approvals: {
-        gates: [],
-        logs: {
-          approved: [],
-          denied: []
-        }
-      },
       command: {
         agents: [],
         decisions: []
@@ -1983,9 +1837,6 @@
     const contextFilesDetail = document.getElementById("contextFilesDetail");
     const officeCanvas = document.getElementById("officeCanvas");
     const officeActivityList = document.getElementById("officeActivityList");
-    const approvalSummary = document.getElementById("approvalSummary");
-    const approvedLogList = document.getElementById("approvedLogList");
-    const deniedLogList = document.getElementById("deniedLogList");
     const addPriorityBtn = document.getElementById("addPriorityBtn");
     const clearActivityBtn = document.getElementById("clearActivityBtn");
     const globalSearch = document.getElementById("globalSearch");
@@ -2098,15 +1949,6 @@
           mergeServerActivity(serverActivity);
         }
 
-        const gitLog = await apiFetch("/git-log");
-        if (gitLog && Array.isArray(gitLog.entries)) {
-          state.gitops = {
-            log: gitLog.entries,
-            ahead: Number(gitLog.ahead) || 0,
-            behind: Number(gitLog.behind) || 0
-          };
-        }
-
         const liveConsole = await apiFetch("/live-console");
         if (Array.isArray(liveConsole)) {
           state.liveConsole = liveConsole;
@@ -2144,16 +1986,6 @@
             items: Array.isArray(derivedState.assistantAudit) ? derivedState.assistantAudit : []
           };
           if (derivedState.git && typeof derivedState.git === 'object') {
-            state.gitops = {
-              repo: derivedState.git.repo || state.gitops?.repo || null,
-              branch: derivedState.git.branch || state.gitops?.branch || null,
-              remote: derivedState.git.remote || state.gitops?.remote || null,
-              log: Array.isArray(derivedState.git.entries) ? derivedState.git.entries : (state.gitops?.log || []),
-              ahead: Number(derivedState.git.ahead) || 0,
-              behind: Number(derivedState.git.behind) || 0
-            };
-          }
-          if (derivedState.apiInventory && typeof derivedState.apiInventory === 'object') {
             state.apiInventory = {
               providers: Array.isArray(derivedState.apiInventory.providers) ? derivedState.apiInventory.providers : [],
               scanStatus: derivedState.apiInventory.scanStatus || null
@@ -2252,27 +2084,6 @@
         executionLogs: chooseArray(localData.executionLogs, serverData.executionLogs, { preferServerWhenLonger: true }),
         activity: mergeActivityEntries(serverData.activity || [], localData.activity || []),
         gitops: {
-          log: chooseArray(localData.gitops?.log, serverData.gitops?.log, { preferServerWhenLonger: true }),
-          ahead: Number(localData.gitops?.ahead ?? serverData.gitops?.ahead) || 0,
-          behind: Number(localData.gitops?.behind ?? serverData.gitops?.behind) || 0
-        },
-        approvals: {
-          gates: chooseArray(localData.approvals?.gates, serverData.approvals?.gates, { preferServerWhenLonger: true }),
-          logs: {
-            approved: chooseArray(localData.approvals?.logs?.approved, serverData.approvals?.logs?.approved, { preferServerWhenLonger: true }),
-            denied: chooseArray(localData.approvals?.logs?.denied, serverData.approvals?.logs?.denied, { preferServerWhenLonger: true })
-          }
-        },
-        apiInventory: {
-          ...(serverData.apiInventory || {}),
-          ...(localData.apiInventory || {}),
-          providers: chooseArray(localData.apiInventory?.providers, serverData.apiInventory?.providers, { preferServerWhenLonger: true }),
-          scanStatus: localData.apiInventory?.scanStatus || serverData.apiInventory?.scanStatus || null
-        },
-        emailOps: {
-          workflows: chooseArray(localData.emailOps?.workflows, serverData.emailOps?.workflows, { preferServerWhenLonger: true })
-        },
-        liveConsole: chooseArray(localData.liveConsole, serverData.liveConsole, { preferServerWhenLonger: true }),
         checkingIn: serverData.checkingIn || localData.checkingIn || null,
         gatewayReflection: {
           ...(serverData.gatewayReflection || {}),
@@ -2311,22 +2122,6 @@
           decisions: Array.isArray(parsed.command?.decisions) ? parsed.command.decisions : clone(defaultState.command.decisions)
         },
         gitops: {
-          log: Array.isArray(parsed.gitops?.log) ? parsed.gitops.log : [],
-          ahead: Number(parsed.gitops?.ahead) || 0,
-          behind: Number(parsed.gitops?.behind) || 0
-        },
-        approvals: {
-          gates: Array.isArray(parsed.approvals?.gates) ? parsed.approvals.gates : [],
-          logs: {
-            approved: Array.isArray(parsed.approvals?.logs?.approved) ? parsed.approvals.logs.approved : [],
-            denied: Array.isArray(parsed.approvals?.logs?.denied) ? parsed.approvals.logs.denied : []
-          }
-        },
-        apiInventory: {
-          providers: Array.isArray(parsed.apiInventory?.providers) ? parsed.apiInventory.providers : [],
-          scanStatus: parsed.apiInventory?.scanStatus || null
-        },
-        assistantAudit: {
           items: Array.isArray(parsed.assistantAudit?.items) ? parsed.assistantAudit.items : []
         },
         emailOps: {
@@ -2598,7 +2393,6 @@
       renderCommandCenter();
       renderApiInventory();
       renderEmailOps();
-      renderGitOps();
     }
 
     function renderGreeting() {
@@ -2786,38 +2580,6 @@
       renderInto(activityFeed, "No activity logged yet.", 24);
       renderInto(activityLogList, "No logs recorded yet.");
     }
-
-    function renderGitOps() {
-      const gitPushStatus = document.getElementById("gitPushStatus");
-      const gitLogList = document.getElementById("gitLogList");
-      if (!gitPushStatus || !gitLogList) return;
-
-      const ahead = Number(state.gitops?.ahead) || 0;
-      const behind = Number(state.gitops?.behind) || 0;
-      const entries = Array.isArray(state.gitops?.log) ? state.gitops.log : [];
-      const repoName = state.gitops?.repo || entries[0]?.repo || 'unknown';
-      const branchName = state.gitops?.branch || entries[0]?.branch || 'unknown';
-      const remoteName = state.gitops?.remote || entries[0]?.remote || 'local';
-
-      gitPushStatus.innerHTML = `<strong>${escapeHtml(repoName)}</strong><p>${escapeHtml(branchName)} · ${escapeHtml(remoteName)}</p><span>${ahead > 0 ? `${ahead} local commit${ahead === 1 ? '' : 's'} not pushed` : 'In sync'}${behind > 0 ? ` · ${behind} behind remote` : ''}</span>`;
-      gitLogList.innerHTML = entries.length
-        ? entries.map((entry) => `
-            <div class="feed-item" style="border-radius:0;padding:1rem 0;background:transparent;border-left:none;border-right:none;border-top:none;border-bottom:1px solid rgba(255,255,255,0.06);box-shadow:none;">
-              <div style="display:flex;justify-content:space-between;gap:1rem;align-items:start;">
-                <strong style="font-size:1rem;line-height:1.35;">${escapeHtml(entry.subject)}</strong>
-                <span style="color:var(--text-faint);white-space:nowrap;">${formatRelativeTime(entry.date)}</span>
-              </div>
-              <p style="margin:0.45rem 0 0;color:var(--text-muted);">${escapeHtml(entry.author || 'Unknown author')}</p>
-              <span>${escapeHtml(entry.shortHash)} · ${escapeHtml(entry.repo || repoName)} · ${escapeHtml(entry.branch || branchName)} · ${entry.pushed ? 'pushed' : 'local only'}</span>
-            </div>
-          `).join("")
-        : '<div class="empty-state">No git history available.</div>';
-    }
-
-    function renderCommandCenter() {
-      agentGrid.innerHTML = "";
-
-      const agents = Array.isArray(state.command?.agents) ? state.command.agents : [];
       const leadership = agents.filter((agent) => !agent.reportsTo);
       const childrenByLeader = new Map();
       agents.forEach((agent) => {
@@ -3063,7 +2825,7 @@
     function getProjectTaskSignals(project) {
       const signalMap = {
         "project-mission-control": {
-          keywords: ["mission control", "dashboard", "kanban", "memory", "docs", "activity", "conversation", "gitops"],
+          keywords: ["mission control", "dashboard", "kanban", "memory", "docs", "activity", "conversation"],
           areas: ["mission control", "memory & docs", "agents"]
         },
         "project-openclaw-config": {
@@ -3228,17 +2990,14 @@
     function renderContextFilesView() {
       if (!contextFilesList || !contextFilesDetail) return;
       const entries = [
-        ...(Array.isArray(state.memoryEntries) ? state.memoryEntries : []).map((entry) => ({
-          ...entry,
-          sourceKind: 'memory',
-          fileKind: entry.type || 'memory'
-        })),
-        ...(Array.isArray(state.documents) ? state.documents : []).map((entry) => ({
-          ...entry,
-          sourceKind: 'document',
-          fileKind: entry.category || 'document'
-        }))
+        ...(Array.isArray(state.memoryEntries) ? state.memoryEntries : []),
+        ...(Array.isArray(state.documents) ? state.documents : [])
       ]
+        .map((entry) => ({
+          ...entry,
+          sourceKind: entry.sourceKind || (entry.type === 'daily-memory' ? 'daily-memory' : entry.type || 'file'),
+          fileKind: entry.fileKind || entry.category || entry.type || 'document'
+        }))
         .slice()
         .sort((a, b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
 
@@ -3247,6 +3006,16 @@
         contextFilesDetail.innerHTML = '<strong>No file selected</strong><p>Markdown and text files will appear here once reflected into Mission Control.</p>';
         return;
       }
+
+      const sourceSummary = new Map();
+      entries.forEach((entry) => {
+        const key = entry.sourceKind || 'file';
+        sourceSummary.set(key, (sourceSummary.get(key) || 0) + 1);
+      });
+      const summaryMarkup = Array.from(sourceSummary.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([key, count]) => `<div class="micro-card"><span>${escapeHtml(humanizeToken(key))}</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(String(count))}</strong></div>`)
+        .join('');
 
       const renderDetail = (entry) => {
         contextFilesDetail.innerHTML = `
@@ -3258,16 +3027,17 @@
             <div class="micro-card"><span>Updated</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(formatDateTime(entry.timestamp))}</strong></div>
             <div class="micro-card"><span>Path</span><strong style="display:block;margin-top:0.3rem;word-break:break-word;">${escapeHtml(entry.path || 'reflected content')}</strong></div>
           </div>
+          <div style="margin-top:1rem;" class="micro-card"><span>Reflection classification</span><strong style="display:block;margin-top:0.3rem;">${escapeHtml(`${humanizeToken(entry.sourceKind || 'file')} · ${humanizeToken(entry.fileKind || 'text')}`)}</strong></div>
           <div style="margin-top:0.95rem;color:var(--text-muted);line-height:1.7;white-space:pre-wrap;">${escapeHtml(entry.content || '')}</div>
         `;
       };
 
-      contextFilesList.innerHTML = '';
+      contextFilesList.innerHTML = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.75rem;margin-bottom:0.9rem;">${summaryMarkup}</div>`;
       entries.forEach((entry, index) => {
         const card = document.createElement('button');
         card.type = 'button';
         card.className = 'search-result';
-        card.innerHTML = `<strong>${escapeHtml(entry.title || 'Untitled file')}</strong><span>${escapeHtml(humanizeToken(entry.sourceKind || 'file'))} · ${escapeHtml(entry.fileKind || 'text')} · ${formatDateTime(entry.timestamp)}</span>`;
+        card.innerHTML = `<strong>${escapeHtml(entry.title || 'Untitled file')}</strong><span>${escapeHtml(humanizeToken(entry.sourceKind || 'file'))} · ${escapeHtml(humanizeToken(entry.fileKind || 'text'))} · ${formatDateTime(entry.timestamp)}</span>`;
         card.addEventListener('click', () => renderDetail(entry));
         contextFilesList.appendChild(card);
         if (index === 0) renderDetail(entry);
@@ -3276,7 +3046,6 @@
 
     function renderOfficeView() {
       if (!officeCanvas || !officeActivityList) return;
-      const liveConsoleList = document.getElementById("liveConsoleList");
       const agents = Array.isArray(state.command?.agents) ? state.command.agents : [];
       const desks = [
         { id: 'leadership', label: 'COO Pod', x: 15, y: 19, width: 18, height: 14 },
@@ -3410,28 +3179,87 @@
           <div class="feed-item"><strong>${escapeHtml(entry.actor || 'System')}</strong><p>${escapeHtml(entry.message || '')}</p><span>${escapeHtml(entry.scope || 'runtime')} · ${formatDateTime(entry.timestamp)}</span></div>
         `).join('') || '<div class="empty-state">No office activity yet.</div>';
 
-      if (liveConsoleList) {
-        liveConsoleList.innerHTML = consoleEntries.length
+      const companyWorkflowPanel = document.getElementById('companyWorkflowPanel');
+      const openclawManagedRuntimePanel = document.getElementById('openclawManagedRuntimePanel');
+      const companyRuntime = state.openclawFootprint?.details?.companyRuntime || {};
+      const currentWork = Array.isArray(companyRuntime.currentWork) ? companyRuntime.currentWork : [];
+      const managedProcesses = Array.isArray(companyRuntime.managedProcesses) ? companyRuntime.managedProcesses : [];
+      const activeShells = Array.isArray(companyRuntime.activeShells) ? companyRuntime.activeShells : [];
+      const softwareStack = Array.isArray(companyRuntime.softwareStack) ? companyRuntime.softwareStack : [];
+      const renderCodeBlock = (text) => `<pre style="margin:0;padding:0.95rem 1rem;border-radius:14px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.06);color:var(--text-muted);font:0.78rem/1.55 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;white-space:pre-wrap;overflow:auto;">${escapeHtml(text || 'No reflected text yet.')}</pre>`;
+
+      if (companyWorkflowPanel) {
+        companyWorkflowPanel.innerHTML = companyRuntime.workflowDiagram || companyRuntime.orgChart || currentWork.length
           ? `
-            <div class="console-shell">
-              <div class="console-toolbar">
-                <span class="console-lights"><span></span><span></span><span></span></span>
-                <span>mission-control runtime stream</span>
-              </div>
-              ${consoleEntries.map((entry) => `
-                <div class="console-row">
-                  <span class="console-stamp">${escapeHtml(new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))}</span>
-                  <span class="console-label">${escapeHtml((entry.actor || 'system').toLowerCase())}</span>
-                  <div class="console-message">
-                    <span class="console-route"><span class="console-level ${escapeHtml((['info', 'warning', 'error', 'success'].includes(entry.level) ? entry.level : 'info'))}">${escapeHtml(entry.level || 'info')}</span><span>${escapeHtml(entry.scope || 'runtime')}</span></span>
-                    <div class="console-command">${escapeHtml(entry.message || '')}</div>
-                    <span class="console-meta">${escapeHtml(entry.source || 'runtime')} log</span>
+            <strong>Loop work at a glance</strong>
+            <div class="module-stack" style="margin-top:0.9rem;">
+              <div style="display:grid;gap:0.65rem;">
+                ${currentWork.length ? currentWork.map((item) => `
+                  <div class="feed-item" style="padding:0.85rem 1rem;">
+                    <strong>${escapeHtml(item.project || 'Project')}</strong>
+                    <p>${escapeHtml(item.feature || 'Feature')}</p>
+                    <span>${escapeHtml(item.pbi || 'PBI')} · ${escapeHtml(item.status || 'status unknown')}</span>
                   </div>
-                </div>
-              `).join('')}
+                `).join('') : '<div class="empty-state">No active reflected project work yet.</div>'}
+              </div>
+              <div>
+                <strong style="display:block;margin-bottom:0.5rem;">Workflow chart</strong>
+                ${renderCodeBlock(companyRuntime.workflowDiagram)}
+              </div>
+              <div>
+                <strong style="display:block;margin-bottom:0.5rem;">Org chart</strong>
+                ${renderCodeBlock(companyRuntime.orgChart)}
+              </div>
             </div>
           `
-          : '<div class="console-shell"><div class="console-toolbar"><span class="console-lights"><span></span><span></span><span></span></span><span>mission-control runtime stream</span></div><div class="empty-state">No live console entries yet.</div></div>';
+          : '<strong>No workflow mirror yet</strong><p>Company loop reflection will appear here after derived state refresh.</p>';
+      }
+
+      if (openclawManagedRuntimePanel) {
+        openclawManagedRuntimePanel.innerHTML = softwareStack.length || managedProcesses.length
+          ? `
+            <strong>OpenClaw-managed runtime</strong>
+            <div class="module-stack" style="margin-top:0.9rem;">
+              <div style="display:grid;gap:0.65rem;">
+                ${softwareStack.length ? softwareStack.map((item) => `
+                  <div class="feed-item" style="padding:0.85rem 1rem;">
+                    <strong>${escapeHtml(item.label || 'Runtime item')}</strong>
+                    <p>${escapeHtml(humanizeToken(item.status || 'unknown'))}</p>
+                    <span>${escapeHtml(item.detail || 'No detail reflected')}</span>
+                  </div>
+                `).join('') : '<div class="empty-state">No software stack reflected yet.</div>'}
+              </div>
+              <div>
+                <strong style="display:block;margin-bottom:0.5rem;">Runtime software map</strong>
+                ${renderCodeBlock(companyRuntime.softwareDiagram)}
+              </div>
+              <div>
+                <strong style="display:block;margin-bottom:0.5rem;">Active OpenClaw shells / terminals</strong>
+                <div style="display:grid;gap:0.65rem;">
+                  ${activeShells.length ? activeShells.map((entry) => `
+                    <div class="feed-item" style="padding:0.85rem 1rem;">
+                      <strong>${escapeHtml(entry.label || entry.name || 'Shell')}</strong>
+                      <p>PID ${escapeHtml(String(entry.pid || 0))}${entry.startedAt ? ` · ${escapeHtml(formatDateTime(entry.startedAt))}` : ''}</p>
+                      <span>${escapeHtml(entry.command || 'No command reflected')}</span>
+                    </div>
+                  `).join('') : '<div class="empty-state">No active OpenClaw-managed shell sessions reflected.</div>'}
+                </div>
+              </div>
+              <div>
+                <strong style="display:block;margin-bottom:0.5rem;">All reflected OpenClaw-managed processes</strong>
+                <div style="display:grid;gap:0.65rem;">
+                  ${managedProcesses.length ? managedProcesses.map((entry) => `
+                    <div class="feed-item" style="padding:0.85rem 1rem;">
+                      <strong>${escapeHtml(entry.label || entry.name || 'Process')}</strong>
+                      <p>${escapeHtml(humanizeToken(entry.kind || 'process'))} · PID ${escapeHtml(String(entry.pid || 0))}</p>
+                      <span>${escapeHtml(entry.command || 'No command reflected')}</span>
+                    </div>
+                  `).join('') : '<div class="empty-state">No managed processes reflected yet.</div>'}
+                </div>
+              </div>
+            </div>
+          `
+          : '<strong>No managed runtime mirror yet</strong><p>OpenClaw-started shells and software will appear here after derived state refresh.</p>';
       }
     }
 
@@ -3516,8 +3344,26 @@
         gatewayReflectionCard.innerHTML = '<strong>No gateway reflection yet</strong><p>Derived gateway and Discord runtime state will appear here.</p>';
         return;
       }
+      const configuredGuildCount = Array.isArray(summary?.configuredGuilds) ? summary.configuredGuilds.length : 0;
+      const requiresAttention = warnings.length > 0;
+      const runtimeStatus = requiresAttention ? 'Needs review' : recentLogHighlights.length ? 'Watch' : 'Stable';
+      const nextAction = requiresAttention
+        ? 'Review the reflected warnings below before assuming gateway state is safe.'
+        : recentLogHighlights.length
+          ? 'Inspect recent highlights for runtime drift or Discord ingress changes.'
+          : 'No immediate gateway action is reflected right now.';
       gatewayReflectionCard.innerHTML = `
         <strong>Gateway Runtime Snapshot</strong>
+        <div style="margin-top:0.9rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
+          <div class="micro-card"><span>Status</span><strong style="display:block;font-size:1.2rem;margin-top:0.35rem;">${escapeHtml(runtimeStatus)}</strong><p class="muted-copy" style="margin:0.45rem 0 0;">${requiresAttention ? 'Warnings need review' : recentLogHighlights.length ? 'Recent activity present' : 'Quiet runtime snapshot'}</p></div>
+          <div class="micro-card"><span>Warnings</span><strong style="display:block;font-size:1.2rem;margin-top:0.35rem;">${warnings.length}</strong><p class="muted-copy" style="margin:0.45rem 0 0;">Reflected config or gateway concerns</p></div>
+          <div class="micro-card"><span>Highlights</span><strong style="display:block;font-size:1.2rem;margin-top:0.35rem;">${recentLogHighlights.length}</strong><p class="muted-copy" style="margin:0.45rem 0 0;">Recent gateway / Discord log hits</p></div>
+          <div class="micro-card"><span>Guilds</span><strong style="display:block;font-size:1.2rem;margin-top:0.35rem;">${configuredGuildCount}</strong><p class="muted-copy" style="margin:0.45rem 0 0;">Configured Discord guild scopes</p></div>
+        </div>
+        <div style="margin-top:1rem;padding:0.85rem 1rem;border-radius:16px;background:rgba(255,255,255,0.035);border:1px solid rgba(255,255,255,0.05);color:var(--text-muted);line-height:1.7;">
+          <strong style="color:var(--text);display:block;margin-bottom:0.35rem;">Operator next action</strong>
+          <span>${escapeHtml(nextAction)}</span>
+        </div>
         <div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;display:grid;gap:0.45rem;">
           <div><strong>Dashboard:</strong> ${escapeHtml(summary?.dashboardUrl || 'n/a')}</div>
           <div><strong>Bind:</strong> ${escapeHtml(summary?.gatewayBind || 'n/a')}</div>
@@ -3553,7 +3399,7 @@
         setPanel('openclawFootprintCard', '', '<strong>No OpenClaw footprint yet</strong><p>Live `.openclaw` directory reflection will appear here.</p>');
         setPanel('openclawRuntimeAgentsPanel', '', '<strong>No runtime agent mirror yet</strong><p>Configured-vs-runtime agent coverage will appear here.</p>');
         setPanel('openclawRuntimeStoresPanel', '', '<strong>No runtime store mirror yet</strong><p>Task/flow/log/media storage summaries will appear here.</p>');
-        setPanel('openclawRuntimeApprovalsPanel', '', '<strong>No exec policy mirror yet</strong><p>Runtime policy reflection will appear here.</p>');
+        setPanel('openclawRuntimePolicyPanel', '', '<strong>No exec policy mirror yet</strong><p>Runtime policy reflection will appear here.</p>');
         setPanel('openclawRuntimeConfigPanel', '', '<strong>No config health mirror yet</strong><p>Config health and audit summaries will appear here.</p>');
         return;
       }
@@ -3610,15 +3456,15 @@
         `).join('') : '<div class="empty-state">No runtime stores reflected yet.</div>'}</div>
       `, '<strong>No runtime store mirror yet</strong><p>Task/flow/log/media storage summaries will appear here.</p>');
 
-      const approvals = details.approvals || {};
-      setPanel('openclawRuntimeApprovalsPanel', `
+      const policyState = details.approvals || {};
+      setPanel('openclawRuntimePolicyPanel', `
         <strong>Exec policy substrate</strong>
         <div style="margin-top:0.85rem;color:var(--text-muted);line-height:1.7;display:grid;gap:0.45rem;">
-          <div><strong>File exists:</strong> ${escapeHtml(String(Boolean(approvals.exists)))}</div>
-          <div><strong>Socket path:</strong> ${escapeHtml(approvals.socketPath || 'n/a')}</div>
-          <div><strong>Masked token:</strong> ${escapeHtml(approvals.maskedToken || 'n/a')}</div>
-          <div><strong>Default rules:</strong> ${escapeHtml(String(approvals.defaultRuleCount || 0))}</div>
-          <div><strong>Agent overrides:</strong> ${escapeHtml(String(approvals.agentOverrideCount || 0))}</div>
+          <div><strong>File exists:</strong> ${escapeHtml(String(Boolean(policyState.exists)))}</div>
+          <div><strong>Socket path:</strong> ${escapeHtml(policyState.socketPath || 'n/a')}</div>
+          <div><strong>Masked token:</strong> ${escapeHtml(policyState.maskedToken || 'n/a')}</div>
+          <div><strong>Default rules:</strong> ${escapeHtml(String(policyState.defaultRuleCount || 0))}</div>
+          <div><strong>Agent overrides:</strong> ${escapeHtml(String(policyState.agentOverrideCount || 0))}</div>
         </div>
       `, '<strong>No exec policy mirror yet</strong><p>Runtime policy reflection will appear here.</p>');
 

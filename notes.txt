@@ -1,0 +1,14 @@
+openclaw is an harness 
+
+    - an LLM model is just used in a framework of adding tools that run continously in the background. it remembers more context then a chat 
+    - claude code was made to code. sure that can do a lot but openclaw is meant to be a personal assistant that does everything using whatever tool (software) we have access to as humans 
+    - model agnostic
+        - using the best model for the best task 
+    
+
+
+
+openclaw chatbot config docs
+    https://docs.openclaw.ai/gateway/configuration-referencev
+
+

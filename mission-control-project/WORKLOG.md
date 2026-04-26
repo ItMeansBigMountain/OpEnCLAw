@@ -71,6 +71,16 @@ Track actions requested, actions attempted, current status, and failures so Miss
   - Prefer `read` for exact file slices
   - Or use PowerShell-safe commands / simpler exec calls on Windows
 
+#### 10. Investigate stale smoke failure report for the Context Files tab
+- Status: Success
+- Notes:
+  - Reviewed `tests/mission-control.smoke.spec.js` and confirmed the failing path targeted `openTab(page, 'context-files', /^Context Files$/)`
+  - Inspected `app/mission-control.html` and confirmed the `context-files` tab button, panel, and DOM targets `#contextFilesList` / `#contextFilesDetail` are present and wired through `switchTab`
+  - Re-ran the targeted Playwright smoke test and confirmed it passes in the current workspace, so the earlier async failure report was stale relative to the present file state
+  - Reconfirmed a Windows-shell lesson during investigation: avoid Unix-style heredoc/redirection patterns in PowerShell-backed exec calls
+
+#### 11. Smoke test syntax after large frontend edits
+
 #### 10. Add approval gates, API inventory, email ops, and live office console scaffolding
 - Status: Success
 - Notes:
@@ -281,6 +291,279 @@ Track actions requested, actions attempted, current status, and failures so Miss
   - Kept risky-action approvals as a direct chat/Discord safety rule rather than a dashboard dependency.
   - Updated the smoke test and project docs so internal guidance no longer tells the team to depend on a web approval gate.
 
+#### 33. Remove the Live Console panel from Office
+- Status: Success
+- Notes:
+  - Removed the visible **Live Console** panel from the Mission Control Office tab after direct operator feedback that it was low-value compared with better external tooling.
+  - Simplified the Office copy back to avatars plus recent office activity instead of presenting a console-log surface as a core operator tool.
+  - Updated the smoke test so Office now validates the office canvas and activity feed, while explicitly confirming the removed `#liveConsoleList` surface stays gone.
+
+#### 34. Make smoke validation invocation Windows-safe and explicit
+- Status: Success
+- Notes:
+  - Chose a small reliability PBI instead of expanding UI scope: make the project’s smoke-test entry point target the actual Mission Control smoke spec directly.
+  - Updated `package.json` so `npm run test:smoke` now runs `tests/mission-control.smoke.spec.js` explicitly, avoiding the earlier Windows-path invocation mismatch seen when a backslash-based direct CLI call returned `No tests found`.
+  - Revalidated by refreshing derived state, running the explicit Playwright smoke spec successfully, and confirming the package-script path now matches the validated test target.
+
+#### 35. Audit the live reflected surfaces and identify the next weak panel
+- Status: Success
+- Notes:
+  - Reviewed project continuity docs plus the live Mission Control UI at `http://127.0.0.1:8899` to classify the currently visible operator surfaces instead of inferring from stale memory alone.
+  - Confirmed the live shell currently exposes Tasks, Stats, Office, Context Files, API Inventory, Email Ops, and GitOps, with Tasks/Stats/Office/Context Files/API Inventory backed by reflected derived state rather than pure seeded placeholders.
+  - Confirmed Email Ops is still the weakest visible surface: the derived state currently reports zero drafts and the UI remains a mostly placeholder/governed-workflow stub rather than a real reflected source.
+  - Confirmed GitOps is also incomplete from a reflection standpoint: the derived state currently has no reflected gitops block, so that tab is present but not yet materially backed by live repo pulse data.
+  - Captured the immediate audit result for prioritization: highest-value remaining manual/partial surface is GitOps for operator visibility, with Email Ops remaining intentionally blocked on a real outbound-email audit source.
+
+#### 36. Repair reflected continuity ingestion so GitOps/context review can trust the source set
+- Status: Success
+- Notes:
+  - Critic review found a higher-priority integrity issue before broader Ralph-loop automation: the derived-state refresh was flattening all transcript text into the reflected `documents` set, which polluted Context Files and undermined any real reflected-source audit.
+  - Updated `scripts/refresh-derived-state.js` so transcript entries retain explicit `role`, and only recent user-side transcript notes are mirrored into `documents` as bounded `conversation-note` records instead of indiscriminately flattening every assistant/system transcript payload.
+  - Re-ran `node scripts\refresh-derived-state.js` and confirmed the derived artifact now emits explicit `conversation-note` classifications alongside real workspace/project docs.
+  - Analyst validation passed with `node --check scripts\refresh-derived-state.js` and `npm run test:smoke`.
+  - This preserves the reflection-first architecture while keeping the next GitOps/operator audit grounded in a cleaner source inventory.
+
+#### 37. Repair project-registry reflection parsing after the workspace schema upgrade
+- Status: Success
+- Notes:
+  - The live Mission Control audit found a real reflected-state defect: the Projects summary showed `Active projects: 0` even while multiple reflected project cards were visibly `In progress`.
+  - Root cause was not the UI count alone; `scripts/refresh-derived-state.js` still parsed the old 5-column `memory/projects.md` format after the workspace registry was upgraded to the new 8-column company-ops schema.
+  - Updated the project loader to support the expanded registry format, normalize project priority/status correctly, and preserve current PBI / next-action metadata instead of misreading those fields as stack/path data.
+  - Re-ran `node scripts\refresh-derived-state.js`, added smoke coverage that asserts the live `Active projects` summary metric is greater than zero, and validated with `npx playwright test tests/mission-control.smoke.spec.js`.
+  - Live UI verification after refresh confirmed the reflected project summary now shows `Active projects: 4`, matching the real in-progress project cards.
+
+#### 38. Classify the live GitOps surface and choose the next reflected-source fix
+- Status: Success
+- Notes:
+  - Reviewed the live GitOps tab at `http://127.0.0.1:8899` and confirmed it is no longer a hollow/manual panel; it is populated from the reflected `git` block in `app/mc-derived-state.json`.
+  - Cross-checked the UI against the derived artifact and confirmed repo (`OpEnCLAw`), branch (`main`), remote (`origin`), ahead/behind status (`0/0` => in sync), and the visible commit list all match the current reflected git data.
+  - This means the GitOps surface now classifies as **reflected but partial**: the commit feed and sync pulse are real, but the tab still lacks higher-value repo continuity signals like working tree status, changed-file counts, and untracked/staged/dirty indicators.
+  - Chose the next bounded GitOps continuity fix: extend `scripts/refresh-derived-state.js` Git ingestion beyond `git log` so Mission Control can reflect current repo cleanliness and local changes instead of only historical commits.
+
+#### 39. Reflect working-tree repo health in GitOps
+- Status: Success
+- Notes:
+  - Extended `scripts/refresh-derived-state.js` git ingestion to parse `git status --short` and emit reflected working-tree state: clean/dirty, changed-file count, staged count, unstaged count, untracked count, conflicted count, plus sampled changed-file entries.
+  - Wired the GitOps frontend to hydrate and preserve the new reflected `workingTree` and `changedFiles` fields instead of only commit history and ahead/behind status.
+  - Upgraded the GitOps tab to show working-tree summary cards and a visible working-tree status row ahead of the commit feed, so local repo health is now inspectable directly in Mission Control.
+  - Validated with `node scripts\refresh-derived-state.js`, `node --check scripts\refresh-derived-state.js`, targeted script extraction syntax check for `renderGitOps()`, and `npm run test:smoke`.
+
+#### 40. Repair malformed frontend CSS and stabilize Office drawer smoke validation
+- Status: Success
+- Notes:
+  - Found and fixed a malformed CSS block in `app/mission-control.html` where `.console-list` was left open and swallowed the following `.priorities` rules, creating a real frontend integrity defect in the shared stylesheet.
+  - Restored the intended `.console-list` rule body and separated the priorities styles cleanly so the Office/priority styling block is syntactically valid again.
+  - Hardened the smoke test by closing the agent drawer with `Escape` instead of a brittle off-viewport close-button click, matching the real interaction path more reliably in Playwright.
+  - Revalidated with `node scripts/refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 41. Separate repo-local churn from external sibling-path changes in GitOps
+- Status: Success
+- Notes:
+  - Critic review found that the current GitOps working-tree totals were technically correct but operationally ambiguous because `git status --short` from the repo root also included sibling-path changes like `../openclaw-config/*` and other `..` entries.
+  - Extended `scripts/refresh-derived-state.js` so reflected git state now classifies changed files as repo-local vs external, and also surfaces deleted/renamed counts plus explicit external file samples.
+  - Upgraded the GitOps UI summary cards to show **In repo / external** counts and added an external-changes warning row in the working-tree detail when sibling-path churn is present.
+  - Validated with `node scripts/refresh-derived-state.js`, `node --check scripts/refresh-derived-state.js`, a fresh derived-artifact inspection, and `npm run test:smoke`.
+
+#### 42. Surface file-scope GitOps detail for staged, unstaged, untracked, and external churn
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: use the already-reflected git working-tree arrays instead of broadening backend scope again.
+  - Upgraded `renderGitOps()` so the working-tree card now shows grouped file-scope detail blocks for staged files, unstaged files, untracked files, and external changes when present.
+  - This turns the GitOps tab from summary-only churn metrics into a more operator-usable reflected continuity surface without introducing fake/manual data.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 43. Separate local-only commits from pushed history in GitOps
+- Status: Success
+- Notes:
+  - Critic review chose a bounded commit-to-working-tree linkage slice instead of new git ingestion: make the existing ahead/pushed metadata legible in the UI.
+  - Upgraded `renderGitOps()` so the summary cards now show a **Local-only commits** count and the feed separates **Local-only commits** from **Pushed history** using the reflected `entry.pushed` state.
+  - This makes it easier for an operator to distinguish unpushed continuity risk from already-shipped history while keeping the working-tree card visible above both sections.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 44. Surface tracking-branch and remote-risk cues in GitOps
+- Status: Success
+- Notes:
+  - Critic review chose the next bounded slice from the registry hint: enrich branch/remote continuity cues without widening into multi-repo selection yet.
+  - Extended `scripts/refresh-derived-state.js` to reflect upstream tracking branch and remote host metadata, then updated `renderGitOps()` to show **Tracking branch** and **Remote risk** summary cards plus explanatory tracking/risk copy.
+  - This makes behind-vs-ahead state more operator-readable and clarifies whether the current branch is actually tracking a remote branch instead of only showing raw ahead/behind counts.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 45. Surface current repo scope and worktree count in GitOps
+- Status: Success
+- Notes:
+  - Critic review chose a bounded repo-scope slice instead of full multi-repo coverage: reflect the current worktree scope and count so operators can tell what repo context the GitOps pulse is describing.
+  - Extended `scripts/refresh-derived-state.js` to reflect git worktree metadata (`repoRoot`, `currentScope`, `worktrees`) from `git worktree list --porcelain`.
+  - Updated `renderGitOps()` so the summary now shows **Repo scope** and **Worktrees** plus a scope detail line with the current worktree path/branch context.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 46. Surface worktree detail rows in GitOps
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: use the already-reflected `worktrees` array to make branch/worktree comparison more legible before attempting multi-repo coverage.
+  - Updated `renderGitOps()` so the working-tree card now shows a **Worktree detail** line listing reflected branch/path scope entries from the current worktree set.
+  - This gives operators a lightweight comparison cue for the current GitOps scope without introducing repo switching or new data sources.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 47. Mark the current worktree explicitly in GitOps
+- Status: Success
+- Notes:
+  - Critic review chose a minimal explicit-selection cue instead of a full selector: highlight which reflected worktree is the current one.
+  - Updated `renderGitOps()` so GitOps now shows a **Current worktree** summary card and marks the current entry in the worktree detail line with `[current]`.
+  - This makes the reflected scope more explicit for operators without introducing stateful repo/worktree switching.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 48. Surface additional-worktree coverage cues in GitOps
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: summarize whether the reflected GitOps scope is single-worktree or has additional worktrees before attempting a true selection control.
+  - Updated `renderGitOps()` so GitOps now shows an **Additional worktrees** summary card plus a short coverage line (`Single reflected worktree in scope.` or an additional-worktree count).
+  - This gives operators a clearer readiness cue for future multi-worktree work without adding control state or widening backend scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 49. Surface truncated-worktree coverage in GitOps detail
+- Status: Success
+- Notes:
+  - Critic review chose a small legibility fix instead of selector work: if only the first five reflected worktrees are shown, tell the operator when more are hidden.
+  - Updated `renderGitOps()` so the **Worktree detail** line appends a `+N more reflected worktrees` cue when the reflected list is longer than the visible preview.
+  - This prevents silent truncation and keeps multi-worktree awareness visible without widening backend scope or adding interactive controls.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 50. Surface worktree preview coverage counts in GitOps
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: make the worktree preview explicit instead of leaving operators to infer how much of the reflected set is visible.
+  - Updated `renderGitOps()` so GitOps now shows a short preview summary like `Showing X of Y reflected worktrees.` alongside the existing worktree coverage cues.
+  - This makes the preview boundary legible even when only one worktree exists and complements the existing `+N more` truncation cue when the list is longer than the visible preview.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 51. Surface worktree preview counts in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review chose a small UI consistency pass instead of selector work: show the visible-vs-total worktree preview count in the summary grid, not only in helper copy below it.
+  - Updated `renderGitOps()` so GitOps now shows a **Worktree preview** micro-card with `visible / total` reflected worktree counts.
+  - This keeps preview scope readable at a glance and aligns the worktree coverage cue with the other GitOps summary cards.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 52. Surface current worktree path in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: make current worktree scope easier to identify at a glance before attempting any selector behavior.
+  - Updated `renderGitOps()` so GitOps now shows a **Worktree path** micro-card using the reflected current worktree path basename.
+  - This complements the existing branch/scope cards and lets operators identify the active worktree faster without reading the longer scope-detail line.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 53. Surface repo-root identity in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review chose a small scope-clarity pass instead of multi-repo controls: distinguish repository identity from current worktree identity at a glance.
+  - Updated `renderGitOps()` so GitOps now shows a **Repo root** micro-card using the reflected repo root basename.
+  - This complements the existing current-worktree path cue and makes repo-vs-worktree scope easier to scan without reading the longer detail copy.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 54. Surface repo-vs-worktree scope mode in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: summarize whether the current scope is the repo root itself or a linked worktree before attempting any selection control.
+  - Updated `renderGitOps()` so GitOps now shows a **Scope mode** micro-card with `Repo root`, `Linked worktree`, or `Unknown` based on existing reflected repo root and current scope paths.
+  - This gives operators a faster repo/worktree relationship cue without widening backend scope or adding interaction state.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 55. Surface plain-language repo/worktree relationship copy in GitOps
+- Status: Success
+- Notes:
+  - Critic review chose a small readability pass instead of further UI expansion: explain the repo/worktree relationship in a plain sentence using existing reflected cues.
+  - Updated `renderGitOps()` so GitOps now shows relationship copy like `Current scope is the repo root ...` or `... is linked to repo root ...` beneath the summary cards.
+  - This complements the micro-cards with a quicker natural-language cue and does not require any new backend data or control state.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 56. Prioritize the current worktree in GitOps detail preview
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: if multiple reflected worktrees exist, show the current one first in the preview before attempting any selector behavior.
+  - Updated `renderGitOps()` so the reflected worktree detail preview sorts the current worktree to the front before applying the visible preview limit.
+  - This improves scanability of the existing preview without adding new controls or widening backend scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 57. Surface explicit worktree-detail coverage counts in GitOps
+- Status: Success
+- Notes:
+  - Critic review kept the slice bounded to readability only: the worktree-detail line should state how many reflected worktrees are shown instead of making operators infer that from separate summary cues.
+  - Updated `renderGitOps()` so the worktree-detail label now reads like `Worktree detail (X/Y shown): ...` while preserving the existing truncation cue.
+  - This keeps the slice on existing reflected worktree data and improves local legibility without adding selection state or multi-repo orchestration.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 58. State when all reflected worktrees are already shown in GitOps detail
+- Status: Success
+- Notes:
+  - Critic review kept the next slice narrowly bounded: when the preview is not truncated, say that all reflected worktrees are already shown instead of leaving operators to infer it from counts alone.
+  - Updated `renderGitOps()` so the worktree-detail line now appends `all reflected worktrees shown` whenever no hidden reflected worktrees remain.
+  - This reuses the existing reflected preview counts and improves local scanability without adding new controls or widening GitOps scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 59. State when the current reflected worktree is included in GitOps detail
+- Status: Success
+- Notes:
+  - Critic review kept the slice bounded to reassurance only: once the preview is reordered, explicitly say that the current reflected worktree is included instead of relying on operators to infer that from list order.
+  - Updated `renderGitOps()` so the worktree-detail line now appends `current reflected worktree included` whenever the visible preview contains the current reflected worktree.
+  - This uses the existing reflected current-scope and preview-entry data only and does not add any selector state or backend scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 60. Surface hidden-worktree count in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review picked a bounded glanceability slice: move truncation visibility into the summary grid so operators can see hidden reflected worktrees without reading the detail line.
+  - Updated `renderGitOps()` so GitOps now shows a **Hidden worktrees** micro-card derived from the existing visible-vs-total worktree preview counts.
+  - This keeps the slice on existing reflected data only and does not add selector state or multi-repo orchestration.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 61. Surface preview completion state in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: summarize whether the reflected worktree preview is complete or truncated, rather than making operators infer that only from counts.
+  - Updated `renderGitOps()` so GitOps now shows a **Preview status** micro-card with `Complete` or `Truncated` based on the existing hidden-worktree count.
+  - This improves glanceability using only reflected preview-count data and does not add any selector state or backend scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 62. Surface current-preview inclusion in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: move current-preview inclusion into the summary grid so operators can confirm that the active reflected scope is visible without reading the detail line.
+  - Updated `renderGitOps()` so GitOps now shows a **Current in preview** micro-card with `Yes` or `No` based on the existing `currentWorktreeVisible` cue.
+  - This reuses existing reflected preview-entry data only and does not add selector state or backend scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 63. Surface preview ordering mode in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: tell operators whether the worktree preview is current-first or still following reflected source order, instead of leaving preview ordering implicit.
+  - Updated `renderGitOps()` so GitOps now shows a **Preview order** micro-card with `Current-first` when current scope exists, otherwise `Reflected order`.
+  - This uses existing reflected current-scope data only and does not add selector state or widen GitOps scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 64. Surface current worktree position in the GitOps summary grid
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: show where the current reflected worktree sits inside the visible preview before moving on to any selector or multi-repo work.
+  - Updated `renderGitOps()` so GitOps now shows a **Current position** micro-card with values like `1/3` when visible or `Not shown` when the current reflected worktree is outside the preview.
+  - This uses existing reflected preview-entry data only and does not add selector state or widen GitOps scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 65. State when the current reflected worktree is not shown in GitOps detail
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: make omission explicit when the current reflected worktree falls outside the visible preview, instead of only calling out the included case.
+  - Updated `renderGitOps()` so the worktree detail line now says `current reflected worktree not shown` whenever a current scope exists but the visible preview does not include it.
+  - This uses existing reflected current-scope and preview-entry data only and does not add selector state or widen GitOps scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
+#### 66. State the current worktree's visible preview position in GitOps detail
+- Status: Success
+- Notes:
+  - Critic review kept the next slice bounded: make the current reflected worktree's placement explicit in the detail line itself, not just in the summary grid.
+  - Updated `renderGitOps()` so the worktree detail line now says `current reflected worktree included at X/Y` when the current scope is visible in the preview.
+  - This uses existing reflected current-scope, preview-entry, and preview-count data only and does not add selector state or widen GitOps scope.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npm run test:smoke`.
+
 ## Open tasks now
 - Add OpenClaw gateway status, health, logs, plugin/channel/runtime summary, and security warnings as first-class Mission Control reflected surfaces
 - Add org chart hierarchy view for agents and company roles
@@ -300,9 +583,26 @@ Track actions requested, actions attempted, current status, and failures so Miss
 - `7-prompt-caching.md` and parts of broader config work are intentionally deferred for now
 - The web approval queue has been retired; risky actions still require explicit approval, but through direct chat/Discord rather than a Mission Control tab
 
+#### 29. Classify reflected Context Files into clearer operator-facing buckets
+- Status: Success
+- Notes:
+  - Reworked the Context Files reflection path so reflected markdown entries now carry durable `sourceKind` and `fileKind` classification instead of collapsing most items into generic memory/document labels.
+  - Added refresh-time classification for workspace docs, daily memory logs, project registry, heartbeat, worklog, developer diary, spec audit, portability docs, automation architecture, cost analysis, and numbered source-prompt files.
+  - Upgraded the Context Files UI with a compact reflected source summary strip plus clearer per-file metadata and a dedicated reflection-classification detail row for the selected file.
+  - Validated with `node scripts\refresh-derived-state.js`, inline script syntax validation of the extracted HTML script, and the Playwright smoke test.
+
 ## Review checkpoint
 - Status: Success
 - Notes:
   - Completed one-by-one review of numbered files `0-Memory.md` through `8-Layered-AI-Model-Stack.md`
   - Confirmed that files 1/2/3/4 are the most directly implemented in the current app
   - Confirmed that 0/5/6/7/8 require selective follow-through rather than blind execution
+
+#### 67. Reflect company workflow and OpenClaw-managed runtime in Office
+- Status: Success
+- Notes:
+  - Critic review kept the request bounded: add a real reflected runtime/workflow surface instead of inventing placeholder system cards or redesigning navigation first.
+  - Extended `scripts/refresh-derived-state.js` so Mission Control now derives a `companyRuntime` block from the live workspace project registry plus active Windows processes filtered to OpenClaw-managed commands like `ralph.ps1` and `openclaw ... gateway run`.
+  - Updated the Office tab in `app/mission-control.html` to show a workflow chart, org chart, current promoted work, active OpenClaw-managed shell sessions, and OpenClaw-managed software/processes running on the machine.
+  - Added Office smoke coverage in `tests/mission-control.smoke.spec.js` for the new workflow/runtime panels.
+  - Analyst validation passed with `node scripts\refresh-derived-state.js` and `npx playwright test tests/mission-control.smoke.spec.js`.
