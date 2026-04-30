@@ -6,12 +6,16 @@ const { execSync, execFileSync } = require('child_process');
 const projectRoot = path.resolve(__dirname, '..');
 const appDir = path.join(projectRoot, 'app');
 const outPath = path.join(appDir, 'mc-derived-state.json');
+const fallbackDataPath = path.join(appDir, 'mc-data.json');
 const openclawHome = path.join(os.homedir(), '.openclaw');
 const workspaceDir = path.join(openclawHome, 'workspace');
 const configPath = path.join(openclawHome, 'openclaw.json');
 const sessionDir = path.join(openclawHome, 'agents', 'main', 'sessions');
 const logPath = path.join(os.homedir(), 'AppData', 'Local', 'Temp', 'openclaw', 'openclaw-2026-04-20.log');
-const worklogPath = path.join(projectRoot, 'WORKLOG.md');
+const workQueuePath = path.join(workspaceDir, 'work-queue.md');
+const projectRegistryPath = path.join(workspaceDir, 'memory', 'projects.md');
+const worklogPath = path.join(workspaceDir, 'WORKLOG.md');
+const projectWorklogPath = path.join(projectRoot, 'WORKLOG.md');
 const diaryPath = path.join(projectRoot, 'DEVELOPER-DIARY.md');
 
 function truncate(text, max = 4000) {
@@ -19,15 +23,20 @@ function truncate(text, max = 4000) {
   return text.length > max ? `${text.slice(0, max - 1)}…` : text;
 }
 
+function stripWrappingCodeTicks(value) {
+  const text = String(value || '').trim();
+  return text.replace(/^`+|`+$/g, '').trim();
+}
+
 function loadProjectRegistryItems() {
-  const registryPath = path.join(workspaceDir, 'memory', 'projects.md');
+  const registryPath = projectRegistryPath;
   if (!fs.existsSync(registryPath)) return [];
 
   return fs.readFileSync(registryPath, 'utf8')
     .split(/\r?\n/)
     .filter((line) => line.trim().startsWith('|'))
     .slice(2)
-    .map((row) => row.split('|').slice(1, -1).map((cell) => cell.trim()))
+    .map((row) => row.split('|').slice(1, -1).map((cell) => stripWrappingCodeTicks(cell)))
     .filter((cells) => cells.length >= 8)
     .map(([project, priority, status, feature, pbi, blocker, nextAction, projectPath]) => ({
       project,
@@ -396,23 +405,74 @@ function parseGitStatusLines(output) {
   return { summary, changedFiles };
 }
 
-function loadGit() {
+function emptyGitSnapshot(overrides = {}) {
+  return {
+    available: false,
+    pathStatus: 'unavailable',
+    repo: null,
+    branch: null,
+    remote: null,
+    remoteUrl: null,
+    upstream: null,
+    remoteHost: null,
+    repoRoot: null,
+    currentScope: null,
+    worktrees: [],
+    ahead: 0,
+    behind: 0,
+    entries: [],
+    workingTree: {
+      dirty: false,
+      clean: true,
+      stagedCount: 0,
+      unstagedCount: 0,
+      untrackedCount: 0,
+      conflictedCount: 0,
+      changedCount: 0,
+      stagedFiles: [],
+      unstagedFiles: [],
+      untrackedFiles: [],
+      conflictedFiles: []
+    },
+    changedFiles: [],
+    ...overrides
+  };
+}
+
+const gitSnapshotCache = new Map();
+
+function loadGitSnapshot(targetPath, options = {}) {
+  const logLimit = Number(options.logLimit) > 0 ? Number(options.logLimit) : 20;
+  const normalizedTargetPath = String(targetPath || '').trim();
+  if (!normalizedTargetPath) return emptyGitSnapshot({ pathStatus: 'missing-path' });
+
+  const resolvedTargetPath = path.resolve(normalizedTargetPath);
+  const cacheKey = `${resolvedTargetPath}::${logLimit}`;
+  if (gitSnapshotCache.has(cacheKey)) return gitSnapshotCache.get(cacheKey);
+
+  if (!fs.existsSync(resolvedTargetPath)) {
+    const snapshot = emptyGitSnapshot({ pathStatus: 'missing-path' });
+    gitSnapshotCache.set(cacheKey, snapshot);
+    return snapshot;
+  }
+
   try {
-    const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
-    const remoteUrl = execFileSync('git', ['config', '--get', 'remote.origin.url'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const repoRoot = execFileSync('git', ['rev-parse', '--show-toplevel'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const branch = execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
+    const remoteUrl = execFileSync('git', ['config', '--get', 'remote.origin.url'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim();
     const upstream = remoteUrl
-      ? execFileSync('git', ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+      ? execFileSync('git', ['rev-parse', '--abbrev-ref', '--symbolic-full-name', '@{u}'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
       : null;
-    const repo = remoteUrl ? remoteUrl.split('/').pop().replace(/\.git$/i, '') : path.basename(projectRoot);
+    const repo = remoteUrl ? remoteUrl.split('/').pop().replace(/\.git$/i, '') : path.basename(repoRoot || resolvedTargetPath);
     const remoteHostMatch = remoteUrl.match(/^(?:https?:\/\/|ssh:\/\/)?(?:[^@]+@)?([^/:]+)/i);
     const remoteHost = remoteHostMatch ? remoteHostMatch[1] : null;
     const aheadBehindArgs = upstream
       ? ['rev-list', '--left-right', '--count', `${upstream}...${branch}`]
       : ['rev-list', '--left-right', '--count', `${branch}...${branch}`];
-    const aheadBehind = execFileSync('git', aheadBehindArgs, { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().split(/\s+/);
-    const log = execFileSync('git', ['log', '--pretty=format:%H%x1f%h%x1f%s%x1f%an%x1f%aI', '-n', '20'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
-    const statusOutput = execFileSync('git', ['status', '--short'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
-    const worktreeOutput = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: projectRoot, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const aheadBehind = execFileSync('git', aheadBehindArgs, { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim().split(/\s+/);
+    const log = execFileSync('git', ['log', '--pretty=format:%H%x1f%h%x1f%s%x1f%an%x1f%aI', '-n', String(logLimit)], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const statusOutput = execFileSync('git', ['status', '--short'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const worktreeOutput = execFileSync('git', ['worktree', 'list', '--porcelain'], { cwd: resolvedTargetPath, stdio: ['ignore', 'pipe', 'ignore'] }).toString();
     const { summary: workingTree, changedFiles } = parseGitStatusLines(statusOutput);
     const worktrees = worktreeOutput
       .split(/\r?\n\r?\n/)
@@ -429,8 +489,7 @@ function loadGit() {
         } : null;
       })
       .filter(Boolean);
-    const repoRoot = worktrees[0]?.path || projectRoot;
-    const currentScope = worktrees.find((entry) => path.resolve(entry.path) === path.resolve(projectRoot)) || null;
+    const currentScope = worktrees.find((entry) => path.resolve(entry.path) === resolvedTargetPath) || { path: resolvedTargetPath, branch };
     const ahead = Number(aheadBehind[1] || 0) || 0;
     const behind = Number(aheadBehind[0] || 0) || 0;
     const entries = log
@@ -442,37 +501,35 @@ function loadGit() {
       })
       .filter(Boolean)
       .map((entry, index) => ({ ...entry, repo, branch, remote: remoteUrl ? 'origin' : 'local', remoteUrl, upstream, remoteHost, pushed: index >= ahead }));
-    return { repo, branch, remote: remoteUrl ? 'origin' : 'local', remoteUrl, upstream, remoteHost, repoRoot, currentScope, worktrees, ahead, behind, entries, workingTree, changedFiles };
-  } catch {
-    return {
-      repo: null,
-      branch: null,
-      remote: null,
-      remoteUrl: null,
-      upstream: null,
-      remoteHost: null,
-      repoRoot: null,
-      currentScope: null,
-      worktrees: [],
-      ahead: 0,
-      behind: 0,
-      entries: [],
-      workingTree: {
-        dirty: false,
-        clean: true,
-        stagedCount: 0,
-        unstagedCount: 0,
-        untrackedCount: 0,
-        conflictedCount: 0,
-        changedCount: 0,
-        stagedFiles: [],
-        unstagedFiles: [],
-        untrackedFiles: [],
-        conflictedFiles: []
-      },
-      changedFiles: []
+    const snapshot = {
+      available: true,
+      pathStatus: 'repo',
+      repo,
+      branch,
+      remote: remoteUrl ? 'origin' : 'local',
+      remoteUrl,
+      upstream,
+      remoteHost,
+      repoRoot,
+      currentScope,
+      worktrees,
+      ahead,
+      behind,
+      entries,
+      workingTree,
+      changedFiles
     };
+    gitSnapshotCache.set(cacheKey, snapshot);
+    return snapshot;
+  } catch {
+    const snapshot = emptyGitSnapshot({ pathStatus: 'not-repo' });
+    gitSnapshotCache.set(cacheKey, snapshot);
+    return snapshot;
   }
+}
+
+function loadGit() {
+  return loadGitSnapshot(projectRoot, { logLimit: 20 });
 }
 
 function maskSecret(value) {
@@ -948,7 +1005,121 @@ function parseWorklogActions(content) {
   return actions;
 }
 
-function derivePriorities(worklogContent) {
+function loadWorkQueuePbis() {
+  if (!fs.existsSync(workQueuePath)) return [];
+
+  const lines = fs.readFileSync(workQueuePath, 'utf8').split(/\r?\n/);
+  const items = [];
+  let currentProject = '';
+  let currentFeature = '';
+  let current = null;
+  let collectingSuccessCriteria = false;
+
+  const flush = () => {
+    if (!current || !current.title) return;
+    current.successCriteria = current.successCriteria.filter(Boolean);
+    items.push(current);
+  };
+
+  for (const rawLine of lines) {
+    const line = rawLine.trimEnd();
+    const projectMatch = line.match(/^##\s+Project:\s+(.+)$/);
+    if (projectMatch) {
+      flush();
+      current = null;
+      currentProject = projectMatch[1].trim();
+      currentFeature = '';
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    const featureMatch = line.match(/^###\s+Feature:\s+(.+)$/);
+    if (featureMatch) {
+      flush();
+      current = null;
+      currentFeature = featureMatch[1].trim();
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    const pbiMatch = line.match(/^####\s+PBI:\s+(.+)$/);
+    if (pbiMatch) {
+      flush();
+      current = {
+        project: currentProject,
+        feature: currentFeature,
+        title: pbiMatch[1].trim(),
+        owner: 'Shared',
+        status: 'not_done',
+        nextAction: '',
+        blocker: 'none',
+        successCriteria: []
+      };
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    if (!current) continue;
+
+    const ownerMatch = line.match(/^-\s+Owner:\s+(.+)$/);
+    if (ownerMatch) {
+      current.owner = ownerMatch[1].trim();
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    const statusMatch = line.match(/^-\s+Status:\s+`?([^`]+)`?$/);
+    if (statusMatch) {
+      current.status = statusMatch[1].trim().toLowerCase();
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    if (/^-\s+Success Criteria:\s*$/.test(line)) {
+      collectingSuccessCriteria = true;
+      continue;
+    }
+
+    const nextActionMatch = line.match(/^-\s+Next Action:\s+(.+)$/);
+    if (nextActionMatch) {
+      current.nextAction = nextActionMatch[1].trim();
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    const blockerMatch = line.match(/^-\s+Blocker:\s+(.+)$/);
+    if (blockerMatch) {
+      current.blocker = blockerMatch[1].trim();
+      collectingSuccessCriteria = false;
+      continue;
+    }
+
+    if (collectingSuccessCriteria) {
+      const criteriaMatch = line.match(/^\s*-\s+(.+)$/);
+      if (criteriaMatch) {
+        current.successCriteria.push(criteriaMatch[1].trim());
+        continue;
+      }
+      if (line.trim()) collectingSuccessCriteria = false;
+    }
+  }
+
+  flush();
+  return items;
+}
+
+function derivePriorities(worklogContent, workQueuePbis = []) {
+  if (workQueuePbis.length) {
+    return workQueuePbis
+      .filter((item) => item.status === 'in_progress' || item.status === 'not_done' || item.status === 'blocked')
+      .slice(0, 4)
+      .map((item, index) => ({
+        id: `priority-${index + 1}-${slugify(`${item.project}-${item.title}`)}`,
+        text: `${item.project}: ${item.title}`,
+        done: false
+      }));
+  }
+
   return extractSectionBullets(worklogContent, '## Current goals').slice(0, 4).map((text, index) => ({
     id: `priority-${index + 1}-${slugify(text)}`,
     text,
@@ -956,13 +1127,66 @@ function derivePriorities(worklogContent) {
   }));
 }
 
-function deriveAgileTasks(worklogContent) {
-  const currentGoals = extractSectionBullets(worklogContent, '## Current goals');
-  const openTasks = extractSectionBullets(worklogContent, '## Open tasks now');
+function deriveAgileTasks(worklogContent, workQueuePbis = []) {
   const actions = parseWorklogActions(worklogContent);
   const baseTimeMs = fs.existsSync(worklogPath) ? fs.statSync(worklogPath).mtimeMs : Date.now();
   let offset = 0;
   const nextTimestamp = () => new Date(baseTimeMs - offset++ * 60000).toISOString();
+
+  const queueTasks = workQueuePbis.map((item, index) => {
+    const isBlocked = item.status === 'blocked';
+    const column = item.status === 'in_progress'
+      ? 'in-progress'
+      : item.status === 'done'
+        ? 'done'
+        : 'backlog';
+    const detailParts = [
+      item.feature ? `Feature: ${item.feature}` : '',
+      item.nextAction ? `Next: ${item.nextAction}` : '',
+      isBlocked && item.blocker && !/^none$/i.test(item.blocker) ? `Blocked: ${item.blocker}` : ''
+    ].filter(Boolean);
+
+    return {
+      id: `work-queue-${index + 1}-${slugify(`${item.project}-${item.title}`)}`,
+      title: item.title,
+      description: detailParts.join(' • ') || 'Reflected from workspace work queue.',
+      priority: inferPriority(`${item.project} ${item.feature} ${item.title}`),
+      column,
+      assignee: item.owner || 'Shared',
+      type: isBlocked ? 'Blocked PBI' : item.status === 'in_progress' ? 'Active PBI' : item.status === 'done' ? 'Completed PBI' : 'Queued PBI',
+      area: item.project || inferArea(item.title),
+      createdAt: nextTimestamp(),
+      source: 'workspace work-queue',
+      project: item.project,
+      feature: item.feature,
+      blocker: item.blocker,
+      nextAction: item.nextAction
+    };
+  });
+
+  if (queueTasks.length) {
+    const doneFromWorklog = actions
+      .filter((item) => /^Success$/i.test(item.status))
+      .slice(-4)
+      .reverse()
+      .map((item, index) => ({
+        id: `done-${index + 1}-${slugify(item.title)}`,
+        title: item.title,
+        description: item.notes[0] || 'Reflected from a successful worklog entry.',
+        priority: inferPriority(item.title),
+        column: 'done',
+        assignee: 'Sosai',
+        type: 'Completed Slice',
+        area: inferArea(item.title),
+        createdAt: nextTimestamp(),
+        source: 'WORKLOG action log'
+      }));
+
+    return [...queueTasks.filter((task) => task.column !== 'done'), ...doneFromWorklog, ...queueTasks.filter((task) => task.column === 'done')];
+  }
+
+  const currentGoals = extractSectionBullets(worklogContent, '## Current goals');
+  const openTasks = extractSectionBullets(worklogContent, '## Open tasks now');
 
   const recurring = currentGoals.map((text, index) => ({
     id: `goal-${index + 1}-${slugify(text)}`,
@@ -1027,35 +1251,79 @@ function deriveAgileTasks(worklogContent) {
   return [...recurring, ...backlog, ...inProgress, ...done];
 }
 
-function deriveCheckingIn(worklogContent, agileTasks, futureWork) {
+function deriveCheckingIn(worklogContent, agileTasks, futureWork, projects = []) {
   const knownCaveats = extractSectionBullets(worklogContent, '## Known caveats');
   const activeTask = agileTasks.find((task) => task.column === 'in-progress') || agileTasks.find((task) => task.column === 'backlog') || null;
+  const missionControlProject = projects.find((project) => /mission control/i.test(project?.name || '')) || null;
+  const reflectedBlockers = missionControlProject?.blocker && !/^none$/i.test(missionControlProject.blocker)
+    ? [missionControlProject.blocker]
+    : [];
+  const reflectedNextSteps = [missionControlProject?.nextAction, ...futureWork.map((item) => item.text)]
+    .filter(Boolean)
+    .slice(0, 3);
+
   return {
-    projectDirectory: projectRoot,
-    currentTask: activeTask?.title || 'No active reflected task',
-    blockers: knownCaveats.slice(0, 3),
-    nextSteps: futureWork.slice(0, 3).map((item) => item.text)
+    projectDirectory: missionControlProject?.path || projectRoot,
+    currentTask: missionControlProject?.currentPbi || activeTask?.title || 'No active reflected task',
+    blockers: [...reflectedBlockers, ...knownCaveats].slice(0, 3),
+    nextSteps: reflectedNextSteps
   };
 }
 
+function getStructuredProjectTasks(agileTasks, projectName) {
+  const normalizedProjectName = String(projectName || '').trim().toLowerCase();
+  if (!normalizedProjectName) return [];
+
+  const explicitlyLinkedTasks = agileTasks.filter((task) => String(task.project || '').trim().toLowerCase() === normalizedProjectName);
+  if (explicitlyLinkedTasks.length) return explicitlyLinkedTasks;
+
+  return agileTasks.filter((task) => {
+    if (task.project) return false;
+    return new RegExp(slugify(projectName || '').replace(/-/g, '.*'), 'i').test(task.title || '');
+  });
+}
+
+function syncFallbackMissionControlState(payload) {
+  const existing = readJsonSafe(fallbackDataPath, {});
+  const existingTasks = Array.isArray(existing.tasks) ? existing.tasks : [];
+  const reflectedTasks = Array.isArray(payload.agileTasks) ? payload.agileTasks : [];
+  const preservedLocalTasks = existingTasks.filter((task) => {
+    if (!task || typeof task !== 'object') return false;
+    return !['workspace work-queue', 'WORKLOG action log', 'WORKLOG current goals', 'WORKLOG open tasks'].includes(task.source);
+  });
+  const next = {
+    ...existing,
+    tasks: [...reflectedTasks, ...preservedLocalTasks],
+    projects: Array.isArray(payload.projects) ? payload.projects : existing.projects,
+    checkingIn: payload.checkingIn && typeof payload.checkingIn === 'object' ? payload.checkingIn : existing.checkingIn,
+    assistantAudit: Array.isArray(payload.assistantAudit)
+      ? { items: payload.assistantAudit }
+      : (existing.assistantAudit || { items: [] })
+  };
+
+  fs.writeFileSync(fallbackDataPath, JSON.stringify(next, null, 2) + '\n', 'utf8');
+  console.log(`Synced fallback Mission Control state in ${fallbackDataPath}`);
+}
+
 function loadProjectDocuments() {
-  return [
-    'WORKLOG.md',
-    'DEVELOPER-DIARY.md',
-    'SPEC-AUDIT.md',
-    'PORTABILITY.md',
-    'AUTOMATION-ARCHITECTURE.md',
-    'TOKEN-COST-ANALYSIS.md',
-    '0-Memory.md',
-    '1-create-HTML-prompt.md',
-    '2-create-modules.md',
-    '3-backend-server.md',
-    '4-config.md',
-    '5-mcp-server.md',
-    '6-SEO-agent.md',
-    '7-prompt-caching.md',
-    '8-Layered-AI-Model-Stack.md'
-  ].map((name) => readMarkdownEntry(path.join(projectRoot, name), 'project-doc')).filter(Boolean);
+  const projectDocumentPaths = [
+    projectWorklogPath,
+    path.join(projectRoot, 'DEVELOPER-DIARY.md'),
+    path.join(projectRoot, 'SPEC-AUDIT.md'),
+    path.join(projectRoot, 'PORTABILITY.md'),
+    path.join(projectRoot, 'AUTOMATION-ARCHITECTURE.md'),
+    path.join(projectRoot, 'TOKEN-COST-ANALYSIS.md'),
+    path.join(projectRoot, '0-Memory.md'),
+    path.join(projectRoot, '1-create-HTML-prompt.md'),
+    path.join(projectRoot, '2-create-modules.md'),
+    path.join(projectRoot, '3-backend-server.md'),
+    path.join(projectRoot, '4-config.md'),
+    path.join(projectRoot, '5-mcp-server.md'),
+    path.join(projectRoot, '6-SEO-agent.md'),
+    path.join(projectRoot, '7-prompt-caching.md'),
+    path.join(projectRoot, '8-Layered-AI-Model-Stack.md')
+  ];
+  return projectDocumentPaths.map((docPath) => readMarkdownEntry(docPath, 'project-doc')).filter(Boolean);
 }
 
 function loadConfiguredAgents() {
@@ -1127,7 +1395,7 @@ function normalizeProjectPriority(priority, missionControl = false) {
 }
 
 function loadProjects(agileTasks) {
-  const registryPath = path.join(workspaceDir, 'memory', 'projects.md');
+  const registryPath = projectRegistryPath;
   const registry = fs.existsSync(registryPath) ? fs.readFileSync(registryPath, 'utf8') : '';
   const lines = registry.split(/\r?\n/).filter((line) => line.trim().startsWith('|'));
   const projectRows = lines.slice(2);
@@ -1135,7 +1403,7 @@ function loadProjects(agileTasks) {
   const missionTotal = agileTasks.length || 1;
 
   return projectRows.map((row) => {
-    const cells = row.split('|').slice(1, -1).map((cell) => cell.trim());
+    const cells = row.split('|').slice(1, -1).map((cell) => stripWrappingCodeTicks(cell));
     const isExpandedRegistry = cells.length >= 8;
     const [
       name,
@@ -1163,13 +1431,40 @@ function loadProjects(agileTasks) {
     const projectPath = isExpandedRegistry ? explicitPath : legacyPath;
 
     const missionControl = /mission control/i.test(name || '');
-    const relatedTasks = missionControl
-      ? agileTasks
-      : agileTasks.filter((task) => new RegExp(slugify(name || '').replace(/-/g, '.*'), 'i').test(task.title || ''));
+    const relatedTasks = getStructuredProjectTasks(agileTasks, name);
     const doneTasks = relatedTasks.filter((task) => task.column === 'done').length;
     const percent = missionControl
       ? Math.round((missionDone / missionTotal) * 100)
       : relatedTasks.length ? Math.round((doneTasks / relatedTasks.length) * 100) : 0;
+
+    const repoPulseSource = projectPath ? loadGitSnapshot(projectPath, { logLimit: 5 }) : emptyGitSnapshot({ pathStatus: 'missing-path' });
+    const latestEntry = repoPulseSource.entries[0] || null;
+    const repoLocalChangeCount = Number(repoPulseSource.workingTree?.repoLocalChangeCount) || 0;
+    const externalChangeCount = Number(repoPulseSource.workingTree?.externalChangeCount) || 0;
+    const repoPulse = {
+      available: Boolean(repoPulseSource.available),
+      pathStatus: repoPulseSource.pathStatus,
+      repo: repoPulseSource.repo || null,
+      branch: repoPulseSource.branch || null,
+      remote: repoPulseSource.remote || null,
+      ahead: Number(repoPulseSource.ahead) || 0,
+      behind: Number(repoPulseSource.behind) || 0,
+      dirty: Boolean(repoPulseSource.workingTree?.dirty),
+      changedCount: Number(repoPulseSource.workingTree?.changedCount) || 0,
+      repoLocalChangeCount,
+      externalChangeCount,
+      repoChangedFiles: Array.isArray(repoPulseSource.workingTree?.repoChangedFiles) ? repoPulseSource.workingTree.repoChangedFiles.slice(0, 6) : [],
+      externalChangedFiles: Array.isArray(repoPulseSource.workingTree?.externalChangedFiles) ? repoPulseSource.workingTree.externalChangedFiles.slice(0, 6) : [],
+      repoRoot: repoPulseSource.repoRoot || null,
+      currentScope: repoPulseSource.currentScope?.path || repoPulseSource.currentScope || null,
+      latest: latestEntry ? {
+        shortHash: latestEntry.shortHash,
+        subject: latestEntry.subject,
+        date: latestEntry.date,
+        author: latestEntry.author,
+        pushed: Boolean(latestEntry.pushed)
+      } : null
+    };
 
     return {
       id: `project-${slugify(name)}`,
@@ -1186,7 +1481,8 @@ function loadProjects(agileTasks) {
       nextAction: isExpandedRegistry ? (nextAction || '') : '',
       taskCount: relatedTasks.length,
       activeTaskCount: relatedTasks.filter((task) => task.column === 'in-progress').length,
-      doneTaskCount: doneTasks
+      doneTaskCount: doneTasks,
+      repoPulse
     };
   });
 }
@@ -1214,17 +1510,26 @@ const safeConversationDocuments = conversations
 const git = loadGit();
 const apiInventory = loadApiInventory();
 const futureWork = loadFutureWork();
-const priorities = derivePriorities(worklogContent);
-const agileTasks = deriveAgileTasks(worklogContent);
-const checkingIn = deriveCheckingIn(worklogContent, agileTasks, futureWork);
+const workQueuePbis = loadWorkQueuePbis();
+const priorities = derivePriorities(worklogContent, workQueuePbis);
+const agileTasks = deriveAgileTasks(worklogContent, workQueuePbis);
 const gatewayReflection = loadGatewayReflection();
 const openclawFootprint = loadOpenClawFootprint();
 const command = { agents: loadConfiguredAgents(), decisions: [] };
 const projects = loadProjects(agileTasks);
+const checkingIn = deriveCheckingIn(worklogContent, agileTasks, futureWork, projects);
 const assistantAudit = loadAssistantAudit(memoryEntries, documents, conversations, git, apiInventory, checkingIn, gatewayReflection, openclawFootprint);
 
 const payload = {
   generatedAt: new Date().toISOString(),
+  sourceState: {
+    workspaceDir,
+    workQueuePath,
+    workspaceWorklogPath: worklogPath,
+    projectWorklogPath,
+    projectRegistryPath,
+    missionControlDerivedStatePath: outPath
+  },
   priorities,
   projects,
   command,
@@ -1244,3 +1549,4 @@ const payload = {
 
 fs.writeFileSync(outPath, JSON.stringify(payload, null, 2) + '\n', 'utf8');
 console.log(`Wrote ${outPath}`);
+syncFallbackMissionControlState(payload);
