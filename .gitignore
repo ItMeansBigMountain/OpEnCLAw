@@ -1,11 +1,1 @@
 **/*.env*
-
-# Mission Control local/runtime artifacts
-mission-control-project/node_modules/
-mission-control-project/test-results/
-mission-control-project/playwright-report/
-mission-control-project/tmp_*
-mission-control-project/app/mc-activity.json
-mission-control-project/app/mc-data.json
-mission-control-project/app/mc-derived-state.json
-mission-control-project/app/mc-live-console.json
